@@ -1,7 +1,8 @@
 project:
-  type: website
+  # type: website
+  type: book
   output-dir: docs
-  #type: book
+
 
 book:
   title: "Computational Mathematics II (MATH2731)"
@@ -9,7 +10,8 @@ book:
   date: "June 2025"
   chapters:
     - index.qmd
-    #- chap-functions.qmd
+    # - chap-functions.qmd
+    
 
 format:
   html:
@@ -55,18 +57,18 @@ format:
        \DeclareOldFontCommand{\rm}{\normalfont\rmseries}{\mathrm}
 
 
-filters:
-  - custom-numbered-blocks
+# filters:
+#   - custom-numbered-blocks
 
-custom-numbered-blocks:
-  classes:
-    eg:
-      collapse: True
-      boxstyle: foldbox.simple
-      colors: [e7efea, 53b57b]
-      label: Example
-    prp:
-      collapse: False
-      boxstyle: foldbox.simple
-      colors: [fcebee, ea3342]
-      label: Proposition
+# custom-numbered-blocks:
+#   classes:
+#     eg:
+#       collapse: True
+#       boxstyle: foldbox.simple
+#       colors: [e7efea, 53b57b]
+#       label: Example
+#     prp:
+#       collapse: False
+#       boxstyle: foldbox.simple
+#       colors: [fcebee, ea3342]
+#       label: Proposition
