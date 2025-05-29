@@ -1,0 +1,70 @@
+project:
+  type: book
+
+book:
+  title: "MATH XXXX Lecture Notes"
+  author: "Prof. Anthony Yeates, Durham University"
+  date: "January 2025"
+  chapters:
+    - index.qmd
+    - chap-functions.qmd
+
+format:
+  html:
+    theme:
+      - litera
+      # - custom.scss
+    fontsize: 0.9em
+    callout-appearance: simple
+    # callout-icon: false
+    minimal: false
+    toc: true
+    self-contained: true
+    title-block-banner: "#eacffa"
+    include-before:
+      <p hidden>
+      $$
+       \def\eb{\boldsymbol{e}}
+       \def\fb{\boldsymbol{f}}
+       \def\hb{\boldsymbol{h}}
+       \def\xb{\boldsymbol{x}}
+       \def\Rb{\boldsymbol{R}}
+       \def\Real{\mathbb{R}}
+       \def\bfzero{\boldsymbol{0}}
+       \newcommand{\ddy}[2]{\frac{\partial{#1}}{\partial{#2}}}
+      $$
+      </p>
+
+  pdf:
+    documentclass: scrreprt
+    pdf-engine: pdflatex
+    include-in-header:
+      text: |
+       \usepackage[makeroom]{cancel}
+       \def\eb{\boldsymbol{e}}
+       \def\fb{\boldsymbol{f}}
+       \def\hb{\boldsymbol{h}}
+       \def\xb{\boldsymbol{x}}
+       \def\Rb{\boldsymbol{R}}
+       \def\Real{\mathbb{R}}
+       \def\bfzero{\boldsymbol{0}}
+       \newcommand{\ddy}[2]{\frac{\partial{#1}}{\partial{#2}}}
+       \DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+       \DeclareOldFontCommand{\rm}{\normalfont\rmseries}{\mathrm}
+
+
+filters:
+  - custom-numbered-blocks
+
+custom-numbered-blocks:
+  classes:
+    eg:
+      collapse: True
+      boxstyle: foldbox.simple
+      colors: [e7efea, 53b57b]
+      label: Example
+    prp:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [fcebee, ea3342]
+      label: Proposition

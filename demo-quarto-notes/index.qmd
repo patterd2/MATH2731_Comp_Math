@@ -1,0 +1,3 @@
+# Preamble {.unnumbered}
+
+This is the home page of a demo set of lecture notes using the Quarto `book` document type (<https://quarto.org/docs/books>).

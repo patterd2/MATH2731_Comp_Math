@@ -1,0 +1,167 @@
+---
+title: "Course materials with Quarto"
+author: "Anthony Yeates"
+date: 2025-01-30
+title-slide-attributes:
+    data-background-image: im/du-bg.png
+    data-background-size: contain
+    data-background-position: top
+    data-background-color: "#CBA8B1"
+format:
+    revealjs:
+        center-title-slide: true
+        footer: "Course materials with Quarto"
+        slide-number: true
+        theme: white
+        auto-stretch: false
+        incremental: false
+        smaller: true
+---
+
+## What is Quarto?
+
+::: {.incremental}
+- an *open-source scientific and technical publishing system*.
+- **input**: `R markdown` with additions including $\LaTeX$, citations, cross-references, figures, callouts etc.
+- some **advantages**:
+    - dynamic content using `python`, `R`, `Julia`, $\ldots$
+    - multiple output formats: `html`, `pdf`, `MS Word`, `ePub`, $\ldots$
+- some **disadvantages**:
+    - existing $\LaTeX$ needs editing.
+    - limited in-built support for "theorem-like" environments.
+:::
+
+## Motivation
+
+::: {.fragment}
+::: {.incremental}
+- improving accessibility of online materials.
+- `html` as the *main* format, not an afterthought.
+:::
+:::
+
+::: {.fragment}
+### Side-benefits
+::: {.incremental}
+- dynamic content (drop-down boxes, figures, movies, code).
+- revamped [my website](https://www.maths.dur.ac.uk/users/anthony.yeates/).
+- can use also for slides.
+:::
+:::
+
+## Why prepare online notes?
+
+![](im/notes-meme.webp){fig-align="center"}
+
+## Why prepare online notes?
+
+::: aside
+cf. <https://mathoverflow.net/questions/27344/what-are-your-experiences-of-handouts-in-mathematics-lectures>
+:::
+
+::: {.incremental}
+- to take pressure off students during lectures?
+- to mitigate the impact of errors in lectures?
+- to free up lecture time to complement/support the notes?
+- to look up things from earlier?
+- to structure the course?
+- to keep the narrative straight?
+- to make students feel like you care?
+:::
+
+
+## My approach
+
+::: {.incremental}
+- **complete** notes and follow them closely.
+    - must be concise.
+- **available** in advance, and on the web (not behind paywall).
+- **readable** by clearly separating types of content.
+    - clean and attractive design.
+    - multiple formats for maximum accessibility.
+:::
+
+## Example: AMV II (Michaelmas 2024)
+
+::: {.fragment}
+### Lecture notes
+
+- `html` version hosted in my `/public_html/` directory: [https://www.maths.dur.ac.uk/users/anthony.yeates/](https://www.maths.dur.ac.uk/users/anthony.yeates/amv2_202400m/).
+- linked from my [homepage](https://www.maths.dur.ac.uk/users/anthony.yeates/) for external visibility.
+- `pdf` version uploaded to [Ultra](https://blackboard.durham.ac.uk/ultra/stream).
+:::
+
+::: {.fragment}
+### Problem sheets
+
+- both `html` and `pdf` versions on [Ultra](https://blackboard.durham.ac.uk/ultra/stream) only.
+- I prepare the version with solutions first then (manually) copy and remove solutions.
+:::
+
+## Getting started {.smaller}
+
+:::{.fragment}
+::: {.incremental}
+- Install software from [https://quarto.org/docs/download/](https://quarto.org/docs/download/).
+- I needed to install [R](https://www.r-project.org) and some packages within it.
+:::
+:::
+::: {.fragment}
+- For theorem numbering, install the [custom-numbered-blocks](https://github.com/ute/custom-numbered-blocks) extension by typing at the command line:
+
+```{.terminal}
+quarto add ute/custom-numbered-blocks
+```
+:::
+::: {.fragment}
+- I use [VS Code](https://code.visualstudio.com/) with the Quarto plugin for editing.
+:::
+
+::: {.fragment}
+
+### Templates
+
+1. `demo-quarto-notes/` – lecture notes (`book` format).
+2. `demo-quarto-problems/` – problems (individual files).
+:::
+
+## Workflow for lecture notes
+
+- write separate `.qmd` file for each chapter.
+- edit `_quarto.yml` with list of chapters, $\LaTeX$ definitions, theorem environments, and other global options.
+- compile at command line:
+
+    ```{.terminal}
+    quarto render
+    ```
+    - by default produces all formats; add `--to html` or `--to pdf` for just one.
+    - output is in the `_book/` subdirectory.
+
+## Workflow for problem sheets
+
+- each problem sheet is an independent `.qmd` file.
+- no list of chapters in `_quarto.yml`.
+- compile everything at command line with
+
+    ```{.terminal}
+    quarto render
+    ```
+    - or to compile just one file:
+    
+    ```{.terminal}
+    quarto render tut1.qmd
+    ```
+    - output is in the `_output/` directory (set in `_quarto.yml`).
+- I make the version with solutions first, then duplicate and delete solutions.
+
+## Conclusions
+
+::: {.incremental}
+- my experience:
+    - reasonable results but requires time investment.
+    - can be infuriating.
+    - still evolving so be prepared to make ongoing changes.
+- alternative solutions for $\LaTeX$ notes $\rightarrow$ `html`:
+    - [Chirun](https://chirun.org.uk) (Newcastle).
+    - [BookML](https://vlmantova.github.io/bookml/) (Leeds).
+:::

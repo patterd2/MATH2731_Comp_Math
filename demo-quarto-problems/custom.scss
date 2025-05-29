@@ -1,0 +1,29 @@
+/*-- scss:defaults --*/
+$border-color-green: #23b24c;
+$background-color-green: #edf7f1;
+$background-color-orange: #fef8f0;
+$border-color-orange: #f0ad4e;
+
+/*-- scss:rules --*/
+.q {
+  margin-bottom: 24px;
+}
+
+.soln {
+  background-color: $background-color-green;
+  border: 2px solid $border-color-green;
+  border-radius: 10px;
+  padding: 6px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+}
+
+.hint {
+  background-color: $background-color-orange;
+  border: 2px solid $border-color-orange;
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 6px;
+  font-size: 0.9em;
+}
