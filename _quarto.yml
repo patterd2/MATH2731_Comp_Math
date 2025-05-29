@@ -6,7 +6,7 @@ project:
 
 book:
   title: "Computational Mathematics II (MATH2731)"
-  author: "Dr Andrew Krause & Dr Denis Patterson, Durham University & Prof. Ash Kayakedi, Tufts University"
+  author: "Dr Andrew Krause & Dr Denis Patterson, Durham University"
   date: "June 2025"
   chapters:
     - index.qmd
