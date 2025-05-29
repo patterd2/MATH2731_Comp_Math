@@ -2,12 +2,12 @@ project:
   type: book
 
 book:
-  title: "MATH XXXX Lecture Notes"
-  author: "Prof. Anthony Yeates, Durham University"
-  date: "January 2025"
+  title: "Computational Mathematics II (MATH2731)"
+  author: "Dr Andrew Krause & Dr Denis Patterson, Durham University"
+  date: "June 2025"
   chapters:
     - index.qmd
-    - chap-functions.qmd
+    #- chap-functions.qmd
 
 format:
   html:

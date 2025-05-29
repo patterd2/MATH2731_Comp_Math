@@ -1,3 +1,100 @@
-# Preamble {.unnumbered}
+# Introduction {.unnumbered}
 
-This is the home page of a demo set of lecture notes using the Quarto `book` document type (<https://quarto.org/docs/books>).
+Welcome to Computational Mathematics II!
+
+This course aims to help you build skills and knowledge in using modern computational methods to do and apply mathematics. It will involve a blend of hands-on computing work and mathematical theory—this theory is generally called "numerical analysis". It consists of studying the mathematical properties of the numerical schemes we implement to understand their performance and limitations. The computing skills developed in this module will be valuable in all subsequent courses in your degree at Durham and well beyond. You will also develop your communication, presentation, and group-work skills through the various assessments involved in the course -- more on that below! 
+
+This module has **no final exam**. In fact, there are no exams of any kind. Instead, the summative assessment and associated final grade are entirely based on coursework undertaken during the term. This means that you should expect to spend more time on this course during the term relative to your other modules. We believe this workload distribution is a better way to train the skills we are trying to develop, and as a bonus, you will not need to worry about this course any further once the term ends!  
+
+## Content
+
+The module's content is divided into six Chapters of roughly equal length; some will focus slightly more on theory, while others have a more practical and hands-on nature.
+
+- **Chapter 1: Introduction to Computational Mathematics**
+    - Programming basics (including Github, and numerical versus symbolic computation)
+    - LaTeX, Overleaf, and presenting lab reports
+    - Finite-precision arithmetic and rounding error
+- **Chapter 2: Continuous Functions**
+    - Interpolation using polynomials -- fitting curves to data (Lagrange polynomials, error estimates, convergence, and Chebyshev nodes)
+    - Solving nonlinear equations (bisection, fixed-point iteration, Newton's method)
+- **Chapter 3: Linear Algebra**
+    - Solving linear systems numerically (LU decomposition, Gaussian elimination, conditioning)
+    - Applications: PageRank, computer graphics
+- **Chapter 4: Calculus**
+    - Numerical differentiation (finite differences)
+    - Numerical integration (quadrature rules, Newton-Cotes formulae)
+- **Chapter 5: Ordinary Differential Equations (ODEs)**
+    - Numerically approximating solutions of ODEs
+    - Timestepping: explicit and implicit methods
+    - Stability and convergence order
+- **Chapter 6: Selected Further Topics**
+    - Intro. to random numbers and stochastic processes
+    - Intro. to partial differential equations
+
+---
+
+## Weekly workflow and summative assessment
+
+The final grade for this module is determined as follows:
+
+- **Weekly lab reports (weeks 1-6)** – 20%
+- **Weekly e-assessments (weeks 1-6)** – 30%
+- **Project (weeks 7-10)** – 50%
+
+### Lab reports
+
+Each week for the first six weeks of the course, we will release a short set of exercises based on the lectures from the previous week. Students will be expected to submit a brief report (1-2 pages A4, including figures) with their solutions to the set of exercises -- the report will consist of written answers and figures/plots. The reports will be evaluated for correctness and quality of the presentation and communication (quality of figures, clarity of argumentation, etc.).  
+**The lab report for a given week will be due at 6 pm on Monday of the following week** (e.g., week one's lab report is due on Monday of week two and so on). Solutions and generalised feedback will be provided to the class on common mistakes and issues arising in each report. Students can also seek detailed feedback on their submission from the lecturers during drop-in sessions and office hours. There will be six lab reports in total, and **your mark is based on your four highest-scoring submissions.**
+
+### E-assessments
+
+Each week for the first six weeks of the course, we will release an e-assessment based on the lectures from the previous week. These exercises are designed to complement the lab reports by focusing exclusively on coding skills. The e-assessments will involve submitting code auto-marked by an online grading tool, and hence give immediate feedback. As with the lab reports, **the e-assessment for a given week will be due at 6 pm on Monday of the following week**. There will be six e-assessments in total, and **your mark is based on your four highest-scoring submissions.**
+
+### Project
+
+The single largest component of the assessment for this module is the project. **Weeks 7-10 of this course focus exclusively on project work with lectures ending in Week 6.** We will be releasing more detailed instructions on the project submission format and assessment criteria separately, but briefly, the main aspects of the project are as follows:
+
+- There will be eight different project options to choose from across different areas of mathematics (e.g., pure, applied, probability, mathematical physics, etc.); each project has a distinct faculty member as supervisor.
+- Students will submit their preferred project options (ranked choice preferences) in Week 4 of the term and be allocated to projects by the end of Week 6 (there are maximum subscription numbers for each option to ensure equity of supervision).
+- Each project consists of two parts: a **guided component** that is completed as part of a small group and an **extension component** that is open-ended and completed as an individual. Group assignments will be done randomly by the supervisors, and group members will share the same grade for the guided component.
+- Each group will jointly submit a five-page report for the guided component of the project, and this is worth 60% of the project grade.
+- Each student will also submit a three-page report and a six-minute video presentation on their extension component. This submission is worth 40% of the project grade.
+
+In Weeks 7-10 of the term, lectures will be replaced by project drop-in sessions during which students can discuss their project with the designated supervisor. This will be an opportunity to discuss progress, ask questions, and seek clarification. Each student only needs to attend the one project drop-in weekly session relevant to their project. Computing drop-in sessions will continue as scheduled in the first six weeks to provide additional support for coding pertinent tasks for the projects.
+
+---
+
+## Lectures, computing drop-ins & project drop-ins
+
+Lectures will primarily present, explain, and discuss new material (especially theory), but will also feature computer demonstrations of the algorithms and numerical methods. As such, students are encouraged to bring their laptops to lectures to run the examples themselves. Students must bring a laptop or device capable of running code to the computer drop-ins to work on the e-assessments and lab reports.
+
+<!--
+Code for all of the examples and exercises will be available on the course Github page:
+[https://github.com/patterd2/MATH2731_Comp_Math](https://github.com/patterd2/MATH2731_Comp_Math)
+-->
+
+|            | Activities                        | Content    |
+|:----------:|:----------------------------------|:-----------|
+| **Week 1** | Introductory lecture, 2 lectures  | Chapter 1  |
+| **Week 2** | 3 lectures, 1 computing drop-in   | Chapter 2  |
+| **Week 3** | 3 lectures, 1 computing drop-in   | Chapter 3  |
+| **Week 4** | 3 lectures, 1 computing drop-in   | Chapter 4  |
+| **Week 5** | 3 lectures, 1 computing drop-in   | Chapter 5  |
+| **Week 6** | 3 lectures, 1 computing drop-in   | Chapter 5/6|
+| **Week 7** | 0 lectures, 1 project drop-in     | Project    |
+| **Week 8** | 0 lectures, 1 project drop-in     | Project    |
+| **Week 9** | 0 lectures, 1 project drop-in     | Project    |
+| **Week 10**| 0 lectures, 1 project drop-in     | Project    |
+
+---
+
+## Contact details and Reading Materials
+
+If you have questions or need clarification on any of the above, please speak to us during lectures, drop-in sessions, or office hours. Alternatively, email one or both of us at [denis.d.patterson@durham.ac.uk](mailto:denis.d.patterson@durham.ac.uk) or [andrew.krause@durham.ac.uk](mailto:andrew.krause@durham.ac.uk).
+
+The lecture notes are designed to be sufficient and self-contained. Hence, students do not need to purchase a textbook to complete the course successfully. References for additional reading will also be given at the end of each chapter.
+
+The following texts may be useful supplementary references for students wishing to read further into topics from the course:
+
+- Burden, R. L., & Faires, J. D. (1997). *Numerical Analysis* (6th ed.). Pacific Grove, CA: Brooks/Cole Publishing Company.
+- Süli, E., & Mayers, D. F. (2003). *An Introduction to Numerical Analysis*. Cambridge: Cambridge University Press.
