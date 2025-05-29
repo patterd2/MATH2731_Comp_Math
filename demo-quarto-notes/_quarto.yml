@@ -1,5 +1,7 @@
 project:
-  type: book
+  type: website
+  output-dir: docs
+  #type: book
 
 book:
   title: "Computational Mathematics II (MATH2731)"
