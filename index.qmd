@@ -32,6 +32,7 @@ The module's content is divided into six Chapters of roughly equal length; some 
 - **Chapter 6: Selected Further Topics**
     - Intro. to random numbers and stochastic processes
     - Intro. to partial differential equations
+
 ---
 
 ## Weekly workflow and summative assessment
