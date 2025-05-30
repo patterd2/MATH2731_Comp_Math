@@ -24,7 +24,8 @@ format:
     minimal: false
     toc: true
     self-contained: true
-    title-block-banner: "#eacffa"
+    title-block-banner: "#68246D"
+    title-block-banner-color: white
     include-before:
       <p hidden>
       $$

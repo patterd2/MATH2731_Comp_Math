@@ -1,10 +1,12 @@
 # Introduction {.unnumbered}
 
-Welcome to Computational Mathematics II!
+**Welcome to Computational Mathematics II!**
 
-This course aims to help you build skills and knowledge in using modern computational methods to do and apply mathematics. It will involve a blend of hands-on computing work and mathematical theory—this theory is generally called "numerical analysis". It consists of studying the mathematical properties of the numerical schemes we implement to understand their performance and limitations. The computing skills developed in this module will be valuable in all subsequent courses in your degree at Durham and well beyond. You will also develop your communication, presentation, and group-work skills through the various assessments involved in the course -- more on that below! 
+This course aims to help you build skills and knowledge in using modern computational methods to do and apply mathematics. It will involve a blend of hands-on computing work and mathematical theory—this theory will include aspects of numerical analysis, computational algebra, and other topics within scientific computing. These areas consist of studying the mathematical properties of the computational representations of mathematical objects (numerical values as well as symbolic manipulations). The computing skills developed in this module will be valuable in all subsequent courses in your degree at Durham and well beyond. We will also introduce you to the use (and abuse) of various computational tools invaluable for doing mathematics, such as AI and searchable websites. While we will encourage you throughout to use all the tools at your disposal, it is **imperative that you understand the details and scope of what you are doing!** You will also develop your communication, presentation, and group-work skills through the various assessments involved in the course -- more on that below!
 
-This module has **no final exam**. In fact, there are no exams of any kind. Instead, the summative assessment and associated final grade are entirely based on coursework undertaken during the term. This means that you should expect to spend more time on this course during the term relative to your other modules. We believe this workload distribution is a better way to train the skills we are trying to develop, and as a bonus, you will not need to worry about this course any further once the term ends!  
+This module has **no final exam**. In fact, there are no exams of any kind. Instead, the summative assessment and associated final grade are entirely based on coursework undertaken during the term. This means that you should expect to spend more time on this course during the term relative to your other modules. We believe this workload distribution is a better way to train the skills we are trying to develop, and as a bonus, you will not need to worry about this course any further once the term ends!
+
+---
 
 ## Content
 
@@ -13,12 +15,12 @@ The module's content is divided into six Chapters of roughly equal length; some 
 - **Chapter 1: Introduction to Computational Mathematics**
     - Programming basics (including Github, and numerical versus symbolic computation)
     - LaTeX, Overleaf, and presenting lab reports
-    - Finite-precision arithmetic and rounding error
+    - Finite-precision arithmetic, rounding error, symbolic representations
 - **Chapter 2: Continuous Functions**
     - Interpolation using polynomials -- fitting curves to data (Lagrange polynomials, error estimates, convergence, and Chebyshev nodes)
     - Solving nonlinear equations (bisection, fixed-point iteration, Newton's method)
 - **Chapter 3: Linear Algebra**
-    - Solving linear systems numerically (LU decomposition, Gaussian elimination, conditioning)
+    - Solving linear systems numerically (LU decomposition, Gaussian elimination, conditioning) and symbolically
     - Applications: PageRank, computer graphics
 - **Chapter 4: Calculus**
     - Numerical differentiation (finite differences)
@@ -30,7 +32,6 @@ The module's content is divided into six Chapters of roughly equal length; some 
 - **Chapter 6: Selected Further Topics**
     - Intro. to random numbers and stochastic processes
     - Intro. to partial differential equations
-
 ---
 
 ## Weekly workflow and summative assessment
