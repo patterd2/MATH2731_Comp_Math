@@ -10,10 +10,10 @@ This module has **no final exam**. In fact, there are no exams of any kind. Inst
 
 ## Content
 
-The module's content is divided into six Chapters of roughly equal length; some will focus slightly more on theory, while others have a more practical and hands-on nature.
+The module's content is divided into six chapters of roughly equal length; some will focus slightly more on theory, while others have a more practical and hands-on nature.
 
 - **Chapter 1: Introduction to Computational Mathematics**
-    - Programming basics (including Github, and numerical versus symbolic computation)
+    - Programming basics (including GitHub, and numerical versus symbolic computation)
     - LaTeX, Overleaf, and presenting lab reports
     - Finite-precision arithmetic, rounding error, symbolic representations
 - **Chapter 2: Continuous Functions**
@@ -62,11 +62,11 @@ The single largest component of the assessment for this module is the project. *
 - Each group will jointly submit a five-page report for the guided component of the project, and this is worth 60% of the project grade.
 - Each student will also submit a three-page report and a six-minute video presentation on their extension component. This submission is worth 40% of the project grade.
 
-In Weeks 7-10 of the term, lectures will be replaced by project drop-in sessions during which students can discuss their project with the designated supervisor. This will be an opportunity to discuss progress, ask questions, and seek clarification. Each student only needs to attend the one project drop-in weekly session relevant to their project. Computing drop-in sessions will continue as scheduled in the first six weeks to provide additional support for coding pertinent tasks for the projects.
+In Weeks 7-10 of the term, lectures will be replaced by project workshop sessions during which students can discuss their project with the designated supervisor. This will be an opportunity to discuss progress, ask questions, and seek clarification. Each student only needs to attend the one project drop-in weekly session relevant to their project. Computing drop-in sessions will continue as scheduled in the first six weeks to provide additional support for coding pertinent tasks for the projects -- there will be two timetabled computing drop-ins per week and students are encouraged to attend at least one of them.
 
 ---
 
-## Lectures, computing drop-ins & project drop-ins
+## Lectures, computing drop-ins & project workshops
 
 Lectures will primarily present, explain, and discuss new material (especially theory), but will also feature computer demonstrations of the algorithms and numerical methods. As such, students are encouraged to bring their laptops to lectures to run the examples themselves. Students must bring a laptop or device capable of running code to the computer drop-ins to work on the e-assessments and lab reports.
 
@@ -83,10 +83,10 @@ Code for all of the examples and exercises will be available on the course Githu
 | **Week 4** | 3 lectures, 1 computing drop-in   | Chapter 4  |
 | **Week 5** | 3 lectures, 1 computing drop-in   | Chapter 5  |
 | **Week 6** | 3 lectures, 1 computing drop-in   | Chapter 5/6|
-| **Week 7** | 0 lectures, 1 project drop-in     | Project    |
-| **Week 8** | 0 lectures, 1 project drop-in     | Project    |
-| **Week 9** | 0 lectures, 1 project drop-in     | Project    |
-| **Week 10**| 0 lectures, 1 project drop-in     | Project    |
+| **Week 7** | 0 lectures, 1 project workshop    | Project    |
+| **Week 8** | 0 lectures, 1 project workshop    | Project    |
+| **Week 9** | 0 lectures, 1 project workshop    | Project    |
+| **Week 10**| 0 lectures, 1 project workshop    | Project    |
 
 ---
 
