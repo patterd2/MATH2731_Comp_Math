@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.7)  15 SEP 2025 17:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.7)  15 SEP 2025 17:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1118,18 +1118,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 1058--1059
  []
 
 [18]
-
-! LaTeX Error: Environment matrix* undefined.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.1087 \begin{matrix*}
-                       
+! Extra alignment tab has been changed to \cr.
+<recently read> \endtemplate 
+                             
+l.1088 ...&+& a_2x_0^2 &+& \ldots &+& a_nx_0^n &=&
+                                                   f(x_0),\\ 
 Here is how much of TeX's memory you used:
- 35395 strings out of 476025
- 718319 string characters out of 5790018
+ 35394 strings out of 476025
+ 718181 string characters out of 5790018
  1871388 words of memory out of 5000000
  55071 multiletter control sequences out of 15000+600000
  583019 words of font info for 170 fonts, out of 8000000 for 9000
