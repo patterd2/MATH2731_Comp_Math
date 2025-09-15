@@ -15,11 +15,15 @@ $$
 $$
 :::
 
+In contrast to the integers, only a subset of real numbers within any given interval can be represented exactly.
+
 ::: {.callout-note}
 Some modern languages (such as Python) automatically promote large integers to arbitrary precision ("long"), but most statically-typed languages (C, Java, Matlab, etc.) do not; an **overflow** will occur and the type remains fixed.
 :::
 
-By contrast, only a subset of real numbers within any given interval can be represented exactly.
+::: {.callout-note}
+A statically typed language is one in which the type of every variable is determined before the program runs.
+:::
 
 ## Fixed-point numbers
 
@@ -46,7 +50,7 @@ $$
 Here $(0.d_1d_2\cdots d_{m})_\beta$ is called the **fraction** (or **significand** or **mantissa**), $\beta$ is the base, and $e$ is the **exponent**. This can represent a much larger range of numbers than a fixed-point system of the same size, although at the cost that the numbers are not equally spaced. If $d_1\neq 0$ then each number in $F$ has a unique representation and $F$ is called **normalised**.
 
 ::: {.callout-example title="Floating-point number system with $\beta=2$, $m=3$, $e_{\rm min}=-1, e_{\rm max}=2$"}
-![](im/fp1.jpg){width=70% fig-align="center"}
+![](im/fp1.jpg){width=90% fig-align="center"}
 :::
 
 ::: {.callout-note}

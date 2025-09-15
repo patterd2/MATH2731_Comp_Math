@@ -33,7 +33,9 @@ If $f$ is not continuous, then something other than a polynomial is required, si
 To approximate functions like $1/x$, there is a well-developed theory of rational function interpolation, which is beyond the scope of this course.
 :::
 
-In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—that is, requiring $p_n(x_i) = f(x_i)$ at a finite set of points $x_i$, usually called **nodes**. Sometimes we will also require the derivative(s) of $p_n$ to match those of $f$.
+In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—that is, requiring $p_n(x_i) = f(x_i)$ at a finite set of points $x_i$, usually called **nodes**. Sometimes we will also require the derivative(s) of $p_n$ to match those of $f$. This type of function approximation where we want to match values of the function that we know at particular points is very natural in many applications. For example, weather forecasts involve numerically solving huge systems of partial differential equations (PDEs), which means actually solving them on a discrete grid of points. If we want weather predictions between grid points, we must **interpolate**. Figure @fig-MET shows the spatial resolutions of a range of current and past weather models produced by the UK Met Office.
+
+![Chart showing a range of weather models produce by the UK Met Office. Even the highest spatial resolution models have more than 1.5km between grid point due to computational constraints.](im/met_office.png){#fig-MET width=85% fig-align="center"}
 
 ## Taylor series {.unnumbered}
 
@@ -105,43 +107,13 @@ Since this error arises from approximating $f$ with a truncated series, rather t
 Error estimates like the Lagrange remainder play an important role in numerical analysis and computation, so it is important to understand where it comes from. The number $\xi$ will ultimately come from Rolle's theorem, which is a special case of the mean value theorem from first-year calculus:
 
 ::: {.theorem}
-#### Rolle's Theorem
+## Rolle's Theorem
 If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, with $f(a)=f(b)=0$, then there exists $\xi\in(a,b)$ with $f'(\xi)=0$.
 :::
 
-**Proof of Lagrange remainder (Taylor's Theorem)**
-
-The argument goes as follows:
-
-1. Define the "auxiliary" function  
-   $$
-   g(t) = f(t) - p_n(t) - M(t-x_0)^{n+1},
-   $$
-   where $p_n$ is the Taylor polynomial. By construction, this function satisfies
-   $$
-   \begin{aligned}
-   g(x_0) &= f(x_0) - p_n(x_0) - M(0)^{n+1} = 0,\\
-   g'(x_0) &= f'(x_0) - p_n'(x_0) - (n+1)M(0)^{n} = 0,\\
-   g''(x_0) &= f''(x_0) - p_n''(x_0) - n(n+1)M(0)^{n-1} = 0,\\
-   &\vdots\\
-   g^{(n)}(x_0) &= f^{(n)}(x_0) - p_n^{(n)}(x_0) - (n+1)!M(0) = 0.
-   \end{aligned}
-   $$
-2. By a suitable choice of $M$, we can make $g(x)=0$ too. Put  
-   $$
-   M = \frac{f(x) - p_n(x)}{(x-x_0)^{n+1}},
-   $$
-   then $g(x) = f(x) - p_n(x) - M(x-x_0)^{n+1} = 0$.
-3. Since $g(x_0)=g(x)=0$ and $x\neq x_0$, Rolle's theorem implies that there exists $\xi_0$ between $x_0$ and $x$ such that $g'(\xi_0)=0$. But we already know that $g'(x_0)=0$, so $g'$ has two distinct roots and we can apply Rolle's theorem again. Hence there exists $\xi_1$ between $x_0$ and $\xi_0$ such that $g''(\xi_1)=0$. We can keep repeating this argument until we get $\xi_{n+1}\equiv \xi$ such that $g^{(n+1)}(\xi)=0$.
-4. We can differentiate $g(t)$ to see that  
-   $$
-   g^{(n+1)}(t) = f^{(n+1)}(t) - p_n^{(n+1)}(t) - M \frac{\mathrm{d}^{n+1}}{\mathrm{d}t^{n+1}}\big[(t-x_0)^{n+1}\big] = f^{(n+1)}(t) - M(n+1)!
-   $$
-   Substituting $\xi$ and our chosen $M$ gives  
-   $$
-   0 = g^{(n+1)}(\xi) = f^{(n+1)}(\xi) - \frac{f(x) - p_n(x)}{(x-x_0)^{n+1}}(n+1)!
-   $$
-   which rearranges to give the formula in Taylor's Theorem. 
+::: {.callout-note}
+Note that Rolle's Theorem does not tell us what the value of $\xi$ might actually be, so in practice we must take some kind of worst case estimate to get an error bound, e.g. calculate the max value of $f'(\xi)$ over the range of possible $\xi$ values.
+:::
 
 ## Polynomial interpolation
 
@@ -221,9 +193,375 @@ If we took the nodes $\{0,2\pi,4\pi\}$, we would get a constant function $p_2(x)
 ![](im/linear_interp.png){width=70% fig-align="center"}
 :::
 
-One way to compute the interpolating polynomial would be to solve the Vandermonde system above, e.g. by Gaussian elimination. However, we will see (next term) that this is not recommended. In practice, we choose a different basis for $p_n$. There are two common choices, due to Lagrange and Newton.
+One way to compute the interpolating polynomial would be to solve the Vandermonde system above, e.g. by Gaussian elimination. However, this is not recommended. In practice, we choose a different basis for $p_n$; there are two common and effective choices due to Lagrange and Newton.
 
 ::: {.callout-note}
-The Vandermonde matrix arises when we write $p_n$ in the **natural basis** $\{1,x,x^2,\ldots\}$.
+The Vandermonde matrix arises when we write $p_n$ in the **natural basis** $\{1,x,x^2,\ldots\}$, but we could also choose to work in some other basis...
 :::
+
+### Lagrange Polynomials {#sec-polylag}
+
+This uses a special basis of polynomials $\{\ell_k\}$ in which the interpolation equations reduce to the identity matrix. In other words, the coefficients in this basis are just the function values,
+$$
+p_n(x) = \sum_{k=0}^n f(x_k)\ell_k(x).
+$$
+
+::: {.eg title="Linear interpolation again."}
+We can re-write our linear interpolant to separate out the function values:
+$$
+p_1(x) = \underbrace{\frac{x - x_1}{x_0 - x_1}}_{\ell_0(x)}f(x_0) + \underbrace{\frac{x-x_0}{x_1-x_0}}_{\ell_1(x)}f(x_1).
+$$
+Then $\ell_0$ and $\ell_1$ form the necessary basis. In particular, they have the property that
+$$
+\ell_0(x_i) = \begin{cases}
+1 & \textrm{if $i=0$},\\
+0 & \textrm{if $i=1$},
+\end{cases}
+\qquad
+\ell_1(x_i) = \begin{cases}
+0 & \textrm{if $i=0$},\\
+1 & \textrm{if $i=1$},
+\end{cases}
+$$
+:::
+
+For general $n$, the $n+1$ **Lagrange polynomials** are defined as a product
+$$
+\ell_k(x) = \prod_{\substack{j=0\\j\neq k}}^n\frac{x - x_j}{x_k - x_j}.
+$$
+By construction, they have the property that
+$$
+\ell_k(x_i) = \begin{cases}
+1 & \textrm{if $i=k$},\\
+0 & \textrm{otherwise}.
+\end{cases}
+$$
+From this, it follows that the interpolating polynomial may be written as above.
+
+::: {.callout-note}
+By the Existence/Uniqueness Theorem, the Lagrange polynomials are the *unique* polynomials with this property.
+:::
+
+::: {.eg}
+## Compute the quadratic interpolating polynomial to $f(x)=\cos(x)$ with nodes $\{-\tfrac\pi4, 0, \tfrac\pi4\}$ using Lagrange polynomials.
+
+The Lagrange polynomials of degree 2 for these nodes are
+$$
+\begin{aligned}
+\ell_0(x) &= \frac{(x-x_1)(x-x_2)}{(x_0-x_1)(x_0-x_2)} = \frac{x(x-\tfrac\pi4)}{\tfrac\pi4\cdot\tfrac\pi2},\\
+\ell_1(x) &= \frac{(x-x_0)(x-x_2)}{(x_1-x_0)(x_1-x_2)} = \frac{(x+\tfrac\pi4)(x-\tfrac\pi4)}{-\tfrac\pi4\cdot\tfrac\pi4},\\
+\ell_2(x) &= \frac{(x-x_0)(x-x_1)}{(x_2-x_0)(x_2-x_1)}\\ 
+&= \frac{x(x+\tfrac\pi4)}{\tfrac\pi2\cdot\tfrac\pi4}.
+\end{aligned}
+$$
+So the interpolating polynomial is
+$$
+\begin{aligned}
+p_2(x) &= f(x_0)\ell_0(x) + f(x_1)\ell_1(x) + f(x_2)\ell_2(x)\\
+&= \tfrac{1}{\sqrt{2}}\tfrac8{\pi^2}x(x-\tfrac\pi4) - \tfrac{16}{\pi^2}(x+\tfrac\pi4)(x-\tfrac\pi4) +\tfrac{1}{\sqrt{2}}\tfrac8{\pi^2}x(x+\tfrac\pi4) = \tfrac{16}{\pi^2}\big(\tfrac{1}{\sqrt{2}} - 1\big)x^2 + 1.
+\end{aligned}
+$$
+The Lagrange polynomials and the resulting interpolant are shown below:
+
+![](im/lagrange_polys.png){width=45%}
+![](im/lagrange.png){width=45%}
+:::
+
+::: {.callout-note}
+Lagrange polynomials were actually discovered by Edward Waring in 1776 and rediscovered by Euler in 1783, before they were published by Lagrange himself in 1795; a classic example of Stigler's law of eponymy!
+:::
+
+The Lagrange form of the interpolating polynomial is easy to write down, but expensive to evaluate since all of the $\ell_k$ must be computed. Moreover, changing any of the nodes means that the $\ell_k$ must all be recomputed from scratch, and similarly for adding a new node (moving to higher degree).
+
+### Newton/Divided-Difference Polynomials
+
+It would be easy to increase the degree of $p_n$ if
+$$
+p_{n+1}(x) = p_{n}(x) + g_{n+1}(x), \quad \textrm{where $g_{n+1}\in{\cal P}_{n+1}$}.
+$$
+From the interpolation conditions, we know that
+$$
+g_{n+1}(x_i) = p_{n+1}(x_i) - p_{n}(x_i) = f(x_i)-f(x_i)=0 \quad \textrm{for $i=0,\ldots,n$},
+$$
+so
+$$
+g_{n+1}(x) = a_{n+1}(x-x_0)\cdots(x-x_{n}).
+$$
+The coefficient $a_{n+1}$ is determined by the remaining interpolation condition at $x_{n+1}$, so
+$$
+p_n(x_{n+1}) + g_{n+1}(x_{n+1}) = f(x_{n+1}) \quad \implies \quad a_{n+1} = \frac{f(x_{n+1}) - p_{n}(x_{n+1})}{(x_{n+1}-x_0)\cdots(x_{n+1}-x_{n})}.
+$$
+
+The polynomial $(x-x_0)(x-x_1)\cdots(x-x_{n})$ is called a **Newton polynomial**. These form a new basis
+$$
+n_0(x)=1, \qquad n_k(x) = \prod_{j=0}^{k-1}(x-x_j) \quad \textrm{for $k>0$}.
+$$
+
+The **Newton form** of the interpolating polynomial is then
+$$
+p_n(x) = \sum_{k=0}^n a_kn_k(x), \qquad a_0 = f(x_0),\qquad a_k = \frac{f(x_k) - p_{k-1}(x_k)}{(x_k-x_0)\cdots(x_k-x_{k-1})} \textrm{ for $k>0$}.
+$$
+Notice that $a_k$ depends only on $x_0,\ldots x_k$, so we can construct first $a_0$, then $a_1$, etc.
+
+It turns out that the $a_k$ are easy to compute, but it will take a little work to derive the method.
+We define the **divided difference** $f[x_0,x_1,\ldots,x_k]$ to be the coefficient of $x^k$ in the polynomial interpolating $f$ at nodes $x_0,\ldots,x_k$. It follows that
+$$
+f[x_0,x_1,\ldots,x_k] = a_k,
+$$
+where $a_k$ is the coefficient in the Newton form above.
+
+::: {.eg title="Compute the Newton interpolating polynomial at two nodes."}
+$$
+\begin{aligned}
+f[x_0] &= a_0 = f(x_0),\\
+f[x_0,x_1] &= a_1 = \frac{f(x_1) - p_0(x_1)}{x_1 - x_0} = \frac{f(x_1)-a_0}{x_1 - x_0} = \frac{f[x_1]-f[x_0]}{x_1 - x_0}.
+\end{aligned}
+$$
+So the **first-order** divided difference $f[x_0,x_1]$ is obtained from the **zeroth-order** differences $f[x_0]$, $f[x_1]$ by subtracting and dividing, hence the name "divided difference".
+:::
+
+::: {.eg title="Compute the Newton interpolating polynomial at three nodes."}
+Continuing from the previous example, we find
+$$
+\begin{aligned}
+f[x_0,x_1,x_2] &= a_2 = \frac{f(x_2) - p_1(x_2)}{(x_2 - x_0)(x_2-x_1)} = \frac{f(x_2) - a_0 - a_1(x_2-x_0)}{(x_2 - x_0)(x_2-x_1)}\\
+& = \ldots = \frac{1}{x_2-x_0}\left(\frac{f[x_2]-f[x_1]}{x_2-x_1} - \frac{f[x_1]-f[x_0]}{x_1-x_0}\right)\\
+&= \frac{f[x_1,x_2]-f[x_0,x_1]}{x_2-x_0}.
+\end{aligned}
+$$
+So again, we subtract and divide. 
+:::
+
+In general, we have the following.
+
+::: {.theorem}
+For $k>0$, the divided differences satisfy
+$$
+f[x_i,x_{i+1},\ldots,x_{i+k}] = \frac{f[x_{i+1},\ldots,x_{i+k}] - f[x_i,\ldots,x_{i+k-1}]}{x_{i+k} - x_i}.
+$$
+:::
+
+**Proof:**  
+Without loss of generality, we relabel the nodes so that $i=0$. So we want to prove that
+$$
+f[x_0,x_1,\ldots,x_{k}] = \frac{f[x_1,\ldots,x_{k}] - f[x_0,\ldots,x_{k-1}]}{x_{k} - x_0}.
+$$
+The trick is to write the interpolant with nodes $x_0, \ldots, x_k$ in the form 
+$$
+p_k(x) = \frac{(x_k-x)q_{k-1}(x) + (x-x_0)\tilde{q}_{k-1}(x)}{x_k-x_0},
+$$
+where $q_{k-1}\in{\cal P}_{k-1}$ interpolates $f$ at the subset of nodes $x_0, x_1, \ldots, x_{k-1}$ and $\tilde{q}_{k-1}\in{\cal P}_{k-1}$ interpolates $f$ at the subset $x_1, x_2,\ldots,x_k$. If this holds, then matching the coefficient of $x^k$ on each side will give the divided difference formula, since, e.g., the leading coefficient of $q_{k-1}$ is $f[x_0,\ldots,x_{k-1}]$. To see that $p_k$ may really be written this way, note that
+$$
+\begin{aligned}
+p_k(x_0) &= q_{k-1}(x_0) = f(x_0),\\
+p_k(x_k) &= \tilde{q}_{k-1}(x_k) = f(x_k),\\
+p_k(x_i) &= \frac{(x_k-x_i)q_{k-1}(x_i) + (x_i-x_0)\tilde{q}_{k-1}(x_i)}{x_k - x_0} = f(x_i) \quad \textrm{for $i=1,\ldots,k-1$}.
+\end{aligned}
+$$
+Since $p_k$ agrees with $f$ at the $k+1$ nodes, it is the unique interpolant in ${\cal P}_k$.
+
+Theorem above gives us our convenient method, which is to construct a **divided-difference table**.
+
+::: {.eg}
+## Construct the Newton polynomial at the nodes $\{-1,0,1,2\}$ and with corresponding function values $\{5,1,1,11\}$
+
+We construct a divided-difference table as follows.
+$$
+\begin{matrix}
+&x_0=-1 \quad &f[x_0]=5 & & &\\
+& & &f[x_0,x_1]=-4 & &\\
+&x_1=0 \quad &f[x_1]=1 & &f[x_0,x_1,x_2]=2 &\\
+& & &f[x_1,x_2]=0 & &f[x_0,x_1,x_2,x_3]=1\\
+&x_2=1 \quad &f[x_2]=1 & &f[x_1,x_2,x_3]=5 &\\
+& & &f[x_2,x_3]=10 & &\\
+&x_3=2 \quad &f[x_3]=11 & & &\\
+\end{matrix}
+$$
+The coefficients of the $p_3$ lie at the top of each column, so
+$$
+\begin{aligned}
+p_3(x) &= f[x_0] + f[x_0,x_1](x-x_0) + f[x_0,x_1,x_2](x-x_0)(x-x_1)\\
+& + f[x_0,x_1,x_2,x_3](x-x_0)(x-x_1)(x-x_2)\\
+&=5 - 4(x+1) + 2x(x+1) + x(x+1)(x-1).
+\end{aligned}
+$$
+Now suppose we add the extra nodes $\{-2,3\}$ with data $\{5,35\}$. All we need to do to compute $p_5$ is add two rows to the bottom of the table --- there is no need to recalculate the rest. This gives
+$$
+\begin{matrix}
+&-1  &5 & & & & &\\
+& & &-4 & & & &\\
+&0  &1 & &2 & & &\\
+& & &0 & &1 & &\\
+&1  &1 & &5 & &\textcolor{red}{-\tfrac1{12}} &\\
+& & &10 & &\textcolor{red}{\tfrac{13}{12}} & &\textcolor{red}{0}\\
+&2 &11 & &\textcolor{red}{\tfrac{17}{6}} & &\textcolor{red}{-\tfrac1{12}}\\
+& & &\textcolor{red}{\tfrac{3}{2}} & &\textcolor{red}{\tfrac{5}{6}} & &\\
+&\textcolor{red}{-2} &\textcolor{red}{5} & &\textcolor{red}{\tfrac92} & &&\\
+& & &\textcolor{red}{6} & & & &\\
+&\textcolor{red}{3}  &\textcolor{red}{35} & & & & &\\
+\end{matrix}
+$$
+The new interpolating polynomial is
+$$
+p_5(x) = p_3(x) - \tfrac{1}{12}x(x+1)(x-1)(x-2).
+$$
+:::
+
+::: {.callout-note}
+Notice that the $x^5$ coefficient vanishes for these particular data, meaning that they are consistent with $f\in{\cal P}_4$.
+:::
+
+::: {.callout-note}
+Note that the value of $f[x_0,x_1,\ldots,x_k]$ is independent of the order of the nodes in the table. This follows from the uniqueness of $p_k$.
+:::
+
+Divided differences are actually approximations for *derivatives* of $f$. In the limit that the nodes all coincide, the Newton form of $p_n(x)$ becomes the Taylor polynomial.
+
+### Interpolation Error
+
+The goal here is to estimate the error $|f(x)-p_n(x)|$ when we approximate a function $f$ by a polynomial interpolant $p_n$. Clearly this will depend on $x$.
+
+::: {.eg}
+## Quadratic interpolant for $f(x)=\cos(x)$ with $\{-\tfrac\pi4,0,\tfrac\pi4\}$.
+
+From @sec-polylag, we have $p_2(x) = \tfrac{16}{\pi^2}\left(\tfrac{1}{\sqrt{2}}-1\right)x^2 + 1$, so the error is
+$$
+|f(x) - p_2(x)| = \left|\cos(x) -  \tfrac{16}{\pi^2}\left(\tfrac{1}{\sqrt{2}}-1\right)x^2 - 1\right|.
+$$
+This is shown below:
+
+![](im/lagrange_error.png){width=70% fig-align="center"}
+
+Clearly the error vanishes at the nodes themselves, but note that it generally does better near the middle of the set of nodes — this is quite typical behaviour.
+:::
+
+We can adapt the proof of Taylor's theorem to get a quantitative error estimate.
+
+::: {.theorem}
+#### Cauchy's Interpolation Error Theorem
+Let $p_n\in{\cal P}_n$ be the unique polynomial interpolating $f(x)$ at the $n+1$ distinct nodes $x_0, x_1, \ldots, x_n \in [a,b]$, and let $f$ be continuous on $[a,b]$ with $n+1$ continuous derivatives on $(a,b)$. Then for each $x\in[a,b]$ there exists $\xi\in(a,b)$ such that
+$$
+f(x) - p_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_0)(x-x_1)\cdots(x-x_n).
+$$
+:::
+
+This looks similar to the error formula for Taylor polynomials (see Taylor's Theorem). But now the error vanishes at multiple nodes rather than just at $x_0$.
+
+From the formula, you can see that the error will be larger for a more "wiggly" function, where the derivative $f^{(n+1)}$ is larger. It might also appear that the error will go down as the number of nodes $n$ increases; we will see in @sec-chebyshev that this is not always true.
+
+::: {.callout-note}
+As in Taylor's theorem, note the appearance of an undetermined point $\xi$. This will prevent us knowing the error exactly, but we can make an estimate as before.
+:::
+
+::: {.eg}
+## Quadratic interpolant for $f(x)=\cos(x)$ with $\{-\tfrac\pi4,0,\tfrac\pi4\}$.
+
+For $n=2$, Cauchy's Interpolation Error Theorem says that
+$$
+f(x) - p_2(x) = \frac{f^{(3)}(\xi)}{6}x(x+\tfrac\pi4)(x-\tfrac\pi4) = \tfrac16\sin(\xi)x(x+\tfrac\pi4)(x-\tfrac\pi4),
+$$
+for some $\xi\in[-\tfrac\pi4,\tfrac\pi4]$.
+
+For an upper bound on the error at a particular $x$, we can just use $|\sin(\xi)|\leq 1$ and plug in $x$.
+
+To bound the maximum error within the interval $[-1,1]$, let us maximise the polynomial $w(x)=x(x+\tfrac\pi4)(x-\tfrac\pi4)$. We have $w'(x) = 3x^2 - \tfrac{\pi^2}{16}$ so turning points are at $x=\pm\tfrac\pi{4\sqrt{3}}$. We have
+$$
+w(-\tfrac\pi{4\sqrt{3}}) = 0.186\ldots, \quad 
+w(\tfrac\pi{4\sqrt{3}}) = -0.186\ldots, \quad 
+w(-1) = -0.383\ldots, \quad w(1) = 0.383\ldots.
+$$
+
+So our error estimate for $x\in[-1,1]$ is
+$$
+|f(x) - p_2(x)| \leq \tfrac16(0.383) = 0.0638\ldots
+$$
+
+From the plot earlier, we see that this bound is satisfied (as it has to be), although not tight.
+:::
+
+### Node Placement: Chebyshev nodes {#sec-chebyshev}
+
+You might expect polynomial interpolation to *converge* as $n\to\infty$. Surprisingly, this is not the case if you take **equally-spaced** nodes $x_i$. This was shown by Runge in a famous 1901 paper.
+
+::: {.eg}
+## The Runge function $f(x) = 1/(1 + 25x^2)$ on $[-1,1]$.
+
+Here are illustrations of $p_n$ for increasing $n$:
+
+![](im/runge1.png){width=45%}
+![](im/runge2.png){width=45%}
+![](im/runge3.png){width=45%}
+![](im/runge4.png){width=45%}
+
+Notice that $p_n$ is converging to $f$ in the middle, but diverging more and more near the ends, even within the interval $[x_0,x_n]$. This is called the **Runge phenomenon**.
+:::
+
+::: {.callout-note}
+A full mathematical explanation for this divergence usually uses complex analysis — see Chapter 13 of *Approximation Theory and Approximation Practice* by L.N. Trefethen (SIAM, 2013). For a more elementary proof, see [this StackExchange post](http://math.stackexchange.com/questions/775405/).
+:::
+
+The problem is (largely) coming from the interpolating polynomial
+$$
+w(x) = \prod_{i=0}^n(x-x_i).
+$$
+We can avoid the Runge phenomenon by choosing different nodes $x_i$ that are **not uniformly spaced**.
+
+Since the problems are occurring near the ends of the interval, it would be logical to put more nodes there. A good choice is given by taking equally-spaced points on the unit circle $|z|=1$, and projecting to the real line:
+
+![](im/chebnodes.png){width=60% fig-align="center"}
+
+The points around the circle are
+$$
+\phi_j = \frac{(2j+1)\pi}{2(n+1)}, \quad j=0,\ldots,n,
+$$
+so the corresponding **Chebyshev nodes** are
+$$
+x_j = \cos\left[\frac{(2j + 1)\pi}{2(n+1)}\right], \quad j=0,\ldots,n.
+$$
+
+::: {.eg}
+## The Runge function $f(x) = 1/(1+25x^2)$ on $[-1,1]$ using the Chebyshev nodes.
+
+For $n=3$, the nodes are $x_0=\cos(\tfrac\pi8)$, $x_1=\cos(\tfrac{3\pi}{8})$, $x_2=\cos(\tfrac{5\pi}{8})$, $x_3=\cos(\tfrac{7\pi}{8})$.
+
+Below we illustrate the resulting interpolant for $n=15$:
+
+![](im/runge_cheby.png){width=50% fig-align="center"}
+
+Compare this to the example with equally spaced nodes.
+:::
+
+In fact, the Chebyshev nodes are, in one sense, an optimal choice. To see this, we first note that they are zeroes of a particular polynomial.
+
+::: {.lemma}
+The Chebyshev points $x_j=\cos\left[\frac{(2j+1)\pi}{2(n+1)}\right]$ for $j=0,\ldots,n$ are zeroes of the Chebyshev polynomial
+$$
+T_{n+1}(t) := \cos\big[(n+1)\arccos(t)\big]
+$$
+:::
+
+::: {.callout-note}
+The Chebyshev polynomials are denoted $T_n$ rather than $C_n$ because the name is transliterated from Russian as "Tchebychef" in French, for example.
+:::
+
+In choosing the Chebyshev nodes, we are choosing the error polynomial $w(x):=\prod_{i=0}^n(x-x_i)$ to be $T_{n+1}(x)/2^n$. (This normalisation makes the leading coefficient 1) This is a good choice because of the following result.
+
+::: {.theorem}
+#### Chebyshev interpolation
+Let $x_0, x_1, \ldots, x_n \in [-1,1]$ be distinct. Then $\max_{[-1,1]}|w(x)|$ is minimized if
+$$
+w(x) = \frac{1}{2^n}T_{n+1}(x),
+$$
+where $T_{n+1}(x)$ is the **Chebyshev polynomial** $T_{n+1}(x) = \cos\Big((n+1)\arccos(x)\Big)$.
+:::
+
+Having established that the Chebyshev polynomial minimises the maximum error, we can see convergence as $n\to\infty$ from the fact that
+$$
+|f(x) - p_n(x)| = \frac{|f^{(n+1)}(\xi)|}{(n+1)!}|w(x)| = \frac{|f^{(n+1)}(\xi)|}{2^n(n+1)!}|T_{n+1}(x)| \leq \frac{|f^{(n+1)}(\xi)|}{2^n(n+1)!}.
+$$
+
+If the function is well-behaved enough that $|f^{(n+1)}(x)| < M$ for some constant whenever $x \in [-1,1]$, then the error will tend to zero as $n \to \infty$.
+
+## Solving Nonlinear Equations
+
 

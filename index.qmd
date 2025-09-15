@@ -103,4 +103,4 @@ The following texts may be useful supplementary references for students wishing 
 
 ## Acknowledgements
 
-We are indebted to Prof. Anthony Yeates (Durham) who numerical analysis notes formed the basis of several chapters of the coures notes.
+We are indebted to Prof. Anthony Yeates (Durham) whose numerical analysis notes formed the basis of several chapters of the coures notes.

@@ -79,3 +79,8 @@ custom-numbered-blocks:
       boxstyle: foldbox.simple
       colors: [fcebee, ea3342]
       label: Theorem
+    proof:
+      collapse: True
+      boxstyle: foldbox.simple
+      colors: [fcebee, ea3342]
+      label: Proof
