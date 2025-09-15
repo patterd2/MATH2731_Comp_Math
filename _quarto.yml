@@ -10,7 +10,8 @@ book:
   date: "June 2025"
   chapters:
     - index.qmd
-    # - chap-functions.qmd
+    - chap-one.qmd
+    - chap-two.qmd
     
 
 format:
@@ -18,7 +19,7 @@ format:
     theme:
       - litera
       # - custom.scss
-    fontsize: 0.9em
+    fontsize: 1.0em
     callout-appearance: simple
     # callout-icon: false
     minimal: false
@@ -58,18 +59,23 @@ format:
        \DeclareOldFontCommand{\rm}{\normalfont\rmseries}{\mathrm}
 
 
-# filters:
-#   - custom-numbered-blocks
+filters:
+  - custom-numbered-blocks
 
-# custom-numbered-blocks:
-#   classes:
-#     eg:
-#       collapse: True
-#       boxstyle: foldbox.simple
-#       colors: [e7efea, 53b57b]
-#       label: Example
-#     prp:
-#       collapse: False
-#       boxstyle: foldbox.simple
-#       colors: [fcebee, ea3342]
-#       label: Proposition
+custom-numbered-blocks:
+  classes:
+    eg:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [E7D6EA, 68246D]
+      label: Example
+    doit:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [e7efea, 53b57b]
+      label: Exercise
+    theorem:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [fcebee, ea3342]
+      label: Theorem

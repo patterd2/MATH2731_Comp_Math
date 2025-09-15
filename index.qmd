@@ -100,3 +100,7 @@ The following texts may be useful supplementary references for students wishing 
 
 - Burden, R. L., & Faires, J. D. (1997). *Numerical Analysis* (6th ed.). Pacific Grove, CA: Brooks/Cole Publishing Company.
 - Süli, E., & Mayers, D. F. (2003). *An Introduction to Numerical Analysis*. Cambridge: Cambridge University Press.
+
+## Acknowledgements
+
+We are indebted to Prof. Anthony Yeates (Durham) who numerical analysis notes formed the basis of several chapters of the coures notes.

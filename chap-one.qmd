@@ -1,0 +1,242 @@
+---
+title: Floating Point Arithmetic
+---
+
+The goal of this chapter is to explore and begin to answer the following question:
+
+> *How do we represent numbers on a computer?*
+
+Integers can be represented exactly, up to some maximum size.
+
+::: {.callout-example title="64-bit integers"}
+If 1 bit (binary digit) is used to store the sign $\pm$, the largest possible number is
+$$
+1\times 2^{62} +1\times 2^{61} + \ldots + 1\times 2^{1} + 1\times 2^{0} = 2^{63}-1.
+$$
+:::
+
+::: {.callout-note}
+Some modern languages (such as Python) automatically promote large integers to arbitrary precision ("long"), but most statically-typed languages (C, Java, Matlab, etc.) do not; an **overflow** will occur and the type remains fixed.
+:::
+
+By contrast, only a subset of real numbers within any given interval can be represented exactly.
+
+## Fixed-point numbers
+
+In everyday life, we tend to use a **fixed point** representation
+$$
+x = \pm (d_1d_2\cdots d_{k-1}.d_k\cdots d_n)_\beta, \quad \textrm{where} \quad d_1,\ldots,d_n\in\{0,1,\ldots,\beta - 1\}.
+$$
+Here $\beta$ is the base (e.g. 10 for decimal arithmetic or 2 for binary).
+
+::: {.callout-example title="$(10.1)_2 = 1\times 2^1 + 0\times 2^0 + 1\times 2^{-1} = 2.5$"}
+:::
+
+If we require that $d_1\neq 0$ unless $k=2$, then every number has a unique representation of this form, except for infinite trailing sequences of digits $\beta - 1$.
+
+::: {.callout-example title="$3.1999\cdots = 3.2$"}
+:::
+
+## Floating-point numbers
+
+Computers use a **floating-point** representation. Only numbers in a **floating-point number system** $F\subset\mathbb{R}$ can be represented exactly, where
+$$
+F = \big\{ \pm (0.d_1d_2\cdots d_{m})_\beta\beta^e \;| \;  \beta, d_i, e \in \mathbb{Z}, \;0 \leq d_i \leq \beta-1, \;e_{\rm min} \leq e \leq e_{\rm max}\big\}.
+$$
+Here $(0.d_1d_2\cdots d_{m})_\beta$ is called the **fraction** (or **significand** or **mantissa**), $\beta$ is the base, and $e$ is the **exponent**. This can represent a much larger range of numbers than a fixed-point system of the same size, although at the cost that the numbers are not equally spaced. If $d_1\neq 0$ then each number in $F$ has a unique representation and $F$ is called **normalised**.
+
+::: {.callout-example title="Floating-point number system with $\beta=2$, $m=3$, $e_{\rm min}=-1, e_{\rm max}=2$"}
+![](im/fp1.jpg){width=70% fig-align="center"}
+:::
+
+::: {.callout-note}
+Notice that the spacing between numbers jumps by a factor $\beta$ at each power of $\beta$. The largest possible number is $(0.111)_22^2 = (\tfrac12 + \tfrac14 + \tfrac18)(4) = \tfrac72$. The smallest non-zero number is $(0.100)_22^{-1}=\tfrac12(\tfrac12) = \tfrac14$.
+:::
+
+::: {.callout-example title="IEEE standard (1985) for double-precision (64-bit) arithmetic"}
+Here $\beta=2$, and there are 52 bits for the fraction, 11 for the exponent, and 1 for the sign.  The actual format used is
+$$
+\pm (1.d_1\cdots d_{52})_22^{e-1023} = \pm (0.1d_1\cdots d_{52})_22^{e-1022}, \quad e = (e_1e_2\cdots e_{11})_2.
+$$
+When $\beta=2$, the first digit of a normalized number is always $1$, so doesn't need to be stored in memory. The **exponent bias** of 1022 means that the actual exponents are in the range $-1022$ to $1025$, since $e\in[0,2047]$. Actually the exponents $-1022$ and $1025$ are used to store $\pm 0$ and $\pm\infty$ respectively.
+
+The smallest non-zero number in this system is $(0.1)_22^{-1021} \approx 2.225\times 10^{-308}$, and the largest number is $(0.1\cdots 1)_22^{1024} \approx 1.798\times 10^{308}$.
+:::
+
+::: {.callout-note}
+IEEE stands for Institute of Electrical and Electronics Engineers. Matlab uses the IEEE 754 standard for floating point arithmetic. The automatic 1 is sometimes called the "hidden bit". The exponent bias avoids the need to store the sign of the exponent.
+:::
+
+Numbers outside the finite set $F$ cannot be represented exactly. If a calculation falls below the lower non-zero limit (in absolute value), it is called **underflow**, and usually set to 0. If it falls above the upper limit, it is called **overflow**, and usually results in a floating-point exception.
+
+
+::: {.callout-note}
+**Ariane 5 rocket failure (1996):** The maiden flight ended in failure. Only 40 seconds after initiation, at altitude 3700m, the launcher veered off course and exploded. The cause was a software exception during data conversion from a 64-bit float to a 16-bit integer. The converted number was too large to be represented, causing an exception.
+:::
+
+::: {.callout-note}
+In IEEE arithmetic, some numbers in the "zero gap" can be represented using $e=0$, since only two possible fraction values are needed for $\pm 0$. The other fraction values may be used with first (hidden) bit 0 to store a set of so-called **subnormal** numbers.
+:::
+
+The mapping from $\mathbb{R}$ to $F$ is called **rounding** and denoted $\mathrm{fl}(x)$. Usually it is simply the nearest number in $F$ to $x$. If $x$ lies exactly midway between two numbers in $F$, a method of breaking ties is required. The IEEE standard specifies *round to nearest even*—i.e., take the neighbour with last digit 0 in the fraction.
+
+::: {.callout-note}
+This avoids statistical bias or prolonged drift.
+:::
+
+::: {.callout-example title="Our toy system from earlier"}
+![](im/fp2.jpg){width=70% fig-align="center"}
+
+$\tfrac98 = (1.001)_2$ has neighbours $1 = (0.100)_22^1$ and $\tfrac54 = (0.101)_22^1$, so is rounded down to $1$.  
+$\tfrac{11}{8} = (1.011)_2$ has neighbours $\tfrac54 = (0.101)_22^1$ and $\tfrac32=(0.110)_22^1$, so is rounded up to $\tfrac32$.
+:::
+
+::: {.callout-note}
+**Vancouver stock exchange index:** In 1982, the index was established at 1000. By November 1983, it had fallen to 520, even though the exchange seemed to be doing well. Explanation: the index was rounded *down* to 3 digits at every recomputation. Since the errors were always in the same direction, they added up to a large error over time. Upon recalculation, the index doubled!
+:::
+
+## Significant figures
+
+When doing calculations without a computer, we often use the terminology of **significant figures**. To count the number of significant figures in a number $x$, start with the first non-zero digit from the left, and count all the digits thereafter, including final zeros if they are after the decimal point.
+
+::: {.callout-example title="3.1056, 31.050, 0.031056, 0.031050, and 3105.0 all have 5 significant figures (s.f.)."}
+:::
+
+To round $x$ to $n$ s.f., replace $x$ by the nearest number with $n$ s.f. An approximation $\hat{x}$ of $x$ is "correct to $n$ s.f." if both $\hat{x}$ and $x$ round to the same number to $n$ s.f.
+
+## Rounding error
+
+If $|x|$ lies between the smallest non-zero number in $F$ and the largest number in $F$, then
+$$
+\mathrm{fl}(x) = x(1+\delta),
+$$
+where the relative error incurred by rounding is
+$$
+|\delta| = \frac{|\mathrm{fl}(x) - x|}{|x|}.
+$$
+
+::: {.callout-note}
+Relative errors are often more useful because they are scale invariant. E.g., an error of 1 hour is irrelevant in estimating the age of this lecture theatre, but catastrophic in timing your arrival at the lecture.
+:::
+
+Now $x$ may be written as $x=(0.d_1d_2\cdots)_\beta\beta^e$ for some $e\in[e_{\rm min},e_{\rm max}]$, but the fraction will not terminate after $m$ digits if $x\notin F$. However, this fraction will differ from that of $\mathrm{fl}(x)$ by at most $\tfrac12\beta^{-m}$, so
+$$
+|\mathrm{fl}(x) - x| \leq \tfrac12\beta^{-m}\beta^e \quad \implies \quad |\delta| \leq \tfrac12\beta^{1-m}.
+$$
+Here we used that the fractional part of $|x|$ is at least $(0.1)_\beta \equiv \beta^{-1}$. The number $\epsilon_{\rm M} = \tfrac12\beta^{1-m}$ is called the **machine epsilon** (or **unit roundoff**), and is independent of $x$. So the relative rounding error satisfies
+$$
+|\delta| \leq \epsilon_{\rm M}.
+$$
+
+::: {.callout-note}
+To check the machine epsilon value in Matlab you can just type 'eps' in the command line, which will return the value 2.2204e-16.
+:::
+
+::: {.callout-note}
+The name "unit roundoff" arises because $\beta^{1-m}$ is the distance between 1 and the next number in the system.
+:::
+
+::: {.callout-example title="For our system with $\beta=2$, $m=3$, we have $\epsilon_{\rm M} = \tfrac12.2^{1-3} = \tfrac18$. For IEEE double precision, we have $\beta=2$ and $m=53$ (including the hidden bit), so $\epsilon_{\rm M}=\tfrac12.2^{1-53}=2^{-53}\approx 1.11\times 10^{-16}$. "}
+:::
+
+When adding/subtracting/multiplying/dividing two numbers in $F$, the result will not be in $F$ in general, so must be rounded.
+
+::: {.callout-example title="Our toy system again ($\beta=2$, $m=3$, $e_{\rm min}=-1$, $e_{\rm max}=2$)"}
+Let us multiply $x=\tfrac58$ and $y=\tfrac78$. We have
+$$
+xy = \tfrac{35}{64} = \tfrac12 + \tfrac1{32} + \tfrac1{64} = (0.100011)_2.
+$$
+This has too many significant digits to represent in our system, so the best we can do is round the result to $\mathrm{fl}(xy) = (0.100)_2 = \tfrac12$.
+:::
+
+::: {.callout-note}
+Typically additional digits are used during the computation itself, as in our example.
+:::
+
+For ${\circ} = +,-,\times, \div$, IEEE standard arithmetic requires rounded exact operations, so that
+$$
+\mathrm{fl}(x {\,\circ\,} y) = (x {\,\circ\,} y)(1+\delta), \quad |\delta|\leq\epsilon_{\rm M}.
+$$
+
+## Loss of significance
+
+You might think that the above guarantees the accuracy of calculations to within $\epsilon_{\rm M}$, but this is true only if $x$ and $y$ are themselves exact. In reality, we are probably starting from $\bar{x}=x(1+\delta_1)$ and $\bar{y}=y(1 + \delta_2)$, with $|\delta_1|, |\delta_2| \leq \epsilon_{\rm M}$. In that case, there is an error even before we round the result, since
+$$
+\begin{aligned}
+\bar{x} \pm \bar{y} &= x(1+ \delta_1) \pm y(1 + \delta_2)\\
+&= (x\pm y)\left(1 + \frac{x\delta_1 \pm y\delta_2}{x\pm y}\right).
+\end{aligned}
+$$
+If the correct answer $x\pm y$ is very small, then there can be an arbitrarily large relative error in the result, compared to the errors in the initial $\bar{x}$ and $\bar{y}$. In particular, this relative error can be much larger than $\epsilon_{\rm M}$. This is called **loss of significance**, and is a major cause of errors in floating-point calculations.
+
+::: {.callout-example title="Quadratic formula for solving $x^2 - 56x + 1 = 0$"}
+To 4 s.f., the roots are
+$$
+x_1 = 28 + \sqrt{783} = 55.98, \quad x_2 = 28-\sqrt{783} = 0.01786.
+$$
+However, working to 4 s.f. we would compute $\sqrt{783} = 27.98$, which would lead to the results
+$$
+\bar{x}_1 = 55.98, \quad \bar{x}_2 = 0.02000.
+$$
+The smaller root is not correct to 4 s.f., because of cancellation error. One way around this is to note that $x^2 - 56x + 1 = (x-x_1)(x-x_2)$, and compute $x_2$ from $x_2 = 1/x_1$, which gives the correct answer.
+:::
+
+::: {.callout-note}
+Note that the error crept in when we rounded $\sqrt{783}$ to $27.98$, because this removed digits that would otherwise have been significant after the subtraction.
+:::
+
+::: {.callout-example title="Evaluate $f(x) = \ex^x - \cos(x) - x$ for $x$ very near zero."}
+Let us plot this function in the range $-5\times 10^{-8}\leq x \leq 5\times 10^{-8}$ -- even in IEEE double precision arithmetic we find significant errors, as shown by the blue curve:
+
+![](im/floating1.png){width=70% fig-align="center"}
+
+The red curve shows the correct result approximated using the Taylor series
+$$
+\begin{aligned}
+f(x) &= \left(1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \ldots\right) - \left( 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \ldots\right) - x\\
+&\approx x^2 + \frac{x^3}{6}.
+\end{aligned}
+$$
+This avoids subtraction of nearly equal numbers.
+:::
+
+::: {.callout-note}
+We will look in more detail at polynomial approximations in the next section.
+:::
+
+Note that floating-point arithmetic violates many of the usual rules of real arithmetic, such as $(a+b)+c = a + (b+c)$.
+
+::: {.callout-example title="In 2-digit decimal arithmetic,"}
+$$
+\begin{aligned}
+\mathrm{fl}\big[(5.9 + 5.5) + 0.4\big] &= \mathrm{fl}\big[\mathrm{fl}(11.4) + 0.4\big] = \mathrm{fl}(11.0 + 0.4) = 11.0,\\
+\mathrm{fl}\big[5.9 + (5.5 + 0.4)\big] &= \mathrm{fl}\big[5.9 + 5.9 \big] = \mathrm{fl}(11.8) = 12.0.
+\end{aligned}
+$$
+:::
+
+::: {.callout-example title="The average of two numbers."}
+In $\mathbb{R}$, the average of two numbers always lies between the numbers. But if we work to 3 decimal digits,
+$$
+\mathrm{fl}\left(\frac{5.01 + 5.02}{2}\right) = \frac{\mathrm{fl}(10.03)}{2} = \frac{10.0}{2} = 5.0.
+$$
+:::
+
+The moral of the story is that sometimes care is needed to ensure that we carry out a calculation accurately and as intended!
+
+## Knowledge checklist {.unnumbered}
+
+**Key topics:**
+
+1. Integer and floating point representations of real numbers on computers.
+
+2. Overflow, underflow and loss of significance.
+
+**Key skills:**
+
+- Understanding and distinguishing integer, fixed-point, and floating-point representations.
+
+- Analyzing the effects of rounding and machine epsilon in calculations.
+
+- Diagnosing and managing rounding errors, overflow, and underflow.
+

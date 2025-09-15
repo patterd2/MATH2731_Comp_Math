@@ -1,0 +1,229 @@
+---
+title: Continuous Functions
+---
+
+The goal of this chapter is to explore and begin to answer the following question:
+
+> *How do we represent mathematical functions on a computer?*
+
+## Polynomial Interpolation: Motivation {.unnumbered}
+
+
+If $f$ is a polynomial of degree $n$,
+$$
+f(x) = p_n(x) = a_0 + a_1x + \ldots + a_nx^n,
+$$
+then we only need to store the $n+1$ coefficients $a_0,\ldots,a_n$. Operations such as taking the derivative or integrating $f$ are also convenient. The idea in this chapter is to find a polynomial that approximates a general function $f$. For a continuous function $f$ on a bounded interval, this is always possible if you take a high enough degree polynomial:
+
+::: {.theorem #WAT style="font-size:1.0em; font-family:mainfont;"}
+## Weierstrass Approximation Theorem (1885)
+For any $f\in C([0,1])$ and any $\epsilon > 0$, there exists a polynomial $p(x)$ such that
+$$
+\max_{0\leq x\leq 1}\big|f(x) - p(x)\big| \leq \epsilon.
+$$
+:::
+
+::: {.callout-note}
+This may be proved using an explicit sequence of polynomials, called Bernstein polynomials.
+:::
+
+If $f$ is not continuous, then something other than a polynomial is required, since polynomials can't handle asymptotic behaviour.
+
+::: {.callout-note}
+To approximate functions like $1/x$, there is a well-developed theory of rational function interpolation, which is beyond the scope of this course.
+:::
+
+In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—that is, requiring $p_n(x_i) = f(x_i)$ at a finite set of points $x_i$, usually called **nodes**. Sometimes we will also require the derivative(s) of $p_n$ to match those of $f$.
+
+## Taylor series {.unnumbered}
+
+A truncated Taylor series is (in some sense) the simplest interpolating polynomial since it uses only a single node $x_0$, although it does require $p_n$ to match both $f$ and some of its derivatives.
+
+::: {.callout-example title="Calculating $\sin(0.1)$ to 6 s.f. by Taylor series."}
+We can approximate this using a Taylor series about the point $x_0=0$, which is
+$$
+\sin(x) = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!} + \ldots.
+$$
+This comes from writing
+$$
+f(x) = a_0 + a_1(x-x_0) + a_2(x-x_0)^2 + \ldots,
+$$
+then differentiating term-by-term and matching values at $x_0$:
+\begin{align*}
+f(x_0) &= a_0,\\
+f'(x_0) &= a_1,\\
+f''(x_0) &= 2a_2,\\
+f'''(x_0) &= 3(2)a_3,\\
+&\vdots\\
+\implies f(x) &= f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \frac{f'''(x_0)}{3!}(x-x_0)^3 + \ldots.
+\end{align*}
+So
+\begin{align*}
+\textrm{1 term} \;&\implies\; f(0.1) \approx 0.1,\\
+\textrm{2 terms} \;&\implies\; f(0.1) \approx 0.1 - \frac{0.1^3}{6} = 0.099833\ldots,\\
+\textrm{3 terms} \;&\implies\; f(0.1) \approx 0.1 - \frac{0.1^3}{6} + \frac{0.1^5}{120} = 0.09983341\ldots.\\
+\end{align*}
+The next term will be $-0.1^7/7! \approx -10^{-7}/10^3 = -10^{-10}$, which won't change the answer to 6 s.f.
+:::
+
+::: {.callout-note}
+The exact answer is $\sin(0.1)=0.09983341$.
+:::
+
+Mathematically, we can write the remainder as follows.
+
+::: {.theorem}
+## Taylor's Theorem
+Let $f$ be $n+1$ times differentiable on $(a,b)$, and let $f^{(n)}$ be continuous on $[a,b]$. If $x,x_0\in[a,b]$ then there exists $\xi \in (a,b)$ such that
+$$
+f(x) = \sum_{k=0}^n\frac{f^{(k)}(x_0)}{k!}(x-x_0)^k \; + \; \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_0)^{n+1}.
+$$
+:::
+The sum is called the **Taylor polynomial** of degree $n$, and the last term is called the **Lagrange form** of the remainder. Note that the unknown number $\xi$ depends on $x$.
+
+::: {.callout-example title="We can use the Lagrange remainder to bound the error in our approximation."}
+For $f(x)=\sin(x)$, we found the Taylor polynomial $p_6(x) = x - x^3/3! + x^5/5!$, and $f^{(7)}(x)=-\sin(x)$. So we have
+$$
+\big|f(x) - p_6(x)\big| = \left|\frac{f^{(7)}(\xi)}{7!}(x-x_0)^7\right|
+$$
+for some $\xi$ between $x_0$ and $x$. For $x=0.1$, we have
+$$
+\big|f(0.1) - p_6(0.1)\big| = \frac{1}{5040}(0.1)^7\big|f^{(7)}(\xi)\big| \quad \textrm{for some $\xi\in[0,0.1]$}.
+$$
+Since $\big|f^{(7)}(\xi)\big| = \big|\sin(\xi)\big| \leq 1$, we can say, before calculating, that the error satisfies
+$$
+\big|f(0.1) - p_6(0.1)\big| \leq 1.984\times 10^{-11}.
+$$
+:::
+
+::: {.callout-note}
+The actual error is $1.983\times 10^{-11}$, so this is a tight estimate.
+:::
+
+Since this error arises from approximating $f$ with a truncated series, rather than due to rounding, it is known as **truncation error**. Note that it tends to be lower if you use more terms (larger $n$), or if the function oscillates less (smaller $f^{(n+1)}$ on the interval $(x_0,x)$).
+
+Error estimates like the Lagrange remainder play an important role in numerical analysis and computation, so it is important to understand where it comes from. The number $\xi$ will ultimately come from Rolle's theorem, which is a special case of the mean value theorem from first-year calculus:
+
+::: {.theorem}
+#### Rolle's Theorem
+If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, with $f(a)=f(b)=0$, then there exists $\xi\in(a,b)$ with $f'(\xi)=0$.
+:::
+
+**Proof of Lagrange remainder (Taylor's Theorem)**
+
+The argument goes as follows:
+
+1. Define the "auxiliary" function  
+   $$
+   g(t) = f(t) - p_n(t) - M(t-x_0)^{n+1},
+   $$
+   where $p_n$ is the Taylor polynomial. By construction, this function satisfies
+   $$
+   \begin{aligned}
+   g(x_0) &= f(x_0) - p_n(x_0) - M(0)^{n+1} = 0,\\
+   g'(x_0) &= f'(x_0) - p_n'(x_0) - (n+1)M(0)^{n} = 0,\\
+   g''(x_0) &= f''(x_0) - p_n''(x_0) - n(n+1)M(0)^{n-1} = 0,\\
+   &\vdots\\
+   g^{(n)}(x_0) &= f^{(n)}(x_0) - p_n^{(n)}(x_0) - (n+1)!M(0) = 0.
+   \end{aligned}
+   $$
+2. By a suitable choice of $M$, we can make $g(x)=0$ too. Put  
+   $$
+   M = \frac{f(x) - p_n(x)}{(x-x_0)^{n+1}},
+   $$
+   then $g(x) = f(x) - p_n(x) - M(x-x_0)^{n+1} = 0$.
+3. Since $g(x_0)=g(x)=0$ and $x\neq x_0$, Rolle's theorem implies that there exists $\xi_0$ between $x_0$ and $x$ such that $g'(\xi_0)=0$. But we already know that $g'(x_0)=0$, so $g'$ has two distinct roots and we can apply Rolle's theorem again. Hence there exists $\xi_1$ between $x_0$ and $\xi_0$ such that $g''(\xi_1)=0$. We can keep repeating this argument until we get $\xi_{n+1}\equiv \xi$ such that $g^{(n+1)}(\xi)=0$.
+4. We can differentiate $g(t)$ to see that  
+   $$
+   g^{(n+1)}(t) = f^{(n+1)}(t) - p_n^{(n+1)}(t) - M \frac{\mathrm{d}^{n+1}}{\mathrm{d}t^{n+1}}\big[(t-x_0)^{n+1}\big] = f^{(n+1)}(t) - M(n+1)!
+   $$
+   Substituting $\xi$ and our chosen $M$ gives  
+   $$
+   0 = g^{(n+1)}(\xi) = f^{(n+1)}(\xi) - \frac{f(x) - p_n(x)}{(x-x_0)^{n+1}}(n+1)!
+   $$
+   which rearranges to give the formula in Taylor's Theorem. 
+
+## Polynomial interpolation
+
+The classical problem of **polynomial interpolation** is to find a polynomial
+$$
+p_n(x) = a_0 + a_1x + \ldots + a_n x^n = \sum_{k=0}^n a_k x^k
+$$
+that interpolates our function $f$ at a finite set of nodes $\{x_0, x_1, \ldots, x_m\}$. In other words, $p_n(x_i)=f(x_i)$ at each of the nodes $x_i$. Since the polynomial has $n+1$ unknown coefficients, we expect to need $n+1$ distinct nodes, so let us assume that $m=n$.
+
+::: {.callout-example title="Linear interpolation ($n=1$)"}
+Here we have two nodes $x_0$, $x_1$, and seek a polynomial $p_1(x) = a_0 + a_1x$. Then the interpolation conditions require that
+$$
+\begin{cases}
+p_1(x_0) = a_0 + a_1x_0 = f(x_0)\\
+p_1(x_1) = a_0 + a_1x_1 = f(x_1)
+\end{cases}
+\implies\quad
+p_1(x) = \frac{x_1f(x_0) - x_0f(x_1)}{x_1 - x_0} + \frac{f(x_1) - f(x_0)}{x_1 - x_0}x.
+$$
+:::
+
+For general $n$, the interpolation conditions require
+$$
+\begin{matrix*}
+a_0 &+& a_1x_0 &+& a_2x_0^2 &+& \ldots &+& a_nx_0^n &=& f(x_0),\\
+a_0 &+& a_1x_1 &+& a_2x_1^2 &+& \ldots &+& a_nx_1^n &=& f(x_1),\\
+\vdots  && \vdots  && \vdots     &&        &&\vdots      && \vdots\\
+a_0 &+& a_1x_n &+& a_2x_n^2 &+& \ldots &+& a_nx_n^n &=& f(x_n),
+\end{matrix*}
+$$
+so we have to solve
+$$
+\begin{pmatrix}
+1 & x_0 & x_0^2 & \cdots & x_0^n\\
+1 & x_1 & x_1^2 & \cdots & x_1^n\\
+\vdots & \vdots &\vdots& & \vdots\\
+1 & x_n & x_n^2 & \cdots & x_n^n\\
+\end{pmatrix}
+\begin{pmatrix}
+a_0\\ a_1\\ \vdots\\ a_n
+\end{pmatrix}
+=
+\begin{pmatrix}
+f(x_0)\\ f(x_1)\\ \vdots\\ f(x_n)
+\end{pmatrix}.
+$$
+This is called a **Vandermonde matrix**. The determinant of this matrix is
+$$
+\det(A) = \prod_{0\leq i < j\leq n} (x_j - x_i),
+$$
+which is non-zero provided the nodes are all distinct. This establishes an important result, where $\mathcal{P}_n$ denotes the space of all real polynomials of degree $\leq n$.
+
+::: {.theorem}
+#### Existence/uniqueness
+Given $n+1$ distinct nodes $x_0, x_1, \ldots, x_n$, there is a unique polynomial $p_n\in\mathcal{P}_n$ that interpolates $f(x)$ at these nodes.
+:::
+
+We may also prove uniqueness by the following elegant argument.
+
+**Proof (Uniqueness part of Existence/Uniqueness Theorem):**  
+Suppose that in addition to $p_n$ there is another interpolating polynomial $q_n\in\mathcal{P}_n$. Then the difference $r_n := p_n - q_n$ is also a polynomial with degree $\leq n$. But we have
+$$
+r_n(x_i) = p_n(x_i) - q_n(x_i) = f(x_i)-f(x_i)=0 \quad \textrm{for $i=0,\ldots,n$},
+$$
+so $r_n(x)$ has $n+1$ roots. From the Fundamental Theorem of Algebra, this is possible only if $r_n(x)\equiv 0$, which implies that $q_n=p_n$.
+
+::: {.callout-note}
+Note that the unique polynomial through $n+1$ points may have degree $< n$. This happens when $a_0=0$ in the solution to the Vandermonde system above.
+:::
+
+::: {.callout-example title="Interpolate $f(x)=\cos(x)$ with $p_2\in\mathcal{P}_2$ at the nodes $\{0, \tfrac{\pi}{2}, \pi\}$."}
+
+We have $x_0=0$, $x_1=\tfrac{\pi}{2}$, $x_2=\pi$, so $f(x_0)=1$, $f(x_1)=0$, $f(x_2)=-1$. Clearly the unique interpolant is a straight line $p_2(x) = 1 - \tfrac2\pi x$.
+
+If we took the nodes $\{0,2\pi,4\pi\}$, we would get a constant function $p_2(x)=1$.
+
+![](im/linear_interp.png){width=70% fig-align="center"}
+:::
+
+One way to compute the interpolating polynomial would be to solve the Vandermonde system above, e.g. by Gaussian elimination. However, we will see (next term) that this is not recommended. In practice, we choose a different basis for $p_n$. There are two common choices, due to Lagrange and Newton.
+
+::: {.callout-note}
+The Vandermonde matrix arises when we write $p_n$ in the **natural basis** $\{1,x,x^2,\ldots\}$.
+:::
+
