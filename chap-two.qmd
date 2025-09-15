@@ -165,12 +165,12 @@ $$
 
 For general $n$, the interpolation conditions require
 $$
-\begin{matrix*}
+\begin{matrix}
 a_0 &+& a_1x_0 &+& a_2x_0^2 &+& \ldots &+& a_nx_0^n &=& f(x_0),\\
 a_0 &+& a_1x_1 &+& a_2x_1^2 &+& \ldots &+& a_nx_1^n &=& f(x_1),\\
 \vdots  && \vdots  && \vdots     &&        &&\vdots      && \vdots\\
 a_0 &+& a_1x_n &+& a_2x_n^2 &+& \ldots &+& a_nx_n^n &=& f(x_n),
-\end{matrix*}
+\end{matrix}
 $$
 so we have to solve
 $$
