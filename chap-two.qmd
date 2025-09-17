@@ -4,16 +4,13 @@ title: Continuous Functions
 
 The goal of this chapter is to explore and begin to answer the following question:
 
-> *How do we represent mathematical functions on a computer?*
+> *How do we represent and manipulate continuous functions on a computer?*
 
-## Polynomial Interpolation: Motivation {.unnumbered}
+## Interpolation
 
+### Polynomial Interpolation: Motivation
 
-If $f$ is a polynomial of degree $n$,
-$$
-f(x) = p_n(x) = a_0 + a_1x + \ldots + a_nx^n,
-$$
-then we only need to store the $n+1$ coefficients $a_0,\ldots,a_n$. Operations such as taking the derivative or integrating $f$ are also convenient. The idea in this chapter is to find a polynomial that approximates a general function $f$. For a continuous function $f$ on a bounded interval, this is always possible if you take a high enough degree polynomial:
+The main idea of this section is to find a polynomial that approximates a general function $f$. But why polynomials? Polynomials have many nice mathematical properties but from the perspective of function approximation, the key one is the following: Any continuous function on a compact interval can be approximated to arbitrary accuracy using a polynomial (provided you are willing to go high enough degree).
 
 ::: {.theorem #WAT style="font-size:1.0em; font-family:mainfont;"}
 ## Weierstrass Approximation Theorem (1885)
@@ -27,7 +24,11 @@ $$
 This may be proved using an explicit sequence of polynomials, called Bernstein polynomials.
 :::
 
-If $f$ is not continuous, then something other than a polynomial is required, since polynomials can't handle asymptotic behaviour.
+If $f$ is a polynomial of degree $n$,
+$$
+f(x) = p_n(x) = a_0 + a_1x + \ldots + a_nx^n,
+$$
+then we only need to store the $n+1$ coefficients $a_0,\ldots,a_n$. Operations such as taking the derivative or integrating $f$ are also convenient. If $f$ is not continuous, then something other than a polynomial is required, since polynomials can't handle asymptotic behaviour.
 
 ::: {.callout-note}
 To approximate functions like $1/x$, there is a well-developed theory of rational function interpolation, which is beyond the scope of this course.
@@ -37,7 +38,7 @@ In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—
 
 ![Chart showing a range of weather models produce by the UK Met Office. Even the highest spatial resolution models have more than 1.5km between grid point due to computational constraints.](im/met_office.png){#fig-MET width=85% fig-align="center"}
 
-## Taylor series {.unnumbered}
+### Taylor series
 
 A truncated Taylor series is (in some sense) the simplest interpolating polynomial since it uses only a single node $x_0$, although it does require $p_n$ to match both $f$ and some of its derivatives.
 
@@ -115,7 +116,7 @@ If $f$ is continuous on $[a,b]$ and differentiable on $(a,b)$, with $f(a)=f(b)=0
 Note that Rolle's Theorem does not tell us what the value of $\xi$ might actually be, so in practice we must take some kind of worst case estimate to get an error bound, e.g. calculate the max value of $f'(\xi)$ over the range of possible $\xi$ values.
 :::
 
-## Polynomial interpolation
+### Polynomial Interpolation
 
 The classical problem of **polynomial interpolation** is to find a polynomial
 $$
@@ -562,6 +563,639 @@ $$
 
 If the function is well-behaved enough that $|f^{(n+1)}(x)| < M$ for some constant whenever $x \in [-1,1]$, then the error will tend to zero as $n \to \infty$.
 
-## Solving Nonlinear Equations
+## Nonlinear Equations
 
+<!--
+### Motivation: Solving Nonlinear Equations
+
+Many problems in both pure and applied mathematics ultimately boil down to solving some particular nonlinear equation. For example, 
+-->
+
+> *How do we find roots of nonlinear equations?*
+
+Given a general equation
+$$
+f(x) = 0,
+$$
+there will usually be no explicit formula for the root(s) $x_*$, so we must use an iterative method.
+
+Rootfinding is a delicate business, and it is essential to begin by plotting a graph of $f(x)$, so that you can tell whether the answer you get from your numerical method is correct.
+
+::: {.eg}
+## $f(x) = \frac{1}{x} - a$, for $a > 0$.
+![](im/root1.jpg){width=60% fig-align="center"}
+
+Clearly we know the root is exactly $x_* = \frac{1}{a}$, but this will serve as a running example to test some of our methods
+:::
+
+### Interval Bisection
+
+If $f$ is continuous and we can find an interval where it changes sign, then it must have a root in this interval. Formally, this is based on:
+
+::: {.theorem}
+#### Intermediate Value Theorem
+If $f$ is continuous on $[a,b]$ and $c$ lies between $f(a)$ and $f(b)$, then there is at least one point $x\in[a,b]$ such that $f(x)=c$.
+:::
+
+If $f(a)f(b)<0$, then $f$ changes sign at least once in $[a,b]$, so by the Intermediate Value Theorem there must be a point $x_*\in[a,b]$ where $f(x_*)=0$.
+
+We can turn this into the following iterative algorithm:
+
+::: {.algorithm title="Interval bisection"}
+Let $f$ be continuous on $[a_0,b_0]$, with $f(a_0)f(b_0)<0$.
+
+- At each step, set $m_k = (a_k + b_k)/2$.
+- If $f(a_k)f(m_k)\geq 0$ then set $a_{k+1}=m_k$, $b_{k+1}=b_k$, otherwise set $a_{k+1}=a_k$, $b_{k+1}=m_k$.
+:::
+
+::: {.eg}
+## $f(x)=\tfrac1x - 0.5$.
+
+1. Try $a_0=1$, $b_0=3$ so that $f(a_0)f(b_0)=0.5(-0.1666) < 0$.  
+   Now the midpoint is $m_0=(1 + 3)/2 = 2$, with $f(m_0)=0$.  
+   We are lucky and have already stumbled on the root $x_*=m_0=2$!
+
+2. Suppose we had tried $a_0=1.5$, $b_0=3$, so  $f(a_0)=0.1666$ and $f(b_0)=-0.1666$, and again $f(a_0)f(b_0)<0$.  
+   Now $m_0 = 2.25$, $f(m_0)=-0.0555$. We have $f(a_0)f(m_0) < 0$, so we set $a_1 = a_0=1.5$ and $b_1 = m_0=2.25$. The root must lie in $[1.5,2.25]$.  
+   Now $m_1 = 1.875$, $f(m_1)=0.0333$, and $f(a_1)f(m_1)>0$, so we take $a_2 = m_1=1.875$, $b_2 = b_1=2.25$. The root must lie in $[1.875,2.25]$.  
+   We can continue this algorithm, halving the length of the interval each time.
+:::
+
+Since the interval halves in size at each iteration, and always contains a root, we are guaranteed to converge to a root provided that $f$ is continuous. Stopping at step $k$, we get the minimum possible error by choosing $m_k$ as our approximation.
+
+::: {.eg}
+## Same example with initial interval $[-0.5,0.5]$.
+![](im/root2.jpg){width=70% fig-align="center"}
+
+In this case $f(a_0)f(b_0)<0$, but there is no root in the interval.
+:::
+
+The rate of convergence is steady, so we can pre-determine how many iterations will be needed to converge to a given accuracy. After $k$ iterations, the interval has length
+$$
+|b_k - a_k| = \frac{|b_0 - a_0|}{2^k},
+$$
+so the error in the mid-point satisfies
+$$
+|m_k - x_*| \leq \frac{|b_0 - a_0|}{2^{k+1}}.
+$$
+In order for $|m_k - x_*| \leq \delta$, we need $n$ iterations, where
+$$
+\frac{|b_0 - a_0|}{2^{n+1}} \leq \delta \quad \implies \log|b_0-a_0| - (n+1)\log(2) \leq \log(\delta) \quad \implies n \geq \frac{\log|b_0-a_0| - \log(\delta)}{\log(2)} - 1.
+$$
+
+::: {.eg}
+## Previous example continued
+
+With $a_0=1.5$, $b_0=3$, as in the above example, then for $\delta = \epsilon_{\rm M}=1.1\times 10^{-16}$ we would need
+$$
+n \geq \frac{\log(1.5) - \log(1.1\times 10^{-16})}{\log(2)}-1 \quad \implies n \geq 53 \textrm{ iterations}.
+$$
+:::
+
+::: {.callout-note}
+This convergence is pretty slow, but the method has the advantage of being very robust (i.e., use it if all else fails...). It has the more serious disadvantage of *only working in one dimension*.
+:::
+
+### Fixed point iteration
+
+This is a very common type of rootfinding method. The idea is to transform $f(x)=0$ into the form $g(x)=x$, so that a root $x_*$ of $f$ is a **fixed point** of $g$, meaning $g(x_*)=x_*$. To find $x_*$, we start from some initial guess $x_0$ and iterate
+$$
+x_{k+1} = g(x_k)
+$$
+until $|x_{k+1}-x_k|$ is sufficiently small. For a given equation $f(x)=0$, there are many ways to transform it into the form $x=g(x)$. Only some will result in a convergent iteration.
+
+::: {.eg}
+## $f(x)=x^2-2x-3$.
+Note that the roots are $-1$ and $3$. Consider some different rearrangements, with $x_0=0$.
+
+1. $g(x) = \sqrt{2x+3}$, gives $x_k\to 3$ [to machine accuracy after 33 iterations].
+
+2. $g(x) = 3/(x-2)$, gives $x_k\to -1$ [to machine accuracy after 33 iterations].
+
+3. $g(x) = (x^2 - 3)/2$, gives $x_k\to -1$ [but very slowly!].
+
+4. $g(x) = x^2 - x - 3$, gives $x_k\to\infty$.
+
+5. $g(x) = (x^2+3)/(2x-2)$, gives $x_k\to -1$ [to machine accuracy after 5 iterations].
+
+If instead we take $x_0=42$, then (1) and (2) still converge to the same roots, (3) now diverges, (4) still diverges, and (5) now converges to the other root $x_k\to 3$.
+:::
+
+In this section, we will consider which iterations will converge, before addressing the *rate* of convergence in @sec-order.
+
+One way to ensure that the iteration will work is to find a **contraction mapping** $g$, which is a map $L\to L$ (for some closed interval $L$) satisfying
+$$
+|g(x)-g(y)| \leq \lambda|x-y|
+$$
+for some $\lambda < 1$ and for all $x$, $y \in L$. The sketch below shows the idea:
+
+![](im/contraction.png){width=70% fig-align="center"}
+
+::: {.theorem}
+#### Contraction Mapping Theorem
+If $g$ is a contraction mapping on $L=[a,b]$, then
+1. There exists a unique fixed point $x_*\in L$ with $g(x_*)=x_*$.
+2. For any $x_0\in L$, the iteration $x_{k+1}=g(x_k)$ will converge to $x_*$ as $k\to\infty$.
+:::
+
+**Proof:**  
+To prove *existence*, consider $h(x)=g(x)-x$. Since $g:L\to L$ we have $h(a)=g(a)-a\geq 0$ and $h(b)=g(b)-b\leq 0$. Moreover, it follows from the contraction property above that $g$ is continuous (think of "$\epsilon\delta$"), therefore so is $h$. So the Intermediate Value Theorem guarantees the existence of at least one point $x_*\in L$ such that $h(x_*)=0$, i.e. $g(x_*)=x_*$.
+
+For *uniqueness*, suppose $x_*$ and $y_*$ are both fixed points of $g$ in $L$. Then 
+$$
+|x_*-y_*| = |g(x_*)-g(y_*)| \leq \lambda |x_*-y_*| < |x_*-y_*|,
+$$
+which is a contradiction.
+
+Finally, to show *convergence*, consider
+$$
+|x_*- x_{k+1} | = |g(x_*) - g(x_k)| \leq \lambda |x_* - x_k| \leq \ldots \leq \lambda^{k+1}|x_*-x_0|.
+$$
+Since $\lambda<1$, we see that $x_k\to x_*$ as $k\to\infty$.
+
+::: {.callout-note}
+The Contraction Mapping Theorem is also known as the **Banach fixed point theorem**, and was proved by Stefan Banach in his 1920 PhD thesis.
+:::
+
+To apply this result in practice, we need to know whether a given function $g$ is a contraction mapping on some interval.
+
+If $g$ is differentiable, then Taylor's theorem says that there exists $\xi\in(x,y)$ with
+$$
+g(x) = g(y) + g'(\xi)(x-y) \,\, \implies \,\, |g(x)-g(y)| \leq \Big(\max_{\xi\in L}|g'(\xi)|\Big)\,|x-y|.
+$$
+So if (a) $g:L\to L$ and (b) $|g'(x)|\leq M$ for all $x\in L$ with  $M<1$, then $g$ is a contraction mapping on $L$.
+
+::: {.eg}
+## Iteration (a) from previous example, $g(x) = \sqrt{2x + 3}$.
+
+Here $g'=(2x + 3)^{-1/2}$, so we see that $|g'(x)|<1$ for all $x>-1$.
+
+For $g$ to be a contraction mapping on an interval $L$, we also need that $g$ maps $L$ into itself. Since our particular $g$ is continuous and monotonic increasing (for $x>-\tfrac32$), it will map an interval $[a,b]$ to another interval whose end-points are $g(a)$ and $g(b)$. 
+
+For example, $g(-\tfrac12)=\sqrt{2}$ and $g(4)=\sqrt{11}$, so the interval $L=[-\tfrac12,4]$ is mapped into itself. It follows by the Contraction Mapping Theorem that (1) there is a unique fixed point $x_*\in[-\tfrac12,4]$ (which we know is $x_*=3$), and (2) the iteration will converge to $x_*$ for any $x_0$ in this interval (as we saw for $x_0=0$).
+:::
+
+In practice, it is not always easy to find a suitable interval $L$. But knowing that $|g'(x_*)|<1$ is enough to guarantee that the iteration will converge if $x_0$ is close enough to $x_*$.
+
+::: {.theorem}
+### Local Convergence Theorem
+Let $g$ and $g'$ be continuous in the neighbourhood of an isolated fixed point $x_*=g(x_*)$. If $|g'(x_*)|<1$ then there is an interval $L=[x_*-\delta,x_*+\delta]$ such that $x_{k+1}=g(x_k)$ converges to $x_*$ whenever $x_0\in L$.
+:::
+
+**Proof:**  
+By continuity of $g'$, there exists some interval $L=[x_*-\delta,x_*+\delta]$ with $\delta>0$ such that $|g'(x)|\leq 
+M$ for some $M<1$, for all $x\in L$. Now let $x\in L$. It follows that
+$$
+|x_* - g(x)| = |g(x_*)-g(x)| \leq M|x_*-x| < |x_*-x| \leq \delta,
+$$
+so $g(x)\in L$. Hence $g$ is a contraction mapping on $L$ and the Contraction Mapping Theorem shows that $x_k\to x_*$.
+
+::: {.eg}
+## Iteration (a) again, $g(x) = \sqrt{2x + 3}$.
+
+Here we know that $x_*=3$, and $|g'(3)|=\tfrac13 < 1$, so the Local Convergence Theorem tells us that the iteration will converge to $3$ if $x_0$ is close enough to $3$.
+:::
+
+::: {.eg}
+## Iteration (e) again, $g(x) = (x^2+3)/(2x-2)$.
+
+Here we have
+$$
+g'(x) = \frac{x^2-2x-3}{2(x-1)^2},
+$$
+so we see that $g'(-1)=g'(3)=0 < 1$. So the Local Convergence Theorem tells us that the iteration will converge to either root if we start close enough.
+:::
+
+::: {.callout-note}
+As we will see, the fact that $g'(x_*)=0$ is related to the fast convergence of iteration (e).
+:::
+
+### Orders of convergence {#sec-order}
+
+To measure the speed of convergence, we compare the error $|x_*-x_{k+1}|$ to the error at the previous step, $|x_*-x_k|$.
+
+::: {.eg title="Interval bisection."}
+Here we had $|x_*-m_{k+1}| \leq \tfrac12|x_*-m_k|$.
+This is called **linear convergence**, meaning that we have $|x_*-x_{k+1}|\leq \lambda |x_* - x_{k}|$ for some constant $\lambda < 1$.
+:::
+
+We can compare a few different iteration schemes that should converge to the same answer to get a sense for how our choice of scheme can impact the convergence order.
+
+::: {.eg}
+## Iteration (a) again, $g(x)=\sqrt{2x+3}$.
+
+Look at the sequence of errors in this case:
+
+| $x_k$           | $|3-x_k|$        | $|3-x_k|/|3-x_{k-1}|$ |
+|-----------------|-----------------|-----------------------|
+| 0.0000000000    | 3.0000000000    | -                     |
+| 1.7320508076    | 1.2679491924    | 0.4226497308          |
+| 2.5424597568    | 0.4575402432    | 0.3608506129          |
+| 2.8433992885    | 0.1566007115    | 0.3422665304          |
+| 2.9473375404    | 0.0526624596    | 0.3362849319          |
+| 2.9823941860    | 0.0176058140    | 0.3343143126          |
+| 2.9941256440    | 0.0058743560    | 0.3336600063          |
+
+We see that the ratio $|x_*-x_k|/|x_*-x_{k-1}|$ is indeed less than $1$, and seems to be converging to $\lambda\approx\tfrac13$. So this is a linearly convergent iteration.
+:::
+
+::: {.eg}
+## Iteration (e) again, $g(x) = (x^2+3)/(2x-2)$.
+
+Now the sequence is:
+
+| $x_k$           | $|(-1)-x_k|$     | $|(-1)-x_k|/|(-1)-x_{k-1}|$ |
+|-----------------|-----------------|-----------------------------|
+| 0.0000000000    | 1.0000000000    | -                           |
+| -1.5000000000   | 0.5000000000    | 0.5000000000                |
+| -1.0500000000   | 0.0500000000    | 0.1000000000                |
+| -1.0006097561   | 0.0006097561    | 0.0121951220                |
+| -1.0000000929   | 0.0000000929    | 0.0001523926                |
+
+Again the ratio $|x_*-x_{k}|/|x_*-x_{k-1}|$ is certainly less than $1$, but this time we seem to have $\lambda\to 0$ as $k\to\infty$. This is called **superlinear convergence**, meaning that the convergence is in some sense "accelerating".
+:::
+
+In general, if $x_k\to x_*$ then we say that the sequence $\{x_k\}$ **converges linearly** if
+$$
+\lim_{k\to\infty}\frac{|x_*-x_{k+1}|}{|x_*-x_k|} = \lambda \quad \textrm{with} \quad 0<\lambda <1.
+$$
+If $\lambda=0$ then the convergence is **superlinear**.
+
+::: {.callout-note}
+The constant $\lambda$ is called the **rate** or **ratio**.
+:::
+
+The following result establishes conditions for linear and superlinear convergence.
+
+::: {.theorem}
+Let $g'$ be continuous in the neighbourhood of a fixed point $x_*=g(x_*)$, and suppose that $x_{k+1}=g(x_k)$ converges to $x_*$ as $k\to\infty$. 
+
+1. If $|g'(x_*)|\neq 0$ then the convergence will be linear with rate $\lambda=|g'(x_*)|$.
+
+2. If $|g'(x_*)|=0$ then the convergence will be superlinear.
+:::
+
+**Proof:**  
+By Taylor's theorem, note that
+$$
+x_* - x_{k+1} = g(x_*) - g(x_k) = g(x_*) - \Big[g(x_*) + g'(\xi_k)(x_k-x_*)\Big] = g'(\xi_k)(x_* - x_k)
+$$
+for some $\xi_k$ between $x_*$ and $x_k$. Since $x_k\to x_*$, we have $\xi_k\to x_*$ as $k\to\infty$, so
+$$
+\lim_{k\to\infty}\frac{|x_*-x_{k+1}|}{|x_*-x_k|} = \lim_{k\to\infty}|g'(\xi_k)| = |g'(x_*)|.
+$$
+This proves the result.
+
+::: {.eg}
+## Iteration (a) again, $g(x)=\sqrt{2x+3}$.
+
+We saw before that $g'(3)=\tfrac13$, so the theorem above shows that convergence will be linear with $\lambda = |g'(3)| = \tfrac13$ as we found numerically.
+:::
+
+::: {.eg}
+## Iteration (e) again, $g(x) = (x^2+3)/(2x-2)$.
+
+We saw that $g'(-1)=0$, so the theorem above shows that convergence will be superlinear, again consistent with our numerical findings.
+:::
+
+We can further classify superlinear convergence by the **order of convergence**, defined as 
+$$
+\alpha = \sup\left\{\beta \, : \, \lim_{k\to\infty}\frac{|x_*-x_{k+1}|}{|x_*-x_k|^\beta} < \infty \right\}.
+$$
+
+For example, $\alpha=2$ is called **quadratic** convergence and $\alpha=3$ is called **cubic** convergence, although for a general sequence $\alpha$ need not be an integer (e.g. the secant method below).
+
+### Newton's method
+
+This is a particular fixed point iteration that is very widely used because (as we will see) it usually converges superlinearly.
+
+![](im/newton.jpg){width=70% fig-align="center"}
+
+Graphically, the idea of **Newton's method** is simple: given $x_k$, draw the tangent line to $f$ at $x=x_k$, and let $x_{k+1}$ be the $x$-intercept of this tangent. So
+$$
+\frac{0 - f(x_k)}{x_{k+1} - x_k} = f'(x_k) \quad \implies\quad  x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}.
+$$
+
+::: {.callout-note}
+In fact, Newton only applied the method to polynomial equations, and without using calculus. The general form using derivatives ("fluxions") was first published by Thomas Simpson in 1740. [See "Historical Development of the Newton-Raphson Method" by T.J. Ypma, *SIAM Review* **37**, 531 (1995).]
+:::
+
+Another way to derive this iteration is to approximate $f(x)$ by the linear part of its Taylor series centred at $x_k$:
+$$
+0 \approx f(x_{k+1}) \approx f(x_k) + f'(x_k)(x_{k+1} - x_{k}).
+$$
+
+The iteration function for Newton's method is
+$$
+g(x) = x - \frac{f(x)}{f'(x)},
+$$
+so using $f(x_*)=0$ we see that $g(x_*)=x_*$. To assess the convergence, note that
+$$
+g'(x) = 1 - \frac{f'(x)f'(x) - f(x)f''(x)}{[f'(x)]^2} = \frac{f(x)f''(x)}{[f'(x)]^2} \quad \implies g'(x_*)=0 \quad \textrm{if $f'(x_*)\neq 0$}.
+$$
+So if $f'(x_*)\neq 0$, the Local Convergence Theorem shows that the iteration will converge for $x_0$ close enough to $x_*$. Moreover, since $g'(x_*)=0$, the order theorem shows that this convergence will be superlinear.
+
+::: {.eg}
+## Calculate $a^{-1}$ using $f(x)=\frac1x - a$ for $a>0$.
+
+Newton's method gives the iterative formula
+$$
+x_{k+1} = x_k - \frac{\frac{1}{x_k}-a}{-\frac{1}{x_k^2}} = 2x_k - a x_k^2.
+$$
+From the graph of $f$, it is clear that the iteration will converge for any $x_0\in(0,a^{-1})$, but will diverge if $x_0$ is too large. With $a=0.5$ and $x_0=1$, Python gives
+
+| $x_k$         | $|2 - x_k|$         | $|2-x_k|/|2-x_{k-1}|$ | $|2-x_k|/|2-x_{k-1}|^2$ |
+|---------------|---------------------|-----------------------|-------------------------|
+| 1.0           | 1.0                 | -                     | -                       |
+| 1.5           | 0.5                 | 0.5                   | 0.5                     |
+| 1.875         | 0.125               | 0.25                  | 0.5                     |
+| 1.9921875     | 0.0078125           | 0.0625                | 0.5                     |
+| 1.999969482   | $3.05\times 10^{-5}$| 0.00390625            | 0.5                     |
+| 2.0           | $4.65\times 10^{-10}$| $1.53\times 10^{-5}$ | 0.5                     |
+| 2.0           | $1.08\times 10^{-19}$| $2.33\times 10^{-10}$| 0.5                     |
+
+In 6 steps, the error is below $\epsilon_{\rm M}$: pretty rapid convergence! The third column shows that the convergence is superlinear. The fourth column shows that $|x_*-x_{k+1}|/|x_*-x_k|^2$ is constant, indicating that the convergence is quadratic (order $\alpha=2$).
+:::
+
+::: {.callout-note}
+Although the solution $\tfrac1a$ is known exactly, this method is so efficient that it is sometimes used in computer hardware to do division!
+:::
+
+In practice, it is not usually possible to determine ahead of time whether a given starting value $x_0$ will converge.
+
+A robust computer implementation should catch any attempt to take too large a step, and switch to a less sensitive (but slower) algorithm (e.g. bisection).
+
+However, it always makes sense to avoid any points where $f'(x)=0$.
+
+::: {.eg}
+## $f(x) = x^3-2x+2$.
+
+Here $f'(x) = 3x^2-2$ so there are turning points at $x=\pm\sqrt{\tfrac23}$ where $f'(x)=0$, as well as a single real root at $x_*\approx -1.769$. The presence of points where $f'(x)=0$ means that care is needed in choosing a starting value $x_0$.
+
+If we take $x_0=0$, then $x_1 = 0 - f(0)/f'(0) = 1$, but then $x_2 = 1 - f(1)/f'(1)=0$, so the iteration gets stuck in an infinite loop:
+
+![](im/newton_fail1.png){width=70% fig-align="center"}
+
+Other starting values, e.g. $x_0=-0.5$ can also be sucked into this infinite loop! The correct answer is obtained for $x_0=-1.0$.
+:::
+
+::: {.callout-note}
+The sensitivity of Newton's method to the choice of $x_0$ is beautifully illustrated by applying it to a **complex** function such as $f(z) = z^3 - 1$. The following plot colours points $z_0$ in the complex plane according to which root they converge to ($1$, $e^{2\pi i/3}$, or $e^{-2\pi i/3}$):
+
+![](im/newton_basins.png){width=80% fig-align="center"}
+
+The boundaries of these **basins of attraction** are fractal.
+:::
+
+### Newton's method for systems
+
+Newton's method generalizes to higher-dimensional problems where we want to find $\mathbf{x}\in\mathbb{R}^m$ that satisfies $\mathbf{f}(\mathbf{x})=0$ for some function $\mathbf{f}:\mathbb{R}^m\to\mathbb{R}^m$.
+
+To see how it works, take $m=2$ so that $\mathbf{x}=(x_1,x_2)^\top$ and $\mathbf{f}=[f_1(\mathbf{x}),f_2(\mathbf{x})]^\top$. Taking the linear terms in Taylor's theorem for two variables gives
+$$
+\begin{aligned}
+0 &\approx f_1(\mathbf{x}_{k+1}) \approx f_1(\mathbf{x}_k) + \left.\frac{\partial f_1}{\partial x_1}\right|_{\mathbf{x}_k}(x_{1,k+1} - x_{1,k}) + \left.\frac{\partial f_1}{\partial x_2}\right|_{\mathbf{x}_k}(x_{2,k+1} - x_{2,k}),\\
+0 &\approx f_2(\mathbf{x}_{k+1}) \approx f_2(\mathbf{x}_k) + \left.\frac{\partial f_2}{\partial x_1}\right|_{\mathbf{x}_k}(x_{1,k+1} - x_{1,k}) + \left.\frac{\partial f_2}{\partial x_2}\right|_{\mathbf{x}_k}(x_{2,k+1} - x_{2,k}).
+\end{aligned}
+$$
+
+In matrix form, we can write
+$$
+\begin{pmatrix}
+0\\
+0
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_1(\mathbf{x}_k)\\
+f_2(\mathbf{x}_k)
+\end{pmatrix}
++
+\begin{pmatrix}
+\frac{\partial f_1}{\partial x_1}(\mathbf{x}_k) & \frac{\partial f_1}{\partial x_2}(\mathbf{x}_k)\\
+\frac{\partial f_2}{\partial x_1}(\mathbf{x}_k) & \frac{\partial f_2}{\partial x_2}(\mathbf{x}_k)
+\end{pmatrix}
+\begin{pmatrix}
+x_{1,k+1} - x_{1,k}\\
+x_{2,k+1} - x_{2,k}
+\end{pmatrix}.
+$$
+
+The matrix of partial derivatives is called the **Jacobian matrix** $J(\mathbf{x}_k)$, so (for any $m$) we have
+$$
+\mathbf{0} = \mathbf{f}(\mathbf{x}_k) + J(\mathbf{x}_k)(\mathbf{x}_{k+1} - \mathbf{x}_{k}).
+$$
+
+To derive Newton's method, we rearrange this equation for $\mathbf{x}_{k+1}$,
+$$
+J(\mathbf{x}_k)(\mathbf{x}_{k+1}-\mathbf{x}_k) = -\mathbf{f}(\mathbf{x}_k) \quad \implies \quad \mathbf{x}_{k+1} = \mathbf{x}_k - J^{-1}(\mathbf{x}_k)\mathbf{f}(\mathbf{x}_k).
+$$
+So to apply the method, we need the inverse of $J$.
+
+::: {.callout-note}
+If $m=1$, then $J(x_k) = \frac{\partial f}{\partial x}(x_k)$, and $J^{-1}=1/J$, so this reduces to the scalar Newton's method.
+:::
+
+::: {.eg }
+## Apply Newton's method to the simultaneous equations $xy - y^3 - 1 = 0$ and $x^2y + y -5=0$, with starting values $x_0=2$, $y_0=3$.
+
+The Jacobian matrix is
+$$
+J(x,y) = \begin{pmatrix}
+y & x-3y^2\\
+2xy & x^2 + 1
+\end{pmatrix},
+$$
+and hence its inverse is given by
+$$
+J^{-1}(x,y) = \frac{1}{y(x^2+1)-2xy(x-3y^2)}\begin{pmatrix}
+x^2 + 1 & 3y^2-x\\
+-2xy & y
+\end{pmatrix}.
+$$
+
+The first iteration of Newton's method gives
+$$
+\begin{pmatrix}
+x_1\\
+y_1
+\end{pmatrix}
+= \begin{pmatrix}
+2\\
+3
+\end{pmatrix}
+- \frac{1}{3(5)-12(2-27)}
+\begin{pmatrix}
+5 & 25\\
+-12 & 3
+\end{pmatrix}
+\begin{pmatrix}
+-22\\
+10
+\end{pmatrix}
+= \begin{pmatrix}
+1.55555556\\
+2.06666667
+\end{pmatrix}.
+$$
+
+Subsequent iterations give
+$$
+\begin{pmatrix}
+x_2\\
+y_2
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.54720541\\
+1.47779333
+\end{pmatrix}, \, 
+\begin{pmatrix}
+x_3\\
+y_3
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.78053503\\
+1.15886481
+\end{pmatrix},
+$$
+and
+$$
+\begin{pmatrix}
+x_4\\
+y_4
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.952843\\
+1.02844269
+\end{pmatrix}, \\ 
+\begin{pmatrix}
+x_5\\
+y_5
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.99776297\\
+1.00124041
+\end{pmatrix}, 
+$$
+
+so the method is converging accurately to the root $x_*=2$, $y_*=1$, shown in the following plot:
+
+![](im/newton2d.png){width=70% fig-align="center"}
+:::
+
+By generalising the scalar analysis (beyond the scope of this course), it can be shown that the convergence is quadratic for $\mathbf{x}_0$ sufficiently close to $\mathbf{x}_*$, provided that $J(\mathbf{x}_*)$ is non-singular (i.e., $\det[J(\mathbf{x}_*)]\neq 0$).
+
+::: {.callout-note}
+In general, finding a good starting point in more than one dimension is difficult, particularly because interval bisection is not available. Algorithms that try to mimic bisection in higher dimensions are available, proceeding by a 'grid search' approach.
+:::
+
+### Quasi-Newton methods
+
+A drawback of Newton's method is that the derivative $f'(x_k)$ must be computed at each iteration. This may be expensive to compute, or may not be available as a formula. For example, the function $f$ might be the right-hand side of some complex partial differential equation, and hence both difficult to differentiate and very high dimensional!
+
+Instead we can use a **quasi-Newton method**
+$$
+x_{k+1} = x_k - \frac{f(x_k)}{g_k},
+$$
+where $g_k$ is some easily-computed approximation to $f'(x_k)$. 
+
+::: {.eg title="Steffensen's method"}
+$$
+g_k = \frac{f\big(f(x_k) + x_k\big) - f(x_k)}{f(x_k)}.
+$$
+This has the form $\frac{1}{h}\big(f(x_k+h) - f(x_k)\big)$ with $h=f(x_k)$.
+:::
+
+Steffensen's method requires two function evaluations per iteration. But once the iteration has started, we already have two nearby points $x_{k-1}$, $x_k$, so we could approximate $f'(x_k)$ by a backward difference
+$$
+g_k = \frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}} \quad \implies \quad x_{k+1} = x_k - \frac{f(x_k)(x_k - x_{k-1})}{f(x_k) - f(x_{k-1})}.
+$$
+This is called the **secant method**, and requires only one function evaluation per iteration (once underway). The name comes from its graphical interpretation:
+
+![](im/secant.jpg){width=70% fig-align="center"}
+
+::: {.callout-note}
+The secant method was introduced by Newton.
+:::
+
+::: {.eg}
+## $f(x)=\tfrac1x - 0.5$.
+
+Now we need two starting values, so take $x_0=0.25$, $x_1=0.5$. The secant method gives:
+
+| $k$ | $x_k$    | $|x_* - x_k|/|x_* - x_{k-1}|$ |
+|-----|----------|------------------------------|
+| 2   | 0.6875   | 0.75                         |
+| 3   | 1.01562  | 0.75                         |
+| 4   | 1.354    | 0.65625                      |
+| 5   | 1.68205  | 0.492188                     |
+| 6   | 1.8973   | 0.322998                     |
+| 7   | 1.98367  | 0.158976                     |
+| 8   | 1.99916  | 0.0513488                    |
+
+Convergence to $\epsilon_{\rm M}$ is achieved in 12 iterations. Notice that the error ratio is decreasing, so the convergence is superlinear.
+:::
+
+The secant method is a **two-point method** since $x_{k+1} = g(x_{k-1},x_k)$. So theorems about single-point fixed-point iterations do not apply.
+
+In general, one can have **multipoint methods** based on higher-order interpolation.
+
+::: {.theorem}
+If $f'(x_*)\neq 0$ then the secant method converges for $x_0$, $x_1$ sufficiently close to $x_*$, and the order of convergence is $(1+\sqrt{5})/2 = 1.618\ldots$.
+:::
+
+::: {.callout-note}
+This illustrates that orders of convergence need not be integers, and is also an appearance of the **golden ratio**.
+:::
+
+**Proof:**  
+To simplify the notation, denote the truncation error by
+$$
+\varepsilon_k := x_* - x_k. 
+$$
+Expanding in Taylor series around $x_*$, and using $f(x_*)=0$, gives
+$$
+\begin{aligned}
+f(x_{k-1}) &= -f'(x_*)\varepsilon_{k-1} + \frac{f''(x_*)}{2}\varepsilon_{k-1}^2 + {\cal O}(\varepsilon_{k-1}^3),\\
+f(x_{k}) &= -f'(x_*)\varepsilon_{k} + \frac{f''(x_*)}{2}\varepsilon_{k}^2 + {\cal O}(\varepsilon_{k}^3).
+\end{aligned}
+$$
+So using the secant formula above we get
+$$
+\begin{aligned}
+\varepsilon_{k+1} &= \varepsilon_k - (\varepsilon_{k}-\varepsilon_{k-1})\frac{-f'(x_*)\varepsilon_{k} + \frac{f''(x_*)}{2}\varepsilon_{k}^2 + {\cal O}(\varepsilon_{k}^3)}{-f'(x_*)(\varepsilon_{k}-\varepsilon_{k-1})+ \frac{f''(x_*)}{2}(\varepsilon_{k}^2 - \varepsilon_{k-1}^2) + {\cal O}(\varepsilon_{k-1}^3)}\\
+&= \varepsilon_k - \frac{ -f'(x_*)\varepsilon_{k} + \frac{f''(x_*)}{2}\varepsilon_{k}^2 + {\cal O}(\varepsilon_{k}^3)}{-f'(x_*) + \frac{f''(x_*)}{2}(\varepsilon_k + \varepsilon_{k-1}) + {\cal O}(\varepsilon_{k-1}^2)}\\
+&= \varepsilon_k + \frac{-\varepsilon_k + \tfrac12\varepsilon_k^2f''(x_*)/f'(x_*) + {\cal O}(\varepsilon_k^3)}{1 - \tfrac12(\varepsilon_k + \varepsilon_{k-1})f''(x_*)/f'(x_*) + {\cal O}(\varepsilon_{k-1}^2)}\\
+&= \varepsilon_k + \left(-\varepsilon_k + \frac{f''(x_*)}{2f'(x_*)}\varepsilon_k^2 + {\cal O}(\varepsilon_k^3) \right)\left(1 + (\varepsilon_k + \varepsilon_{k-1})\frac{f''(x_*)}{2f'(x_*)} + {\cal O}(\varepsilon_{k-1}^2) \right)\\
+&= \varepsilon_k - \varepsilon_k + \frac{f''(x_*)}{2f'(x_*)}\varepsilon_k^2 - \frac{f''(x_*)}{2f'(x_*)}\varepsilon_k(\varepsilon_k + \varepsilon_{k-1}) + {\cal O}(\varepsilon_{k-1}^3)\\
+&= -\frac{f''(x_*)}{2f'(x_*)}\varepsilon_k\varepsilon_{k-1} + {\cal O}(\varepsilon_{k-1}^3).
+\end{aligned}
+$$
+This is similar to the corresponding formula for Newton's method, where we have
+$$
+\varepsilon_{k+1} = -\frac{f''(x_*)}{2f'(x_*)}\varepsilon_k^2 + {\cal O}(\varepsilon_k^3).
+$$
+The above tells us that the error for the secant method tends to zero faster than linearly, but not quadratically (because $\varepsilon_{k-1} > \varepsilon_k$).
+
+To find the order of convergence, note that $\varepsilon_{k+1}\sim \varepsilon_k\varepsilon_{k-1}$ suggests a power-law relation of the form
+$$
+|\varepsilon_k| = |\varepsilon_{k-1}|^\alpha\left|\frac{f''(x_*)}{2f'(x_*)}\right|^\beta \quad \implies \quad |\varepsilon_{k-1}| = |\varepsilon_k|^{1/\alpha}\left|\frac{f''(x_*)}{2f'(x_*)}\right|^{-\beta/\alpha}.
+$$
+Putting this in both sides of the previous equation gives
+$$
+|\varepsilon_{k}|^\alpha\left|\frac{f''(x_*)}{2f'(x_*)}\right|^\beta = |\varepsilon_k|^{(1+\alpha)/\alpha}\left|\frac{f''(x_*)}{2f'(x_*)}\right|^{(\alpha-\beta)/\alpha}.
+$$
+Equating powers gives
+$$
+\alpha = \frac{1+\alpha}{\alpha} \quad \implies \alpha = \frac{1 + \sqrt{5}}{2}, \quad \beta = \frac{\alpha - \beta}{\alpha} \quad \implies \beta = \frac{\alpha}{\alpha + 1} = \frac{1}{\alpha}.
+$$
+It follows that
+$$
+\lim_{k\to\infty}\frac{|x_* - x_{k+1}|}{|x_* - x_k|^\alpha} = \lim_{k\to\infty}\frac{|\varepsilon_{k+1}|}{|\varepsilon_k|^\alpha} = \left|\frac{f''(x_*)}{2f'(x_*)}\right|^{1/\alpha},
+$$
+so the secant method has order of convergence $\alpha$.
 

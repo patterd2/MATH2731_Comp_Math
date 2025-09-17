@@ -74,6 +74,11 @@ custom-numbered-blocks:
       boxstyle: foldbox.simple
       colors: [e7efea, 53b57b]
       label: Exercise
+    algorithm:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [e7efea, 53b57b]
+      label: Algorithm
     theorem:
       collapse: False
       boxstyle: foldbox.simple
