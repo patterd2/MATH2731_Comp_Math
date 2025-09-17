@@ -254,7 +254,7 @@
     "href": "chap-three.html#knowledge-checklist",
     "title": "3  Linear Algebra",
     "section": "Knowledge checklist",
-    "text": "Knowledge checklist\nKey topics:\n\nInteger and floating point representations of real numbers on computers.\nOverflow, underflow and loss of significance.\n\nKey skills:\n\nUnderstanding and distinguishing integer, fixed-point, and floating-point representations.\nAnalyzing the effects of rounding and machine epsilon in calculations.\nDiagnosing and managing rounding errors, overflow, and underflow.",
+    "text": "Knowledge checklist\nKey topics:\n\nDirect and iterative methods for solving linear systems: triangular systems, Gaussian elimination, LU decomposition, and iterative algorithms.\nVector and matrix norms, including induced matrix norms and their role in error analysis.\nConditioning and the condition number: sensitivity of solutions to input errors and implications for numeric stability.\n\nKey skills:\n\nFormulate and solve linear systems using direct and iterative methods (e.g., Gaussian elimination, LU decomposition).\nApply norms to measure errors and conditioning, and calculate condition numbers.\nAnalyze computational complexity and efficiency of matrix algorithms.",
     "crumbs": [
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Linear Algebra</span>"
     ]
