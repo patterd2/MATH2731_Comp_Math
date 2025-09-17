@@ -12,6 +12,7 @@ book:
     - index.qmd
     - chap-one.qmd
     - chap-two.qmd
+    - chap-three.qmd
     
 
 format:

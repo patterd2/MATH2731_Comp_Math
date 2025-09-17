@@ -1199,3 +1199,20 @@ $$
 $$
 so the secant method has order of convergence $\alpha$.
 
+## Knowledge checklist {.unnumbered}
+
+**Key topics:**
+
+1. Polynomial interpolation, including the Lagrange and Newton divided-difference forms of polynomial interpolation.
+
+2. Interpolation error estimates, truncation error, and the significance of node placement (e.g. the Runge phenomenon).
+
+3. Numerical rootfinding methods, including interval bisection and fixed point iteration, with discussion of existence, uniqueness, and orders of convergence (linear, superlinear).
+
+**Key skills:**
+
+- Constructing and analyzing polynomial interpolants for a given data set and function, using Taylor, Lagrange, and Newton methods.
+
+- Estimating approximation errors and choosing optimal interpolation nodes to improve numerical stability and convergence.
+
+- Implementing and evaluating iterative algorithms for solving nonlinear equations, including measuring and understanding convergence rates.

@@ -1,0 +1,1095 @@
+---
+title: Linear Algebra
+---
+
+## Systems of Linear Equations {#s-lin}
+
+The central goal of this chapter is to answer the following seemingly straightforward question:
+
+> *How do we solve a linear system numerically?*
+
+Linear systems of the form
+$$
+\begin{aligned}
+a_{11}x_1 &+ a_{12}x_2 + \ldots + a_{1n}x_n = b_1,\\
+a_{21}x_1 &+ a_{22}x_2 + \ldots + a_{2n}x_n = b_2,\\
+\vdots    &\qquad\vdots\qquad\qquad\vdots\\
+a_{n1}x_1 &+ a_{n2}x_2 + \ldots + a_{nn}x_n = b_n
+\end{aligned}
+$$
+occur in many applications (often with very large $n$). It is convenient to express this in matrix form:
+$$
+A\mathbf{x} = \mathbf{b},
+$$
+where $A$ is an $n\times n$ square matrix with elements $a_{ij}$, and $\mathbf{x}$, $\mathbf{b}$ are $n\times 1$ vectors.
+
+We will need some basic facts from linear algebra:
+
+1. $A^\top$ is the **transpose** of $A$, so $(a^\top)_{ij} = a_{ji}$.
+
+2. $A$ is **symmetric** if $A=A^\top$.
+
+3. $A$ is **non-singular** iff there exists a solution $\mathbf{x}\in\mathbb{R}^n$ for every $\mathbf{b}\in\mathbb{R}^n$.
+
+4. $A$ is non-singular iff $\det(A)\neq 0$.
+
+5. $A$ is non-singular iff there exists a unique **inverse** $A^{-1}$ such that $AA^{-1}=A^{-1}A = I$.
+
+It follows from fact 5 above that $A\mathbf{x} = \mathbf{b}$ has a unique solution iff $A$ is non-singular, given by $\mathbf{x} = A^{-1}\mathbf{b}$.
+
+In this chapter, we will see how to solve $A\mathbf{x} = \mathbf{b}$ both **efficiently** and **accurately**.
+
+Although this seems like a conceptually easy problem (just use Gaussian elimination!), it is actually a hard one when $n$ gets large. Nowadays, linear systems with $n=1$ million arise routinely in computational problems. And even for small $n$ there are some potential pitfalls, as we will see.
+
+
+::: {.callout-note}
+If $A$ is instead rectangular ($m\times n$), then there are different numbers of equations and unknowns, and we do not expect a unique solution. Nevertheless, we can still look for an approximate solution in this case and there are methods for this problem in the course reading list.
+:::
+
+Many algorithms are based on the idea of rewriting $A\mathbf{x} = \mathbf{b}$ in a form where the matrix is easier to invert. Easiest to invert are diagonal matrices, followed by orthogonal matrices (where $A^{-1}=A^\top$). However, the most common method for solving $A\mathbf{x} = \mathbf{b}$ transforms the system to *triangular* form.
+
+## Triangular systems
+
+If the matrix $A$ is triangular, then $A\mathbf{x} = \mathbf{b}$ is straightforward to solve.
+
+A matrix $L$ is called **lower triangular** if all entries above the diagonal are zero:
+$$
+L = \begin{pmatrix}
+l_{11} & 0 & \cdots & 0\\
+l_{21} & l_{22} & \ddots & \vdots\\
+\vdots & &\ddots & 0\\
+l_{n1} & \cdots & \cdots & l_{nn}
+\end{pmatrix}.
+$$
+The determinant is just
+$$
+\det(L) = l_{11}l_{22}\cdots l_{nn},
+$$
+so the matrix will be non-singular iff all of the diagonal elements are non-zero.
+
+::: {.eg}
+## Solve $L\mathbf{x} = \mathbf{b}$ for $n=4$.
+
+The system is
+$$
+\begin{pmatrix}
+l_{11} & 0 & 0 & 0\\
+l_{21} & l_{22} & 0 & 0\\
+l_{31} & l_{32} & l_{33} & 0\\
+l_{41} & l_{42} & l_{43} & l_{44}
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\ x_2\\ x_3\\ x_4
+\end{pmatrix}
+=
+\begin{pmatrix}
+b_1\\ b_2\\ b_3\\ b_4
+\end{pmatrix}
+$$
+which is equivalent to
+$$
+\begin{aligned}
+l_{11}x_1 &= b_1,\\
+l_{21}x_1 + l_{22}x_2 &= b_2,\\
+l_{31}x_1 + l_{32}x_2 + l_{33}x_3 &= b_3,\\
+l_{41}x_1 + l_{42}x_2 + l_{43}x_3 + l_{44}x_4 &= b_4.
+\end{aligned}
+$$
+We can just solve step-by-step:
+$$
+x_1 = \frac{b_1}{l_{11}}, \,\, x_2 = \frac{b_2 - l_{21}x_1}{l_{22}},
+$$
+$$x_3 = \frac{b_3 - l_{31}x_1 - l_{32}x_2}{l_{33}}, \,\, x_4 = \frac{b_4 - l_{41}x_1 - l_{42}x_2 - l_{43}x_3}{l_{44}}.
+$$
+This is fine since we know that $l_{11}$, $l_{22}$, $l_{33}$, $l_{44}$ are all non-zero when a solution exists.
+:::
+
+In general, any lower triangular system $L\mathbf{x}=\mathbf{b}$ can be solved by **forward substitution**
+$$
+x_j = \frac{b_j - \sum_{k=1}^{j-1}l_{jk}x_k}{l_{jj}}, \quad j=1,\ldots,n.
+$$
+
+Similarly, an **upper triangular** matrix $U$ has the form
+$$
+U = \begin{pmatrix}
+u_{11} & u_{12} & \cdots & u_{1n}\\
+0 & u_{22} & & \vdots\\
+\vdots & \ddots & \ddots & \vdots\\
+0 & \cdots & 0 & u_{nn}
+\end{pmatrix},
+$$
+and an upper-triangular system $U\mathbf{x} = \mathbf{b}$ may be solved by **backward substitution**
+$$
+x_j = \frac{b_j - \sum_{k=j+1}^{n}u_{jk}x_k}{u_{jj}}, \quad j=n,\ldots,1.
+$$
+
+To estimate the computational cost of forward substitution, we can count the number of floating-point operations ($+$, $-$, $\times$, $\div$).
+
+::: {.eg title="Number of operations required for forward substitution."}
+Consider each $x_j$. We have
+- $j=1$: 1 division
+- $j=2$: 1 division + [1 subtraction + 1 multiplication]
+- $j=3$: 1 division + $2\,\times$[1 subtraction + 1 multiplication]
+- $\vdots$
+- $j=n$: 1 division + $(n-1)\,\times$[1 subtraction + 1 multiplication]
+
+So the total number of operations required is
+$$
+\sum_{j=1}^n\Big(1 + 2(j-1)\Big) = 2\sum_{j=1}^nj - \sum_{j=1}^n1 = n(n+1) - n = n^2.
+$$
+:::
+
+So solving a triangular system by forward (or backward) substitution takes $n^2$ operations. We may say that the **computational complexity** of the algorithm is $n^2$.
+
+::: {.callout-note}
+In practice, this is only a rough estimate of the computational cost, because reading from and writing to the computer's memory also take time. This can be estimated given a "memory model", but this depends on the particular computer.
+:::
+
+## Gaussian elimination
+
+If our matrix $A$ is not triangular, we can try to transform it to triangular form. **Gaussian elimination** uses elementary row operations to transform the system to upper triangular form $U\mathbf{x} = \mathbf{y}$.
+
+Elementary row operations include swapping rows and adding multiples of one row to another. They won't change the solution $\mathbf{x}$, but will change the matrix $A$ and the right-hand side $\mathbf{b}$.
+
+::: {.eg title="Transform to upper triangular form the system"}
+$$
+\begin{aligned}
+x_1 + 2x_2 + x_3 &= 0,\\
+x_1 - 2x_2 + 2x_3 &= 4,\\
+2x_1 + 12x_2 - 2x_3 &= 4.
+\end{aligned}
+$$
+$$
+A=\begin{pmatrix}
+1 & 2 & 1\\
+1 & -2 & 2\\
+2 & 12 & -2
+\end{pmatrix},
+\quad
+\mathbf{b}=\begin{pmatrix}
+0\\ 4\\ 4
+\end{pmatrix}.
+$$
+
+**Stage 1.** Subtract $1$ times equation 1 from equation 2, and $2$ times equation 1 from equation 3, so as to eliminate $x_1$ from equations 2 and 3:
+$$
+\begin{aligned}
+x_1 + 2x_2 + x_3 &= 0,\\
+-4x_2 + x_3 &= 4,\\
+8x_2 - 4x_3 &= 4.
+\end{aligned}
+$$
+$$
+A^{(2)}=\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 8 & -4
+\end{pmatrix}
+\quad
+\mathbf{b}^{(2)}=\begin{pmatrix}
+0\\ 4\\ 4
+\end{pmatrix},
+\quad m_{21}=1, \quad m_{31}=2.
+$$
+
+**Stage 2.** Subtract $-2$ times equation 2 from equation 3, to eliminate $x_2$ from equation 3:
+$$
+\begin{aligned}
+x_1 + 2x_2 + x_3 &= 0,\\
+-4x_2 + x_3 &= 4,\\
+-2x_3 = 12.
+\end{aligned}
+$$
+$$
+A^{(3)}=\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 0 & -2
+\end{pmatrix}
+\quad
+\mathbf{b}^{(3)}=\begin{pmatrix}
+0\\ 4\\ 12
+\end{pmatrix},
+\quad m_{32}=-2.
+$$
+
+Now the system is upper triangular, and back substitution gives $x_1=11$, $x_2=-\tfrac{5}{2}$, $x_3=-6$.
+:::
+
+We can write the general algorithm as follows.
+
+::: {.algorithm title="Gaussian elimination"}
+Let $A^{(1)}=A$ and  $\mathbf{b}^{(1)}=\mathbf{b}$. Then for each $k$ from 1 to $n-1$, compute a new matrix $A^{(k+1)}$ and right-hand side $\mathbf{b}^{(k+1)}$ by the following procedure:
+
+1. Define the row multipliers
+   $$
+   m_{ik} = \frac{a_{ik}^{(k)}}{a_{kk}^{(k)}}, \quad i=k+1,\ldots,n.
+   $$
+2. Use these to remove the unknown $x_k$ from equations $k+1$ to $n$, leaving
+   $$
+   a_{ij}^{(k+1)} = a_{ij}^{(k)} - m_{ik}a_{kj}^{(k)}, \quad b_i^{(k+1)} = b_i^{(k)} - m_{ik}b_k^{(k)}, \quad i,j=k+1,\ldots,n.
+   $$
+The final matrix $A^{(n)}=U$ will then be upper triangular.
+:::
+
+This procedure will work providing $a_{kk}^{(k)}\neq 0$ for every $k$. (We will worry about this later.)
+
+What about the computational cost of Gaussian elimination?
+
+::: {.eg}
+## Number of operations required to find $U$.
+
+Computing $A^{(k+1)}$ requires:
+- $n-(k+1)+1 = n-k$ divisions to compute $m_{ik}$.
+- $(n-k)^2$ subtractions and the same number of multiplications to compute $a_{ij}^{(k+1)}$.
+
+So in total $A^{(k+1)}$ requires $2(n-k)^2 + n-k$ operations. Overall, we need to compute $A^{(k+1)}$ for $k=1,\ldots,n-1$, so the total number of operations is
+$$
+\begin{aligned}
+N &= \sum_{k=1}^{n-1}\Big(2n^2 + n - (4n+1)k + 2k^2\Big) \\
+  &= n(2n+1)\sum_{k=1}^{n-1}1 - (4n+1)\sum_{k=1}^{n-1}k + 2\sum_{k=1}^{n-1}k^2.
+\end{aligned}
+$$
+Recalling that
+$$
+\sum_{k=1}^n k = \tfrac12n(n+1), \,\, \sum_{k=1}^n k^2 = \tfrac16n(n+1)(2n+1),
+$$
+we find
+$$
+\begin{aligned}
+N &= n(2n+1)(n-1) - \tfrac12(4n+1)(n-1)n + \tfrac13(n-1)n(2n-1) \\
+&= \tfrac23n^3 - \tfrac12n^2 - \tfrac16n.
+\end{aligned}
+$$
+So the number of operations required to find $U$ is ${\cal O}(n^3)$.
+:::
+
+It is known that ${\cal O}(n^3)$ is not optimal, and the best theoretical algorithm known for inverting a matrix takes ${\cal O}(n^{2.3728639})$ operations. However, algorithms achieving this bound are highly impractical for most real-world uses due to massive constant factors and implementation overhead. It remains an open conjecture that there exists an ${\cal O}(n^{2+\epsilon})$ algorithm, for $\epsilon$ arbitrarily small. 
+
+## LU decomposition
+
+In Gaussian elimination, both the final matrix $U$ and the sequence of row operations are determined solely by $A$, and do not depend on $\mathbf{b}$. We will see that the sequence of row operations that transforms $A$ to $U$ is equivalent to left-multiplying by a matrix $F$, so that
+$$
+FA = U, \qquad U\mathbf{x} = F\mathbf{b}.
+$$
+To see this, note that step $k$ of Gaussian elimination can be written in the form
+$$
+A^{(k+1)} = F^{(k)}A^{(k)}, \quad \mathbf{b}^{(k+1)} = F^{(k)}\mathbf{b}^{(k)},
+$$
+where
+$$
+F^{(k)} := \begin{pmatrix}
+1 & 0&\cdots & \cdots &\cdots&0\\
+0 & \ddots & \ddots&&&\vdots \\
+\vdots & \ddots& 1 &\ddots&&\vdots \\
+\vdots & & -m_{k+1,k} & \ddots &\ddots&\vdots \\
+\vdots & & \vdots & \ddots& \ddots &0\\
+0& \cdots  & -m_{n,k} &\cdots&0&1
+\end{pmatrix}.
+$$
+Multiplying by $F^{(k)}$ has the effect of subtracting $m_{ik}$ times row $k$ from row $i$, for $i=k+1,\ldots,n$. 
+
+::: {.callout-note}
+A matrix with this structure (the identity except for a single column below the diagonal) is called a **Frobenius matrix**.
+:::
+
+::: {.eg}
+You can check in the earlier example that
+$$
+F^{(1)}A=\begin{pmatrix}
+1 & 0 & 0\\
+-1 & 1 & 0\\
+-2 & 0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+1 & 2 & 1\\
+1 & -2 & 2\\
+2 & 12 & -2
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 8 & -4
+\end{pmatrix} = A^{(2)},
+$$
+and
+$$
+F^{(2)}A^{(2)}=
+\begin{pmatrix}
+1 & 0 & 0\\
+0 & 1 & 0\\
+0 & 2 & 1
+\end{pmatrix}
+\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 8 & -4
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 0 & -2
+\end{pmatrix} = A^{(3)}=U.
+$$
+:::
+
+It follows that
+$$
+U = A^{(n)} = F^{(n-1)}F^{(n-2)}\cdots F^{(1)}A.
+$$
+Now the $F^{(k)}$ are invertible, and the inverse is just given by adding rows instead of subtracting:
+$$
+(F^{(k)})^{-1} = \begin{pmatrix}
+1 & 0&\cdots & \cdots &\cdots&0\\
+0 & \ddots & \ddots&&&\vdots \\
+\vdots & \ddots& 1 &\ddots&&\vdots \\
+\vdots & & m_{k+1,k} & \ddots &\ddots&\vdots \\
+\vdots & & \vdots & \ddots& \ddots &0\\
+0& \cdots  & m_{n,k} &\cdots&0&1
+\end{pmatrix}.
+$$
+So we could write
+$$
+A = (F^{(1)})^{-1}(F^{(2)})^{-1}\cdots (F^{(n-1)})^{-1}U.
+$$
+Since the successive operations don't "interfere" with each other, we can write
+$$
+  (F^{(1)})^{-1}(F^{(2)})^{-1}\cdots (F^{(n-1)})^{-1} =  \begin{pmatrix}
+1 & 0& \cdots&\cdots&\cdots&0\\
+m_{2,1} & 1 &\ddots&&&\vdots\\
+m_{3,1} & m_{3,2} & 1&\ddots&&\vdots\\
+m_{4,1} & m_{4,2} & m_{4,3}&\ddots&\ddots&\vdots\\
+\vdots & \vdots&\vdots&&1&0\\
+m_{n,1} & m_{n,2} & m_{n,3}&\cdots&m_{n,n-1} &1
+\end{pmatrix} := L.
+$$
+Thus we have established the following result.
+
+::: {.theorem title="LU decomposition"}
+Let $U$ be the upper triangular matrix from Gaussian elimination of $A$ (without pivoting), and let $L$ be the unit lower triangular matrix above. Then
+$$
+A = LU.
+$$
+:::
+
+::: {.callout-note}
+*Unit* lower triangular means that there are all 1's on the diagonal.
+:::
+
+The theorem above says that Gaussian elimination is equivalent to factorising $A$ as the product of a lower triangular and an upper triangular matrix. This is not at all obvious from the algorithm! The decomposition is unique up to a scaling $LD$, $D^{-1}U$ for some diagonal matrix $D$.
+
+The system $A\mathbf{x}=\mathbf{b}$ becomes $LU\mathbf{x}=\mathbf{b}$, which we can readily solve by setting $U\mathbf{x}=\mathbf{y}$. We first solve $L\mathbf{y}=\mathbf{b}$ for $\mathbf{y}$, then $U\mathbf{x}=\mathbf{y}$ for $\mathbf{x}$. Both are triangular systems.
+
+Moreover, if we want to solve several systems $A\mathbf{x} = \mathbf{b}$ with different $\mathbf{b}$ but the same matrix, we just need to compute $L$ and $U$ once. This saves time because, although the initial $LU$ factorisation takes ${\cal O}(n^3)$ operations, the evaluation takes only ${\cal O}(n^2)$.
+
+::: {.callout-note}
+This matrix factorisation viewpoint dates only from the 1940s, and LU decomposition was introduced by Alan Turing in a 1948 paper (*Q. J. Mechanics Appl. Mat.* **1**, 287). Other common factorisations used in numerical linear algebra are **QR** (which we will see later) and *Cholesky*.
+:::
+
+::: {.eg}
+Solve our earlier example by LU decomposition.
+
+$$
+\begin{pmatrix}
+1 & 2 & 1\\
+1 & -2 & 2\\
+2 & 12 & -2
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\ x_2\\ x_3
+\end{pmatrix}
+=
+\begin{pmatrix}
+0\\ 4\\ 4
+\end{pmatrix}.
+$$
+
+We apply Gaussian elimination as before, but ignore $\mathbf{b}$ (for now), leading to
+$$
+U = \begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 0 & -2
+\end{pmatrix}.
+$$
+As we apply the elimination, we record the multipliers so as to construct the matrix
+$$
+L = \begin{pmatrix}
+1 & 0 & 0\\
+1 & 1 & 0\\
+2 & -2 & 1
+\end{pmatrix}.
+$$
+Thus we have the factorisation/decomposition
+$$
+\begin{pmatrix}
+1 & 2 & 1\\
+1 & -2 & 2\\
+2 & 12 & -2
+\end{pmatrix} =
+\begin{pmatrix}
+1 & 0 & 0\\
+1 & 1 & 0\\
+2 & -2 & 1
+\end{pmatrix}
+\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 0 & -2
+\end{pmatrix}.
+$$
+
+With the matrices $L$ and $U$, we can readily solve for any right-hand side $\mathbf{b}$. We illustrate for our particular $\mathbf{b}$. Firstly, solve $L\mathbf{y}=\mathbf{b}$:
+$$
+\begin{pmatrix}
+1 & 0 & 0\\
+1 & 1 & 0\\
+2 & -2 & 1
+\end{pmatrix}
+\begin{pmatrix}
+y_1\\y_2\\y_3
+\end{pmatrix}
+=
+\begin{pmatrix}
+0\\ 4\\ 4
+\end{pmatrix}
+$$
+$$
+\implies y_1 = 0, \,\, y_2 = 4-y_1 =4, \,\, y_3=4-2y_1+2y_2 = 12.
+$$
+Notice that $\mathbf{y}$ is the right-hand side $\mathbf{b}^{(3)}$ constructed earlier. Then, solve $U\mathbf{x} = \mathbf{y}$:
+$$
+\begin{pmatrix}
+1 & 2 & 1\\
+0 & -4 & 1\\
+0 & 0 & -2
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\x_2\\x_3
+\end{pmatrix}=
+\begin{pmatrix}
+0\\4\\12
+\end{pmatrix}
+$$
+$$
+\implies x_3 = -6, \,\, x_2=-\tfrac14(4-x_3)=-\tfrac52, \,\, x_1 = -2x_2 - x_3 = 11.
+$$
+:::
+
+## Vector norms
+
+To measure the error when the solution is a vector, as opposed to a scalar, we usually summarize the error in a single number called a **norm**. A **norm** effectively gives us a way to define a notion of distance in higher dimensions.
+
+A **vector norm** on $\mathbb{R}^n$ is a real-valued function that satisfies:
+1. $\|\mathbf{x} + \mathbf{y}\| \leq \|\mathbf{x}\| + \|\mathbf{y}\|$ for every $\mathbf{x},\mathbf{y}\in \mathbb{R}^n$ (**triangle inequality**).
+2. $\|\alpha \mathbf{x}\| = |\alpha|\,\|\mathbf{x}\|$ for every $\mathbf{x}\in \mathbb{R}^n$ and every $\alpha\in\mathbb{R}$.
+3. $\|\mathbf{x}\| \geq 0$ for every $\mathbf{x}\in \mathbb{R}^n$, and $\|\mathbf{x}\|=0$ implies $\mathbf{x}=0$.
+
+::: {.eg title="There are three common examples:"}
+1. The **$\ell_2$-norm**  
+   $$
+   \|\mathbf{x}\|_2 := \sqrt{\sum_{k=1}^n x_k^2} = \sqrt{\mathbf{x}^\top \mathbf{x}}.
+   $$
+   This is just the usual Euclidean length of $\mathbf{x}$.
+
+2. The **$\ell_1$-norm**  
+   $$
+   \|\mathbf{x}\|_1 := \sum_{k=1}^n |x_k|.
+   $$
+   This is sometimes known as the **taxicab** or **Manhattan** norm, because it corresponds to the distance that a taxi has to drive on a rectangular grid of streets to get to $\mathbf{x}\in\mathbb{R}^2$.
+
+3. The **$\ell_\infty$-norm**  
+   $$
+   \|\mathbf{x}\|_\infty := \max_{k=1,\ldots,n} |x_k|.
+   $$
+   This is sometimes known as the **maximum** norm.
+
+:::
+
+The norms in the example above are all special cases of the $\ell_p$-norm,
+$$
+\|\mathbf{x}\|_p = \left(\sum_{k=1}^n |x_k|^p\right)^{1/p},
+$$
+which is a norm for any real number $p\geq 1$. Increasing $p$ means that more and more emphasis is given to the maximum element $|x_k|$.
+
+::: {.eg}
+## Consider the vectors $\mathbf{a}=(1,-2,3)^\top$, $\mathbf{b}=(2,0,-1)^\top$, and $\mathbf{c}=(0,1,4)^\top$.
+
+The $\ell_1$-, $\ell_2$-, and $\ell_\infty$-norms are:
+$$
+\begin{aligned}
+\|\mathbf{a}\|_1 &= 1 + 2 + 3 = 6 \\
+\|\mathbf{b}\|_1 &= 2 + 0 + 1 = 3 \\
+\|\mathbf{c}\|_1 &= 0 + 1 + 4 = 5 \\
+\\
+\|\mathbf{a}\|_2 &= \sqrt{1 + 4 + 9} \approx 3.74 \\
+\|\mathbf{b}\|_2 &= \sqrt{4 + 0 + 1} \approx 2.24 \\
+\|\mathbf{c}\|_2 &= \sqrt{0 + 1 + 16} \approx 4.12 \\
+\\
+\|\mathbf{a}\|_\infty &= \max\{1,2,3\} = 3 \\
+\|\mathbf{b}\|_\infty &= \max\{2,0,1\} = 2 \\
+\|\mathbf{c}\|_\infty &= \max\{0,1,4\} = 4
+\end{aligned}
+$$
+Notice that, for a single vector $\mathbf{x}$, the norms satisfy the ordering $\|\mathbf{x}\|_1 \geq \|\mathbf{x}\|_2 \geq \|\mathbf{x}\|_\infty$, but that vectors may be ordered differently by different norms.
+:::
+
+::: {.eg}
+## Sketch the 'unit circles' $\{\mathbf{x}\in\mathbb{R}^2 : \|\mathbf{x}\|_p=1\}$ for $p=1,2,\infty$.
+
+![](im/norms.png){width=70% fig-align="center"}
+:::
+
+## Matrix norms
+
+We also use norms to measure the "size" of matrices. Since the set $\mathbb{R}^{n\times n}$ of $n\times n$ matrices with real entries is a vector space, we could just use a vector norm on this space. But usually we add an additional axiom.
+
+A **matrix norm** is a real-valued function $\|\cdot\|$ on $\mathbb{R}^{n\times n}$ that satisfies:
+
+1. $\|A + B\| \leq \|A\| + \|B\|$ for every $A,B\in\mathbb{R}^{n\times n}$.
+
+2. $\|\alpha A\| = |\alpha|\,\|A\|$ for every $A\in \mathbb{R}^{n\times n}$ and every $\alpha\in\mathbb{R}$.
+
+3. $\|A\| \geq 0$ for every $A\in \mathbb{R}^{n\times n}$ and $\|A\|=0$ implies $A=0$.
+
+4. $\|AB\| \leq \|A\|\|B\|$ for every $A,B\in\mathbb{R}^{n\times n}$ (**consistency**).
+
+::: {.callout-note}
+We usually want this additional axiom because matrices are more than just vectors. Some books call this a **submultiplicative norm** and define a "matrix norm" to satisfy just the first three properties, perhaps because (4) only works for square matrices.
+:::
+
+::: {.eg title="Frobenius norm"}
+If we treat a matrix as a big vector with $n^2$ components, then the $\ell_2$-norm is called the **Frobenius norm** of the matrix:
+$$
+\|A\|_F = \sqrt{\sum_{i=1}^n\sum_{j=1}^n a_{ij}^2}.
+$$
+This norm is rarely used in numerical analysis because it is not induced by any vector norm (as we are about to define).
+:::
+
+The most important matrix norms are so-called **induced** or **operator** norms. Remember that $A$ is a linear map on $\mathbb{R}^n$, meaning that it maps every vector to another vector. So we can measure the size of $A$ by how much it can stretch vectors with respect to a given vector norm. Specifically, if $\|\cdot\|_p$ is a vector norm, then the **induced** norm is defined as
+$$
+\|A\|_p := \sup_{\mathbf{x}\neq \boldsymbol{0}}\frac{\|A\mathbf{x}\|_p}{\|\mathbf{x}\|_p} = \max_{\|\mathbf{x}\|_p=1}\|A\mathbf{x}\|_p.
+$$
+To see that the two definitions here are equivalent, use the fact that $\|\cdot\|_p$ is a vector norm. So by property (2) we have
+$$
+\sup_{\mathbf{x}\neq \boldsymbol{0}}\frac{\|A\mathbf{x}\|_p}{\|\mathbf{x}\|_p} = \sup_{\mathbf{x}\neq \boldsymbol{0}}\left\| A\frac{\mathbf{x}}{\|\mathbf{x}\|_p}\right\|_p = \sup_{\|\mathbf{y}\|_p=1}\|A\mathbf{y}\|_p = \max_{\|\mathbf{y}\|_p=1}\|A\mathbf{y}\|_p.
+$$
+
+::: {.callout-note}
+Usually we use the same notation for the induced matrix norm as for the original vector norm. The meaning should be clear from the context.
+:::
+
+::: {.eg}
+Let
+$$
+A = \begin{pmatrix}
+0 & 1\\
+3 & 0
+\end{pmatrix}.
+$$
+In the $\ell_2$-norm, a unit vector in $\mathbb{R}^2$ has the form $\mathbf{x}=(\cos\theta,\sin\theta)^\top$, so the image of the unit circle is
+$$
+A\mathbf{x} = \begin{pmatrix}
+\sin\theta\\
+3\cos\theta
+\end{pmatrix}.
+$$
+This is illustrated below:
+
+![](im/matrixnorm.png){width=60% fig-align="center"}
+
+The induced matrix norm is the maximum stretching of this unit circle, which is
+$$
+\|A\|_2 = \max_{\|\mathbf{x}\|_2=1}\|A\mathbf{x}\|_2 = \max_\theta\big(\sin^2\theta + 9\cos^2\theta \big)^{1/2} = \max_\theta\big(1 + 8\cos^2\theta\big)^{1/2} = 3.
+$$
+:::
+
+:::{.theorem}
+## Induced norms are matrix norms
+
+The induced norm corresponding to any vector norm is a matrix norm, and the two norms satisfy $\|A\mathbf{x}\| \leq \|A\|\|\mathbf{x}\|$ for any matrix $A\in\mathbb{R}^{n\times n}$ and any vector $\mathbf{x}\in\mathbb{R}^n$.
+:::
+
+**Proof:**  
+Properties (1)-(3) follow from the fact that the vector norm satisfies the corresponding properties. To show (4), note that, by the definition above, we have for any vector $\mathbf{y}\in\mathbb{R}^n$ that
+$$
+\|A\| \geq \frac{\|A\mathbf{y}\|}{\|\mathbf{y}\|} \quad \implies \quad
+\|A\mathbf{y}\| \leq \|A\|\|\mathbf{y}\|.
+$$
+Taking $\mathbf{y} = B\mathbf{x}$ for some $\mathbf{x}$ with $\|\mathbf{x}\|=1$, we get
+$$
+\|AB\mathbf{x}\|\leq\|A\|\|B\mathbf{x}\| \leq \|A\|\|B\|.
+$$
+This holds in particular for the vector $\mathbf{x}$ that maximises $\|AB\mathbf{x}\|$, so
+$$
+\|AB\| = \max_{\|\mathbf{x}\|=1}\|AB\mathbf{x}\| \leq \|A\|\|B\|. 
+$$
+
+It is cumbersome to compute the induced norms from their definition, but fortunately there are some very useful alternative formulae.
+
+:::{.theorem}
+## Matrix norms induced by $\ell_1$ and $\ell_\infty$
+
+The matrix norms induced by the $\ell_1$-norm and $\ell_\infty$-norm satisfy
+$$
+\|A\|_1 = \max_{j=1,\ldots,n}\sum_{i=1}^n|a_{ij}|, \quad \text{(maximum column sum)}
+$$
+$$
+\|A\|_\infty = \max_{i=1,\ldots,n}\sum_{j=1}^n|a_{ij}|. \quad \text{(maximum row sum)}
+$$
+:::
+
+**Proof:**  
+We will prove the result for the $\ell_1$-norm as an illustration of the method:
+$$
+\|A\mathbf{x}\|_1 = \sum_{i=1}^n\left|\sum_{j=1}^n a_{ij}x_j\right| \leq \sum_{i=1}^n\sum_{j=1}^n|a_{ij}|\,|x_j| = \sum_{j=1}^n|x_j|\sum_{i=1}^n|a_{ij}|.
+$$
+If we let
+$$
+c = \max_{j=1,\ldots,n}\sum_{i=1}^n|a_{ij}|,
+$$
+then
+$$
+\|A\mathbf{x}\|_1 \leq c\|\mathbf{x}\|_1 \quad \implies \|A\|_1 \leq c.
+$$
+Now let $m$ be the column where the maximum sum is attained. If we choose $\mathbf{y}$ to be the vector with components $y_k=\delta_{km}$, then we have $\|A\mathbf{y}\|_1 = c$. Since $\|\mathbf{y}\|_1=1$, we must have that
+$$
+\max_{\|\mathbf{x}\|_1=1}\|A\mathbf{x}\|_1 \geq \|A\mathbf{y}\|_1=c \quad \implies \|A\|_1 \geq c.
+$$
+The only way to satisfy both inequalities is if $\|A\|_1=c$. 
+
+::: {.eg}
+For the matrix
+$$
+A = \begin{pmatrix}
+-7 & 3 & -1\\
+2 & 4 & 5\\
+-4 & 6 & 0
+\end{pmatrix}
+$$
+we have
+$$
+\|A\|_1 = \max\{13, 13, 6\} = 13, \qquad \|A\|_\infty = \max\{11,11,10\} = 11.
+$$
+:::
+
+What about the matrix norm induced by the $\ell_2$-norm? This turns out to be related to the eigenvalues of $A$. Recall that $\lambda\in\mathbb{C}$ is an **eigenvalue** of $A$ with associated **eigenvector** $\mathbf{u}$ if
+$$
+A\mathbf{u} = \lambda\mathbf{u}.
+$$
+We define the **spectral radius** $\rho(A)$ of $A$ to be the maximum $|\lambda|$ over all eigenvalues $\lambda$ of $A$.
+
+:::{.theorem}
+## Spectral norm
+
+The matrix norm induced by the $\ell_2$-norm satisfies
+$$
+\|A\|_2 = \sqrt{\rho(A^\top A)}.
+$$
+:::
+
+As a result of the theorem above, this norm is sometimes known as the **spectral norm**.
+
+::: {.eg}
+For our matrix
+$$
+A = \begin{pmatrix}
+0 & 1\\
+3 & 0
+\end{pmatrix},
+$$
+we have
+$$
+A^\top A = \begin{pmatrix}
+0 & 3\\
+1 & 0
+\end{pmatrix}
+\begin{pmatrix}
+0 & 1\\
+3 & 0
+\end{pmatrix}
+=\begin{pmatrix}
+9 & 0\\
+0 & 1
+\end{pmatrix}.
+$$
+We see that the eigenvalues of $A^\top A$ are $\lambda=1,9$, so  $\|A\|_2=\sqrt{9}=3$ (as we calculated earlier).
+:::
+
+**Proof:**  
+We want to show that
+$$
+\max_{\|\mathbf{x}\|_2 = 1}\|A\mathbf{x}\|_2  = \max\{\sqrt{|\lambda|} \,: \,\textrm{$\lambda$ eigenvalue of $A^\top A$} \}.
+$$
+For $A$ real, $A^\top A$ is symmetric, so has real eigenvalues $\lambda_1 \leq\lambda_2 \leq \ldots \leq \lambda_n$ with corresponding orthonormal eigenvectors $\mathbf{u}_1, \ldots,\mathbf{u}_n$ in $\mathbb{R}^n$. (Orthonormal means that $\mathbf{u}_j^\top \mathbf{u}_k = \delta_{jk}$.) Note also that all of the eigenvalues are non-negative, since
+$$
+A^\top A\mathbf{u}_1 = \lambda_1\mathbf{u}_1 \quad \implies \lambda_1 = \frac{\mathbf{u}_1^\top A^\top A\mathbf{u}_1}{\mathbf{u}_1^\top\mathbf{u}_1} = \frac{\|A\mathbf{u}_1\|_2^2}{\|\mathbf{u}_1\|_2^2} \geq 0.
+$$
+So we want to show that $\|A\|_2=\sqrt{\lambda_n}$. The eigenvectors form a basis, so every vector $\mathbf{x}\in\mathbb{R}^n$ can be expressed as a linear combination $\mathbf{x} = \sum_{k=1}^n\alpha_k\mathbf{u}_k$. Therefore
+$$
+\|A\mathbf{x}\|_2^2 = \mathbf{x}^\top A^\top A\mathbf{x} = \mathbf{x}^\top\sum_{k=1}^n\alpha_k\lambda_k\mathbf{u}_k = \sum_{j=1}^n\alpha_j\mathbf{u}_j^\top\sum_{k=1}^n\alpha_k\lambda_k\mathbf{u}_k = \sum_{k=1}^n\alpha_k^2\lambda_k,
+$$
+where the last step uses orthonormality of the $\mathbf{u}_k$. It follows that
+$$
+\|A\mathbf{x}\|_2^2 \leq \lambda_n\sum_{k=1}^n\alpha_k^2.
+$$
+But if $\|\mathbf{x}\|_2=1$, then $\|\mathbf{x}\|_2^2=\sum_{k=1}^n\alpha_k^2 = 1$, so $\|A\mathbf{x}\|_2^2 \leq \lambda_n$. To show that the maximum of $\|A\mathbf{x}\|_2^2$ is equal to $\lambda_n$, we can choose $\mathbf{x}$ to be the corresponding eigenvector $\mathbf{x}=\mathbf{u}_n$. In that case, $\alpha_1=\ldots=\alpha_{n-1}=0$ and $\alpha_n=1$, so $\|A\mathbf{x}\|_2^2 =\lambda_n$. 
+
+## Conditioning
+
+Some linear systems are inherently more difficult to solve than others, because the solution is sensitive to small perturbations in the input. We will examine how to quantify this sensitivity and how to adjust our methods to control for it.
+
+::: {.eg}
+Consider the linear system
+$$
+\begin{pmatrix}
+1 & 1\\
+0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}
+= \begin{pmatrix}
+1\\ 1
+\end{pmatrix}
+\implies
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}= 
+\begin{pmatrix}
+0\\ 1
+\end{pmatrix}.
+$$
+If we add a small rounding error $0<\delta \ll 1$ to the data $b_1$ then
+$$
+\begin{pmatrix}
+1 & 1\\
+0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}
+= \begin{pmatrix}
+1 + \delta\\ 1
+\end{pmatrix}
+\implies
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}= 
+\begin{pmatrix}
+\delta\\ 1
+\end{pmatrix}.
+$$
+The solution is within rounding error of the true solution, so the system is called **well conditioned**.
+:::
+
+::: {.eg}
+Now let $\epsilon \ll 1$ be a fixed positive number, and consider the linear system
+$$
+\begin{pmatrix}
+\epsilon & 1\\
+0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}
+= \begin{pmatrix}
+1 + \delta\\ 1
+\end{pmatrix}
+\implies
+\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}= 
+\begin{pmatrix}
+\delta/\epsilon\\ 1
+\end{pmatrix}.
+$$
+The true solution is still $(0,1)^\top$, but if the error $\delta$ is as big as the matrix entry $\epsilon$, then the solution for $x_1$ will be completely wrong. This system is much more sensitive to errors in $\mathbf{b}$, so is called **ill-conditioned**.
+
+Graphically, this system (right) is more sensitive to $\delta$ than the first system (left) because the two lines are closer to parallel:
+
+![](im/conditioning.png){width=80% fig-align="center"}
+:::
+
+To measure the **conditioning** of a linear system, consider the following estimate of the ratio of the relative errors in the output ($x$) versus the input ($b$):
+$$
+\begin{aligned}
+\frac{|\textrm{relative error in }\mathbf{x}|}{|\textrm{relative error in }\mathbf{b}|}
+&= \frac{\|\delta\mathbf{x}\|/\|\mathbf{x}\|}{\|\delta\mathbf{b}\|/\|\mathbf{b}\|}
+= \left(\frac{\|\delta\mathbf{x}\|}{\|\mathbf{x}\|}\right)\left(\frac{\|\mathbf{b}\|}{\|\delta\mathbf{b}\|} \right) \\
+&= \left(\frac{\|A^{-1}\delta\mathbf{b}\|}{\|\mathbf{x}\|}\right)\left(\frac{\|\mathbf{b}\|}{\|\delta\mathbf{b}\|} \right) \\
+&\leq \frac{\|A^{-1}\|\|\delta\mathbf{b}\|}{\|\mathbf{x}\|}\left(\frac{\|\mathbf{b}\|}{\|\delta\mathbf{b}\|} \right) \\
+&= \frac{\|A^{-1}\|\|\mathbf{b}\|}{\|\mathbf{x}\|} = \frac{\|A^{-1}\|\|A\mathbf{x}\|}{\|\mathbf{x}\|}\\
+&\leq \|A^{-1}\|\|A\|.
+\end{aligned}
+$$
+
+We define the **condition number** of a matrix $A$ in some induced norm $\|\cdot\|_*$ to be
+$$
+\kappa_*(A) = \|A^{-1}\|_*\|A\|_*.
+$$
+If $\kappa_*(A)$ is large, then the solution will be sensitive to errors in $\mathbf{b}$, at least for some $\mathbf{b}$. A large condition number means that the matrix is close to being non-invertible (i.e. two rows are close to being linearly dependent).
+
+::: {.callout-note}
+This is a "worst case" amplification of the error by a given matrix. The actual result will depend on $\delta\mathbf{b}$ (which we usually don't know if it arises from previous rounding error).
+:::
+
+Note that $\det(A)$ will tell you whether a matrix is singular or not, but not whether it is ill-conditioned. Since $\det(\alpha A) = \alpha^n\det(A)$, the determinant can be made arbitrarily large or small by scaling (which does not change the condition number). For instance, the matrix
+$$
+\begin{pmatrix}
+10^{-50} & 0\\
+0 & 10^{-50}
+\end{pmatrix}
+$$
+has tiny determinant but is well-conditioned.
+
+::: {.eg}
+Return to our earlier examples and consider the condition numbers in the 1-norm.
+
+We have (assuming $0< \epsilon \ll 1$) that
+$$
+A = \begin{pmatrix}
+1 & 1\\
+0 & 1
+\end{pmatrix} \implies
+A^{-1} = \begin{pmatrix}
+1 & -1\\
+0 & 1
+\end{pmatrix} \implies
+\|A\|_1 = \|A^{-1}\|_1 = 2 \implies \kappa_1(A) = 4,
+$$
+$$
+B = \begin{pmatrix}
+\epsilon & 1\\
+0 & 1
+\end{pmatrix} \implies
+B^{-1} = \frac{1}{\epsilon}\begin{pmatrix}
+1 & -1\\
+0 & \epsilon
+\end{pmatrix} 
+$$
+$$
+\implies
+\|B\|_1 = 2, \,\, \|B^{-1}\|_1 = \frac{1 + \epsilon}{\epsilon} \implies \kappa_1(B) = \frac{2(1+\epsilon)}{\epsilon}.
+$$
+For matrix $B$, $\kappa_1(B)\to\infty$ as $\epsilon\to 0$, showing that the matrix $B$ is ill-conditioned.
+:::
+
+::: {.eg}
+The **Hilbert matrix** $H_n$ is the $n\times n$ symmetric matrix with entries
+$$
+(h_n)_{ij} = \frac{1}{i+j-1}.
+$$
+These matrices are notoriously ill-conditioned. For example, $\kappa_2(H_5) \approx 4.8\times 10^5$, and $\kappa_2(H_{20})\approx 2.5\times 10^{28}$. Solving an associated linear system in floating-point arithmetic would be hopeless.
+:::
+
+A practical limitation of the condition number is that you have to know $A^{-1}$ before you can calculate it. We can always estimate $\|A^{-1}\|$ by taking some arbitrary vectors $\mathbf{x}$ and using
+$$
+\|A^{-1}\| \geq \frac{\|\mathbf{x}\|}{\|\mathbf{b}\|}.
+$$
+
+## Iterative methods
+
+For large systems, the ${\cal O}(n^3)$ cost of Gaussian elimination is prohibitive. Fortunately, many such systems that arise in practice are **sparse**, meaning that most of the entries of the matrix $A$ are zero. In this case, we can often use iterative algorithms to do better than ${\cal O}(n^3)$.
+
+In this course, we will only study algorithms for symmetric positive definite matrices. A matrix $A$ is called **symmetric positive definite** (or **SPD**) if $\mathbf{x}^\top A\mathbf{x}>0$ for every vector $\mathbf{x}\neq 0$.
+
+::: {.callout-note}
+Recall that a symmetric matrix has real eigenvalues. It is positive definite iff all of its eigenvalues are positive.
+:::
+
+::: {.eg}
+Show that the following matrix is SPD:
+$$
+A = \begin{pmatrix}
+3 & 1 & -1\\
+1 & 4 & 2\\
+-1 & 2 & 5
+\end{pmatrix}.
+$$
+With $\mathbf{x} = (x_1,x_2,x_3)^\top$, we have
+$$
+\begin{aligned}
+\mathbf{x}^\top A\mathbf{x} &= 3x_1^2 + 4x_2^2 + 5x_3^2 + 2x_1x_2 + 4x_2x_3 - 2x_1x_3\\
+&= x_1^2 + x_2^2 + 2x_3^2 + (x_1+x_2)^2 + (x_1-x_3)^2 + 2(x_2+x_3)^2.
+\end{aligned}
+$$
+This is positive for any non-zero vector $\mathbf{x}\in\mathbb{R}^3$, so $A$ is SPD (eigenvalues $1.29$, $4.14$ and $6.57$).
+:::
+
+If $A$ is SPD, then solving $A\mathbf{x} = \mathbf{b}$ is equivalent to minimizing the quadratic functional
+$$
+f:\mathbb{R}^n \to \mathbb{R}, \qquad f(\mathbf{x}) = \tfrac12\mathbf{x}^\top A\mathbf{x} -\mathbf{b}^\top\mathbf{x}.
+$$
+When $A$ is SPD, this functional behaves like a U-shaped parabola, and has a unique finite global minimizer $\mathbf{x}_*$ such that $f(\mathbf{x}_*)< f(\mathbf{x})$ for all $\mathbf{x}\in\mathbb{R}^n$, $\mathbf{x}\neq\mathbf{x}_*$.
+
+To find $\mathbf{x}_*$, we need to set $\nabla f = \boldsymbol{0}$. We have
+$$
+f(\mathbf{x}) = \tfrac12\sum_{i=1}^n x_i\left(\sum_{j=1}^n a_{ij}x_j\right) - \sum_{j=1}^nb_jx_j
+$$
+so
+$$
+\begin{aligned}
+\frac{\partial f}{\partial x_k} &= \tfrac12\left(\sum_{i=1}^n x_ia_{ik} + \sum_{j=1}^na_{kj}x_j \right) - b_k \\ &= \tfrac12\left(\sum_{i=1}^n a_{ki}x_i + \sum_{j=1}^na_{kj}x_j \right) - b_k = \sum_{j=1}^na_{kj}x_j - b_k.
+\end{aligned}
+$$
+In the penultimate step we used the symmetry of $A$ to write $a_{ik}=a_{ki}$. It follows that
+$$
+\nabla f = A\mathbf{x} - \mathbf{b},
+$$
+so locating the minimum of $f(\mathbf{x})$ is indeed equivalent to solving $A\mathbf{x}=\mathbf{b}$.
+
+::: {.callout-note}
+Minimizing functions is a vast sub-field of numerical analysis known as **optimization**. We will only cover this specific case.
+:::
+
+A popular class of methods for optimization are **line search** methods, where at each iteration the search is restricted to a single **search direction** $\mathbf{d}_k$. The iteration takes the form
+$$
+\mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k\mathbf{d}_k.
+$$
+The **step size** $\alpha_k$ is chosen by minimizing $f(\mathbf{x})$ along the line $\mathbf{x} = \mathbf{x}_k + \alpha\mathbf{d}_k$. For our functional above, we have
+$$
+\begin{aligned}
+f(\mathbf{x}_{k} + \alpha\mathbf{d}_{k}) &= \big(\tfrac12\mathbf{d}_{k}^\top A\mathbf{d}_{k}\big)\alpha^2 + \mathbf{d}_{k}^\top\big(  A\mathbf{x}_k - \mathbf{b} \big)\alpha + \tfrac12\mathbf{x}_k^\top A\mathbf{x}_k - \mathbf{b}^\top\mathbf{x}_k.
+\end{aligned}
+$$
+This is a quadratic in $\alpha$, and the coefficient of $\alpha^2$ is positive because $A$ is positive definite. It is therefore a U-shaped parabola and achieves its minimum when
+$$
+\frac{\partial f}{\partial\alpha} = \mathbf{d}_k^\top A\mathbf{d}_k \alpha + \mathbf{d}_k^\top\big(A\mathbf{x}_k - \mathbf{b}\big) = 0.
+$$
+Defining the **residual** $\mathbf{r}_k := A\mathbf{x}_k - \mathbf{b}$, we see that the desired choice of step size is
+$$
+\alpha_k = - \frac{\mathbf{d}_k^\top\mathbf{r}_k}{\mathbf{d}_k^\top A\mathbf{d}_k}.
+$$
+
+Different line search methods differ in how the search direction $\mathbf{d}_k$ is chosen at each iteration. For example, the **method of steepest descent** sets
+$$
+\mathbf{d}_k = - \nabla f (\mathbf{x}_k) = -\mathbf{r}_k,
+$$
+where we have remembered the gradient formula above.
+
+::: {.eg}
+Use the method of steepest descent to solve the system
+$$
+\begin{pmatrix}
+3 & 2\\ 2 & 6
+\end{pmatrix}\begin{pmatrix}
+x_1\\ x_2
+\end{pmatrix}=\begin{pmatrix}
+2\\ -8
+\end{pmatrix}.
+$$
+Starting from $\mathbf{x}_0=(-2,-2)^\top$, we get
+$$
+\begin{aligned}
+\mathbf{d}_0 = \mathbf{b} - A\mathbf{x}_0 = \begin{pmatrix}
+12\\ 8
+\end{pmatrix} &\implies \alpha_0 = \frac{\mathbf{d}_0^\top\mathbf{d}_0}{\mathbf{d}_0^\top A\mathbf{d}_0} = \frac{208}{1200} \\ &\implies \mathbf{x}_1 = \mathbf{x}_0 + \alpha_0\mathbf{d}_0 \approx \begin{pmatrix}
+0.08\\ -0.613
+\end{pmatrix}.
+\end{aligned}
+$$
+Continuing the iteration, $\mathbf{x}_k$ proceeds towards the solution $(2,-2)^\top$ as illustrated below. The coloured contours show the value of $f(x_1,x_2)$.
+
+![](im/linear_steepest.png){width=70% fig-align="center"}
+:::
+
+Unfortunately, the method of steepest descent can be slow to converge. In the **conjugate gradient method**, we still take $\mathbf{d}_0=-\mathbf{r}_0$, but subsequent search directions $\mathbf{d}_k$ are chosen to be **$A$-conjugate**, meaning that
+$$
+\mathbf{d}_{k+1}^\top A \mathbf{d}_k = 0.
+$$
+This means that minimization in one direction does not undo the previous minimizations.
+
+In particular, we construct $\mathbf{d}_{k+1}$ by writing
+$$
+\mathbf{d}_{k+1} = -\mathbf{r}_{k+1} + \beta_k\mathbf{d}_k,
+$$
+then choosing the scalar $\beta_k$ such that $\mathbf{d}_{k+1}^\top A\mathbf{d}_k = 0$. This gives
+$$
+0 = \big(-\mathbf{r}_{k+1} + \beta_k\mathbf{d}_k\big)^\top A \mathbf{d}_{k} = -\mathbf{r}_{k+1}^\top A \mathbf{d}_k + \beta_k\mathbf{d}_k^\top A \mathbf{d}_k
+$$
+and hence
+$$
+\beta_k = \frac{\mathbf{r}_{k+1}^\top A\mathbf{d}_k}{\mathbf{d}_k^\top A \mathbf{d}_k}.
+$$
+
+Thus we get the basic conjugate gradient algorithm.
+
+::: {.algorithm title="Conjugate gradient method"}
+Start with an initial guess $\mathbf{x}_0$ and initial search direction $\mathbf{d}_0 = -\mathbf{r}_0 = \mathbf{b} - A\mathbf{x}_0$. For each $k=0,1,\ldots$, do the following:
+
+1. Compute step size
+   $$
+   \alpha_k = -\frac{\mathbf{d}_k^\top\mathbf{r}_k}{\mathbf{d}_k^\top A \mathbf{d}_k}.
+   $$
+
+2. Compute $\mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k\mathbf{d}_k$.
+
+3. Compute residual $\mathbf{r}_{k+1} = A\mathbf{x}_{k+1} - \mathbf{b}$.
+
+4. If $\|\mathbf{r}_{k+1}\| <$ tolerance, output $\mathbf{x}_{k+1}$ and stop.
+
+5. Determine new search direction
+   $$
+   \mathbf{d}_{k+1} = -\mathbf{r}_{k+1} + \beta_k\mathbf{d}_k \quad \textrm{where} \quad\beta_k = \frac{\mathbf{r}_{k+1}^\top A \mathbf{d}_k}{\mathbf{d}_k^\top A \mathbf{d}_k}.
+   $$
+:::
+
+::: {.eg}
+Solve our previous example with the conjugate gradient method.
+
+Starting with $\mathbf{x}_0=(-2,-2)^\top$, the first step is the same as in steepest descent, giving $\mathbf{x}_1 = (0.08, -0.613)^\top$. But then we take
+$$
+\mathbf{r}_1 = A\mathbf{x}_1 -\mathbf{b} = \begin{pmatrix}
+-2.99\\ 4.48
+\end{pmatrix}, \quad \beta_0 = \frac{\mathbf{r}_1^\top A\mathbf{d}_0}{\mathbf{d}_0^\top A\mathbf{d}_0} = 0.139, \quad \mathbf{d}_1 = -\mathbf{r}_1 + \beta_0\mathbf{d}_0 = \begin{pmatrix}
+4.66\\-3.36
+\end{pmatrix}.
+$$
+The second iteration then gives
+$$
+\alpha_1 = -\frac{\mathbf{d}_1^\top\mathbf{r}_1}{\mathbf{d}_1^\top A\mathbf{d}_1} = 0.412 \implies \mathbf{x}_2 = \mathbf{x}_1 + \alpha_1\mathbf{d}_1 = \begin{pmatrix}
+2\\-2
+\end{pmatrix}.
+$$
+This time there is no zig-zagging and the solution is reached in just two iterations:
+
+![](im/linear_cg.png){width=70% fig-align="center"}
+:::
+
+In exact arithmetic, the conjugate gradient method will always give the exact answer in $n$ iterations -- one way to see this is to use the following.
+
+::: {.theorem}
+The residuals $\mathbf{r}_k:=A\mathbf{x}_k - \mathbf{b}$ at each stage of the conjugate gradient method are mutually orthogonal, meaning $\mathbf{r}_j^\top \mathbf{r}_k = 0$ for $j=0,\ldots,k-1$.
+:::
+
+After $n$ iterations, the only residual vector that can be orthogonal to all of the previous ones is $\mathbf{r}_n=\boldsymbol{0}$, so $\mathbf{x}_n$ must be the exact solution.
+
+In practice, conjugate gradients is not competitive as a direct method. It is computationally intensive, and rounding errors can destroy the orthogonality, meaning that more than $n$ iterations may be required. Instead, its main use is for large sparse systems. For suitable matrices (perhaps after **preconditioning**), it can converge very rapidly.
+
+We can save computation by using the alternative formulae
+$$
+\mathbf{r}_{k+1} = \mathbf{r}_k + \alpha_k A\mathbf{d}_k, \quad
+\alpha_k = \frac{\mathbf{r}_k^\top \mathbf{r}_k}{\mathbf{d}_k^\top A \mathbf{d}_k}, \quad
+\beta_k = \frac{\mathbf{r}_{k+1}^\top\mathbf{r}_{k+1}}{\mathbf{r}_k^\top\mathbf{r}_k}.
+$$
+With these formulae, each iteration requires only one matrix-vector product, two vector-vector products, and three vector additions. Compare this to the basic algorithm above which requires two matrix-vector products, four vector-vector products and three vector additions.
+
+## Knowledge checklist {.unnumbered}
+
+**Key topics:**
+
+1. Integer and floating point representations of real numbers on computers.
+
+2. Overflow, underflow and loss of significance.
+
+**Key skills:**
+
+- Understanding and distinguishing integer, fixed-point, and floating-point representations.
+
+- Analyzing the effects of rounding and machine epsilon in calculations.
+
+- Diagnosing and managing rounding errors, overflow, and underflow.
+
