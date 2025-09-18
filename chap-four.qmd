@@ -328,9 +328,9 @@ $$
 ::: {.theorem}
 Let $f$ be continuous on $[a,b]$ with $n+1$ continuous derivatives on $(a,b)$. Then the Newton-Cotes formula above satisfies the error bound
 $$
-\begin{multline}
-\big|I(f) - I_n(f)\big| \leq \\ \frac{\max_{\xi\in[a,b]}|f^{(n+1)}(\xi)|}{(n+1)!}\int_a^b\big|(x-x_0)(x-x_1)\cdots(x-x_{n}) \big|\,\mathrm{d}x.
-\end{multline}
+\begin{aligned}
+&\big|I(f) - I_n(f)\big| \leq \\ &\frac{\max_{\xi\in[a,b]}|f^{(n+1)}(\xi)|}{(n+1)!}\int_a^b\big|(x-x_0)(x-x_1)\cdots(x-x_{n}) \big|\,\mathrm{d}x.
+\end{aligned}
 $$
 :::
 

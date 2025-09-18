@@ -3893,6 +3893,10 @@ background: #68246D;
 --color1: #e7efea;
 --color2: #53b57b;
 }
+.doit {
+--color1: #e7efea;
+--color2: #53b57b;
+}
 .theorem {
 --color1: #fcebee;
 --color2: #ea3342;
@@ -3900,10 +3904,6 @@ background: #68246D;
 .proof {
 --color1: #fcebee;
 --color2: #ea3342;
-}
-.doit {
---color1: #e7efea;
---color2: #53b57b;
 }
 .eg {
 --color1: #E7D6EA;
@@ -4557,9 +4557,9 @@ I_1(f) = \sigma_0f(a) + \sigma_1f(b) = \frac{b-a}{2}\big(f(a) + f(b)\big).
 </div>
 <div id="theorem-4.1" class="theorem">
 <p></p><details class="theorem fbx-simplebox fbx-default" open=""><summary><strong>Theorem 4.1</strong></summary><div>Let <span class="math inline">\(f\)</span> be continuous on <span class="math inline">\([a,b]\)</span> with <span class="math inline">\(n+1\)</span> continuous derivatives on <span class="math inline">\((a,b)\)</span>. Then the Newton-Cotes formula above satisfies the error bound <span class="math display">\[
-\begin{multline}
-\big|I(f) - I_n(f)\big| \leq \\ \frac{\max_{\xi\in[a,b]}|f^{(n+1)}(\xi)|}{(n+1)!}\int_a^b\big|(x-x_0)(x-x_1)\cdots(x-x_{n}) \big|\,\mathrm{d}x.
-\end{multline}
+\begin{aligned}
+&amp;\big|I(f) - I_n(f)\big| \leq \\ &amp;\frac{\max_{\xi\in[a,b]}|f^{(n+1)}(\xi)|}{(n+1)!}\int_a^b\big|(x-x_0)(x-x_1)\cdots(x-x_{n}) \big|\,\mathrm{d}x.
+\end{aligned}
 \]</span><p></p>
 </div></details>
 </div>
