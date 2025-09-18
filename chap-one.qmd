@@ -1,12 +1,14 @@
 ---
-title: Floating Point Arithmetic
+title: Numerical and Symbolic Computing
 ---
+
+
 
 The goal of this chapter is to explore and begin to answer the following question:
 
-> *How do we represent numbers on a computer?*
+> *How do we represent numbers and symbolic expressions on a computer?*
 
-Integers can be represented exactly, up to some maximum size.
+Integers and arithmetic operations on computers can be represented exactly, up to some maximum size.
 
 ::: {.callout-example title="64-bit integers"}
 If 1 bit (binary digit) is used to store the sign $\pm$, the largest possible number is
@@ -15,7 +17,7 @@ $$
 $$
 :::
 
-In contrast to the integers, only a subset of real numbers within any given interval can be represented exactly.
+In contrast to the integers, only a subset of real numbers within any given interval can be represented exactly. 
 
 ::: {.callout-note}
 Some modern languages (such as Python) automatically promote large integers to arbitrary precision ("long"), but most statically-typed languages (C, Java, Matlab, etc.) do not; an **overflow** will occur and the type remains fixed.
@@ -25,9 +27,11 @@ Some modern languages (such as Python) automatically promote large integers to a
 A statically typed language is one in which the type of every variable is determined before the program runs.
 :::
 
+Symbolic expressions representing a range of mathematical objects and operations can also be manipulated exactly using [Computer Algebra Systems (CAS)](https://en.wikipedia.org/wiki/Computer_algebra_system), although such operations are almost always much slower than numerical computations using integer or real-valued numbers. These dualities between numerical and symbolic computation will be a key theme throughout the course.
+
 ## Fixed-point numbers
 
-In everyday life, we tend to use a **fixed point** representation
+In everyday life, we tend to use a **fixed point** representation of real numbers:
 $$
 x = \pm (d_1d_2\cdots d_{k-1}.d_k\cdots d_n)_\beta, \quad \textrm{where} \quad d_1,\ldots,d_n\in\{0,1,\ldots,\beta - 1\}.
 $$
@@ -68,14 +72,14 @@ The smallest non-zero number in this system is $(0.1)_22^{-1021} \approx 2.225\t
 :::
 
 ::: {.callout-note}
-IEEE stands for Institute of Electrical and Electronics Engineers. Matlab uses the IEEE 754 standard for floating point arithmetic. The automatic 1 is sometimes called the "hidden bit". The exponent bias avoids the need to store the sign of the exponent.
+IEEE stands for Institute of Electrical and Electronics Engineers. Matlab uses the [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) standard for floating point arithmetic. The automatic 1 is sometimes called the "hidden bit". The exponent bias avoids the need to store the sign of the exponent.
 :::
 
 Numbers outside the finite set $F$ cannot be represented exactly. If a calculation falls below the lower non-zero limit (in absolute value), it is called **underflow**, and usually set to 0. If it falls above the upper limit, it is called **overflow**, and usually results in a floating-point exception.
 
 
 ::: {.callout-note}
-**Ariane 5 rocket failure (1996):** The maiden flight ended in failure. Only 40 seconds after initiation, at altitude 3700m, the launcher veered off course and exploded. The cause was a software exception during data conversion from a 64-bit float to a 16-bit integer. The converted number was too large to be represented, causing an exception.
+**Ariane 5 rocket failure (1996):** The maiden flight ended in failure. Only 40 seconds after initiation, at altitude 3700m, the launcher veered off course and exploded. The cause was a software exception during data conversion from a 64-bit float to a 16-bit integer. The converted number was too large to be represented, causing an exception. 
 :::
 
 ::: {.callout-note}
@@ -120,7 +124,7 @@ $$
 $$
 
 ::: {.callout-note}
-Relative errors are often more useful because they are scale invariant. E.g., an error of 1 hour is irrelevant in estimating the age of this lecture theatre, but catastrophic in timing your arrival at the lecture.
+Relative errors are often more useful because they are scale invariant. E.g., an error of 1 hour is irrelevant in estimating the age of a lecture theatre, but catastrophic in timing your arrival at the lecture.
 :::
 
 Now $x$ may be written as $x=(0.d_1d_2\cdots)_\beta\beta^e$ for some $e\in[e_{\rm min},e_{\rm max}]$, but the fraction will not terminate after $m$ digits if $x\notin F$. However, this fraction will differ from that of $\mathrm{fl}(x)$ by at most $\tfrac12\beta^{-m}$, so
@@ -228,6 +232,10 @@ $$
 
 The moral of the story is that sometimes care is needed to ensure that we carry out a calculation accurately and as intended!
 
+## Symbolic computing
+
+Symbolic computations require different data types from numerical ones; in MATLAB we can use the [Symbolic Math Toolbox](https://uk.mathworks.com/help/symbolic/symbolic-computations-in-matlab.html). In the following chapters, we will compare symbolic and numerical approaches to solving mathematical problems. One key difference is that symbolic computations are exact, but much more expensive to scale up to solve larger problems; for example, we will tackle numerical problems involving matrices of size $10^4 \times 10^4$ or larger, which would not be possible to successfully manipulate symbolically on a modern computer.
+
 ## Knowledge checklist {.unnumbered}
 
 **Key topics:**
@@ -235,6 +243,8 @@ The moral of the story is that sometimes care is needed to ensure that we carry 
 1. Integer and floating point representations of real numbers on computers.
 
 2. Overflow, underflow and loss of significance.
+
+3. Symbolic and numerical representations.
 
 **Key skills:**
 
