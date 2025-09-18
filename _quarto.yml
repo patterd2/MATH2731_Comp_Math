@@ -13,6 +13,7 @@ book:
     - chap-one.qmd
     - chap-two.qmd
     - chap-three.qmd
+    - chap-four.qmd
     
 
 format:

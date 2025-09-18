@@ -1,0 +1,673 @@
+---
+title: Calculus
+---
+
+## Differentiation {#s-diff}
+
+> *How do we differentiate functions numerically?*
+
+### Basics
+
+The definition of the derivative as
+$$
+f'(x_0) = \lim_{h\to 0}\frac{f(x_0+h) - f(x_0)}{h},
+$$
+suggests an obvious approximation: just pick some small finite $h$ to give the estimate
+$$
+f'(x_0) \approx \frac{f(x_0 + h) - f(x_0)}{h}.
+$$
+For $h>0$ this is called a **forward difference** (and, for $h<0$, a **backward difference**). It is an example of a **finite-difference formula**.
+
+![](im/diff.jpg){width=60% fig-align="center"}
+
+Of course, what we are doing with the forward difference is approximating $f'(x_0)$ by the slope of the linear interpolant for $f$ at the nodes $x_0$ and $x_1=x_0 + h$. So we could also have derived the forward difference formula by starting with the Lagrange form of the interpolating polynomial,
+$$
+f(x) = \frac{x-x_1}{x_0-x_1}f(x_0) + \frac{x-x_0}{x_1-x_0}f(x_1) + \frac{f''(\xi)}{2}(x-x_0)(x-x_1)
+$$
+for some $\xi\in[x_0,x_1]$. Differentiating -- and remembering that $\xi$ depends on $x$, so that we need to use the chain rule -- we get
+$$
+\begin{aligned}
+f'(x) &= \frac{1}{x_0-x_1}f(x_0) + \frac{1}{x_1-x_0}f(x_1) + \frac{f''(\xi)}{2}(2x - x_0 - x_1) \\
+&\quad + \frac{f'''(\xi)}{2}\left(\frac{\mathrm{d}\xi}{\mathrm{d}x}\right)(x-x_0)(x-x_1),\\
+&\implies f'(x_0) = \frac{f(x_1) - f(x_0)}{x_1-x_0} + f''(\xi)\frac{x_0-x_1}{2}.
+\end{aligned}
+$$
+Equivalently,
+$$
+f'(x_0) = \frac{f(x_0+h)-f(x_0)}{h} - f''(\xi)\frac{h}{2}.
+$$
+This shows that the **truncation error** for our forward difference approximation is $-f''(\xi)h/2$, for some $\xi\in[x_0,x_0+h]$. In other words, a smaller interval or a less "wiggly" function will lead to a better estimate, as you would expect.
+
+Another way to estimate the truncation error is to use Taylor's theorem, which tells us that
+$$
+f(x_0+h) = f(x_0) + h f'(x_0) + h^2\frac{f''(\xi)}{2},
+$$
+for some $\xi$ between $x_0$ and $x_0+h$. Rearranging this will give back the forward difference error formula.
+
+::: {.eg}
+## Derivative of $f(x)=\log(x)$ at $x_0=2$.
+
+Using a forward-difference, we get the following sequence of approximations:
+
+| $h$   | Forward difference | Truncation error |
+|-------|-------------------|------------------|
+| 1     | 0.405465          | 0.0945349        |
+| 0.1   | 0.487902          | 0.0120984        |
+| 0.01  | 0.498754          | 0.00124585       |
+| 0.001 | 0.499875          | 0.000124958      |
+
+Indeed the error is linear in $h$, and we estimate that it is approximately $0.125 h$ when $h$ is small. This agrees with the error formula above, since $f''(x) = -x^{-2}$, so we expect $-f''(\xi)/2\approx \tfrac18$.
+:::
+
+Since the error is linearly proportional to $h$, the approximation is called **linear**, or **first order**.
+
+### Higher-order finite differences
+
+To get a higher-order approximation, we can differentiate a higher degree interpolating polynomial. This means that we need more nodes.
+
+::: {.eg}
+### Central difference
+
+Take three nodes $x_0$, $x_1=x_0+h$, and $x_2=x_0+2h$. Then the Lagrange form of the interpolating polynomial is
+$$
+\begin{aligned}
+f(x) &= \frac{(x-x_1)(x-x_2)}{(x_0-x_1)(x_0-x_2)}f(x_0) + \frac{(x-x_0)(x-x_2)}{(x_1-x_0)(x_1-x_2)}f(x_1)\\ &+ \frac{(x-x_0)(x-x_1)}{(x_2-x_0)(x_2-x_1)}f(x_2) \\
+&+ \frac{f'''(\xi)}{3!}(x-x_0)(x-x_1)(x-x_2).
+\end{aligned}
+$$
+Differentiating, we get
+$$
+\begin{aligned}
+f'(x) &= \frac{2x - x_1 - x_2}{(x_0-x_1)(x_0-x_2)}f(x_0)\\ &+ \frac{2x - x_0 - x_2}{(x_1-x_0)(x_1-x_2)}f(x_1)\\ &+ \frac{2x-x_0-x_1}{(x_2-x_0)(x_2-x_1)}f(x_2)\\
+&+ \frac{f'''(\xi)}{6}\Big((x-x_1)(x-x_2) + (x-x_0)(x-x_2) + (x-x_0)(x-x_1) \Big) \\
+&+ \frac{f^{(4)}(\xi)}{6}\left(\frac{\mathrm{d}\xi}{\mathrm{d}x}\right)(x-x_0)(x-x_1)(x-x_2).
+\end{aligned}
+$$
+Now substitute in $x=x_1$ to evaluate this at the central point:
+$$
+\begin{aligned}
+f'(x_1) &= \frac{x_1 - x_2}{(x_0-x_1)(x_0-x_2)}f(x_0)\\ &+ \frac{2x_1 - x_0 - x_2}{(x_1-x_0)(x_1-x_2)}f(x_1) + \frac{x_1-x_0}{(x_2-x_0)(x_2-x_1)}f(x_2)\\
+&+ \frac{f'''(\xi)}{6}(x_1-x_0)(x_1-x_2),\\
+&= \frac{-h}{2h^2}f(x_0) + 0 + \frac{h}{2h^2}f(x_2) - \frac{f'''(\xi)}{6}h^2\\
+&= \frac{f(x_1+h) - f(x_1-h)}{2h} - \frac{f'''(\xi)}{6}h^2.
+\end{aligned}
+$$
+This is called a **central difference** approximation for $f'(x_1)$, and is frequently used in practice.
+:::
+
+To see the quadratic behaviour of the truncation error, go back to our earlier example.
+
+::: {.eg}
+### Derivative of $f(x)=\log(x)$ at $x=2$
+
+| $h$   | Forward difference | Truncation error | Central difference | Truncation error |
+|-------|-------------------|------------------|-------------------|------------------|
+| 1     | 0.405465          | 0.0945349        | 0.549306          | -0.0493061       |
+| 0.1   | 0.487902          | 0.0120984        | 0.500417          | -0.000417293     |
+| 0.01  | 0.498754          | 0.00124585       | 0.500004          | -4.16673e-06     |
+| 0.001 | 0.499875          | 0.000124958      | 0.500000          | -4.16666e-08     |
+
+The truncation error for the central difference is about $0.04h^2$, which agrees with the formula since $f'''(\xi)\approx 2/2^3 = \tfrac14$ when $h$ is small.
+:::
+
+### Rounding error
+
+The problem with numerical differentiation is that it involves subtraction of nearly-equal numbers. As $h$ gets smaller, the problem gets worse.
+
+To quantify this for the central difference, suppose that we have the correctly rounded values of $f(x_1\pm h)$, so that
+$$
+\text{fl}[f(x_1+h)] = (1+\delta_1)f(x_1+h),\qquad
+\text{fl}[f(x_1-h)]=(1+\delta_2)f(x_1-h),
+$$
+where $|\delta_1|,|\delta_2|\leq \epsilon_{\rm M}$. Ignoring the rounding error in dividing by $2h$, we then have that
+$$
+\begin{aligned}
+&\left| f'(x_1) - \frac{\text{fl}[f(x_1+h)] - \text{fl}[f(x_1-h)]}{2h}\right| \\ = &\left| - \frac{f'''(\xi)}{6}h^2 - \frac{\delta_1f(x_1+h) - \delta_2f(x_1-h)}{2h}\right|\\
+\leq &\frac{|f'''(\xi)|}{6}h^2 + \epsilon_{\rm M}\frac{|f(x_1+h)| + |f(x_1-h)|}{2h}\\
+\leq &\frac{h^2}{6}\max_{[x_1-h, x_1+h]} |f'''(\xi)| + \frac{\epsilon_{\rm M}}{h}\max_{[x_1-h, x_1+h]}|f(\xi)|.
+\end{aligned}
+$$
+The first term is the truncation error, which tends to zero as $h\to 0$. But the second term is the rounding error, which tends to infinity as $h\to 0$.
+
+::: {.eg}
+### Derivative of $f(x)=\log(x)$ at $x=2$ again
+
+Here is a comparison of the terms in the inequality above (the red points are the left-hand side), shown on logarithmic scales, using $\xi=2$ to estimate the maxima.
+
+![](im/diffrounding.png){width=60% fig-align="center"}
+
+You see that once $h$ is small enough, rounding error takes over and the error in the computed derivative starts to increase again.
+:::
+
+### Richardson extrapolation
+
+Finding higher-order formulae by differentiating Lagrange polynomials is tedious, and there is a simpler trick to obtain higher-order formulae, called **Richardson extrapolation**.
+
+We begin from the central-difference formula. Since we will use formulae with different $h$, let us define the notation
+$$
+D_h := \frac{f(x_1+h) - f(x_1-h)}{2h}.
+$$
+
+Now use Taylor's theorem to expand more terms in the truncation error:
+$$
+\begin{aligned}
+f(x_1 \pm h) = f(x_1) &\pm f'(x_1)h + \frac{f''(x_1)}{2}h^2 \pm \frac{f'''(x_1)}{3!}h^3 \\ &+ \frac{f^{(4)}(x_1)}{4!}h^4 \pm \frac{f^{(5)}(x_1)}{5!}h^5 + {\cal O}(h^6).
+\end{aligned}
+$$
+Substituting into the formula for $D_h$, the even powers of $h$ cancel and we get
+$$
+\begin{aligned}
+D_h &= \frac{1}{2h}\Big(2f'(x_1)h + 2f'''(x_1)\frac{h^3}{6} +   2f^{(5)}(x_1)\frac{h^5}{120} + {\cal O}(h^7)  \Big)\\
+&=f'(x_1) + f'''(x_1)\frac{h^2}{6} + f^{(5)}(x_1)\frac{h^4}{120} + {\cal O}(h^6).
+\end{aligned}
+$$
+
+::: {.callout-note}
+You may not have seen the **big-Oh notation**. When we write $f(x) = {\cal O}(g(x))$, we mean
+$$
+\lim_{x\to 0}\frac{|f(x)|}{|g(x)|} \leq M < \infty.
+$$
+So the error is ${\cal O}(h^6)$ if it gets smaller at least as fast as $h^6$ as $h\to 0$ (essentially, it contains no powers of $h$ less than 6).
+:::
+
+The leading term in the error here has the same coefficient $h^2/6$ as the truncation error we derived earlier, although we have now expanded the error to higher powers of $h$.
+
+The trick is to apply the same formula with different step-sizes, typically $h$ and $h/2$:
+$$
+\begin{aligned}
+D_h &= f'(x_1) + f'''(x_1)\frac{h^2}{6} + f^{(5)}(x_1)\frac{h^4}{120} + {\cal O}(h^6),\\
+D_{h/2} &= f'(x_1) + f'''(x_1)\frac{h^2}{2^2(6)} + f^{(5)}(x_1)\frac{h^4}{2^4(120)} + {\cal O}(h^6).
+\end{aligned}
+$$
+We can then eliminate the $h^2$ term by simple algebra:
+$$
+\begin{aligned}
+D_h - 2^2D_{h/2} =& -3f'(x_1) + \left(1 - \frac{2^2}{2^4}\right)f^{(5)}(x_1)\frac{h^4}{120} + {\cal O}(h^6),\\
+\implies \quad D_h^{(1)} :=& \frac{2^2D_{h/2} - D_h}{3} = f'(x_1) - f^{(5)}(x_1)\frac{h^4}{480} + {\cal O}(h^6).
+\end{aligned}
+$$
+The new formula $D_h^{(1)}$ is 4th-order accurate.
+
+::: {.eg}
+#### Derivative of $f(x)=\log(x)$ at $x=2$ (central difference).
+
+| $h$   | $D_h$         | Error         | $D_h^{(1)}$    | Error         |
+|-------|---------------|--------------|----------------|--------------|
+| 1.0   | 0.5493061443  | 0.04930614433| 0.4979987836   | 0.00200121642|
+| 0.1   | 0.5004172928  | 0.00041729278| 0.4999998434   | 1.56599487e-07|
+| 0.01  | 0.5000041667  | 4.16672916e-06| 0.5000000000   | 1.56388791e-11|
+| 0.001 | 0.5000000417  | 4.16666151e-08| 0.5000000000   | 9.29256672e-14|
+:::
+
+In fact, we could have applied this **Richardson extrapolation** procedure without knowing the coefficients of the error series. If we have some general order-$n$ approximation
+$$
+D_h = f'(x) + Ch^n + {\cal O}(h^{n+1}),
+$$
+then we can always evaluate it with $h/2$ to get
+$$
+D_{h/2} = f'(x) + C\frac{h^n}{2^n} + {\cal O}(h^{n+1})
+$$
+and then eliminate the $h^n$ term to get a new approximation
+$$
+D_h^{(1)} := \frac{2^nD_{h/2} - D_h}{2^n - 1} = f'(x) + {\cal O}(h^{n+1}).
+$$
+
+::: {.callout-note}
+The technique is used not only in differentiation but also in **Romberg integration** and the **Bulirsch-Stoer method** for solving ODEs.
+:::
+
+::: {.callout-note}
+There is nothing special about taking $h/2$; we could have taken $h/3$ or even $2h$, and modified the formula accordingly. But $h/2$ is usually convenient.
+:::
+
+Furthermore, Richardson extrapolation can be applied iteratively. In other words, we can now combine $D_{h}^{(1)}$ and $D_{h/2}^{(1)}$ to get an even higher order approximation $D_h^{(2)}$, and so on.
+
+::: {.eg}
+#### Iterated Richardson extrapolation for central differences.
+
+From
+$$
+\begin{aligned}
+D_h^{(1)} &= f'(x_1) + C_1h^4 + {\cal O}(h^6),\\
+D_{h/2}^{(1)} &= f'(x_1) + C_1\frac{h^4}{2^4} + {\cal O}(h^6),
+\end{aligned}
+$$
+we can eliminate the $h^4$ term to get the 6th-order approximation
+$$
+D_h^{(2)} := \frac{2^4D_{h/2}^{(1)} - D_h^{(1)}}{2^4 - 1}.
+$$
+:::
+
+::: {.callout-note}
+Lewis Fry Richardson (1881--1953) was from Newcastle and an undergraduate there. He was the first person to apply mathematics (finite differences) to weather prediction, and was ahead of his time: in the absence of electronic computers, he estimated that 60,000 people would be needed to predict the next day's weather!
+:::
+
+## Numerical integration {#s-int}
+
+> *How do we calculate integrals numerically?*
+
+The definite integral
+$$
+I(f) := \int_a^b f(x)\,\mathrm{d}x
+$$
+can usually not be evaluated in closed form. To approximate it numerically, we can use a **quadrature formula**
+$$
+I_n(f) := \sum_{k=0}^n \sigma_k f(x_k),
+$$
+where $x_0,\ldots,x_n$ are a set of **nodes** and $\sigma_0,\ldots,\sigma_n$ are a set of corresponding **weights**.
+
+::: {.callout-note}
+The nodes are also known as **quadrature points** or **abscissas**, and the weights as **coefficients**.
+:::
+
+::: {.eg}
+### The trapezium rule
+
+$$
+I_1(f) = \frac{b-a}{2}\Big( f(a) + f(b) \Big).
+$$
+
+This is the quadrature formula above with $x_0=a$, $x_1=b$, $\sigma_0=\sigma_1=\tfrac12(b-a)$.
+
+For example, with $a=0$, $b=2$, $f(x)=\mathrm{e}^x$, we get
+$$
+I_1(f) = \frac{2 - 0}{2}\big(\mathrm{e}^0 + \mathrm{e}^{2}\big) = 8.389 \quad \textrm{to 4 s.f.}
+$$
+The exact answer is
+$$
+I(f) = \int_0^{2}\mathrm{e}^x\,\mathrm{d}x = \mathrm{e}^{2} - \mathrm{e}^0 = 6.389 \quad \textrm{to 4 s.f.}
+$$
+Graphically, $I_1(f)$ measures the area under the straight line that interpolates $f$ at the ends:
+
+![](im/trapz.png){width=60% fig-align="center"}
+:::
+
+### Newton-Cotes formulae
+
+We can derive a family of "interpolatory" quadrature formulae by integrating interpolating polynomials of different degrees. We will also get error estimates using the interpolation error theorem.
+
+Let $x_0, \ldots, x_n \in [a,b]$, where $x_0 < x_1 < \cdots < x_n$, be a set of $n+1$ nodes, and let $p_n\in{\cal P}_n$ be the polynomial that interpolates $f$ at these nodes. This may be written in Lagrange form as
+$$
+p_n(x) = \sum_{k=0}^n f(x_k)\ell_k(x), \quad \textrm{where}\quad \ell_k(x) = \prod_{\substack{j=0\\j\neq k}}^n\frac{x - x_j}{x_k - x_j}.
+$$
+To approximate $I(f)$, we integrate $p_n(x)$ to define the quadrature formula
+$$
+I_n(f) := \int_a^b\sum_{k=0}^n f(x_k)\ell_k(x)\,\mathrm{d}x = \sum_{k=0}^n f(x_k)\int_a^b\ell_k(x)\,\mathrm{d}x.
+$$
+In other words,
+$$
+I_n(f) := \sum_{k=0}^n\sigma_k f(x_k), \quad \textrm{where} \quad \sigma_k = \int_a^b\ell_k(x)\,\mathrm{d}x.
+$$
+When the nodes are equidistant, this is called a **Newton-Cotes formula**. If $x_0=a$ and $x_n=b$, it is called a **closed Newton-Cotes formula**.
+
+::: {.callout-note}
+An **open Newton-Cotes formula** has nodes $x_i = a + (i+1)h$ for $h = (b-a)/(n+2)$.
+:::
+
+::: {.eg}
+### Trapezium rule
+
+This is the closed Newton-Cotes formula with $n=1$. To see this, let $x_0=a$, $x_1=b$. Then
+$$
+\begin{aligned}
+\ell_0(x) = \frac{x-b}{a-b} \implies \sigma_0 &= \int_a^b\ell_0(x)\,\mathrm{d}x \\ &= \frac{1}{a-b}\int_a^b(x-b)\,\mathrm{d}x \\ &= \frac{1}{2(a-b)}(x-b)^2\big|_a^b \\ &= \frac{b-a}{2},
+\end{aligned}
+$$
+and
+$$
+\begin{aligned}
+\ell_1(x) = \frac{x-a}{b-a} \implies \sigma_1 &= \int_a^b\ell_1(x)\,\mathrm{d}x \\ &= \frac{1}{b-a}\int_a^b(x-a)\,\mathrm{d}x \\ &= \frac{1}{2(b-a)}(x-a)^2\big|_a^b = \frac{b-a}{2}.
+\end{aligned}
+$$
+This gives
+$$
+I_1(f) = \sigma_0f(a) + \sigma_1f(b) = \frac{b-a}{2}\big(f(a) + f(b)\big).
+$$
+:::
+
+::: {.theorem}
+Let $f$ be continuous on $[a,b]$ with $n+1$ continuous derivatives on $(a,b)$. Then the Newton-Cotes formula above satisfies the error bound
+$$
+\begin{multline}
+\big|I(f) - I_n(f)\big| \leq \\ \frac{\max_{\xi\in[a,b]}|f^{(n+1)}(\xi)|}{(n+1)!}\int_a^b\big|(x-x_0)(x-x_1)\cdots(x-x_{n}) \big|\,\mathrm{d}x.
+\end{multline}
+$$
+:::
+
+**Proof:**  
+First note that the error in the Newton-Cotes formula may be written
+$$
+\begin{aligned}
+\big|I(f) - I_n(f)\big| &= \left|\int_a^bf(x)\,\mathrm{d}x - \int_a^bp_n(x)\,\mathrm{d}x \right| \\
+&= \left| \int_a^b\big[f(x) - p_n(x)\big]\,\mathrm{d}x\right| \\
+&\leq \int_a^b\big|f(x) - p_n(x)\big|\,\mathrm{d}x.
+\end{aligned}
+$$
+Now recall the interpolation error theorem, which says that, for each $x\in[a,b]$, we can write
+$$
+f(x) - p_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-x_0)(x-x_1)\cdots(x-x_{n})
+$$
+for some $\xi\in(a,b)$. The theorem simply follows by inserting this into the inequality above. $\Box$
+
+::: {.eg}
+### Trapezium rule error
+
+Let $M_2 = \max_{\xi\in[a,b]}|f''(\xi)|$. Here the theorem reduces to
+$$
+\begin{aligned}
+\big|I(f) - I_1(f)\big| &\leq \frac{M_2}{(1+1)!}\int_a^b\big|(x-a)(x-b)\big|\,\mathrm{d}x \\ &= \frac{M_2}{2!}\int_a^b(x-a)(b-x)\,\mathrm{d}x \\ &= \frac{(b-a)^3}{12}M_2.
+\end{aligned}
+$$
+For our earlier example with $a=0$, $b=2$, $f(x)=\mathrm{e}^x$, the estimate gives
+$$
+\big|I(f) - I_1(f)\big| \leq \tfrac1{12}(2^3)\mathrm{e}^{2} \approx 4.926.
+$$
+This is an overestimate of the actual error which was $\approx 2.000$.
+:::
+
+The theorem suggests that the accuracy of $I_n$ is limited both by the smoothness of $f$ (outside our control) and by the location of the nodes $x_k$. If the nodes are free to be chosen, then we can use **Gaussian integration** (more to follow on that topic).
+
+::: {.callout-note}
+As with interpolation, taking a high $n$ is not usually a good idea. One can prove for the closed Newton-Cotes formula that
+$$
+\sum_{k=0}^n|\sigma_k| \to \infty \quad \textrm{as} \quad n\to\infty.
+$$
+This makes the quadrature vulnerable to rounding errors for large $n$.
+:::
+
+### Composite Newton-Cotes formulae
+
+Since the Newton-Cotes formulae are based on polynomial interpolation at equally-spaced points, the results do not converge as the number of nodes increases. A better way to improve accuracy is to divide the interval $[a,b]$ into $m$ subintervals $[x_{i-1},x_i]$ of equal length
+$$
+h := \frac{b-a}{m},
+$$
+and use a Newton-Cotes formula of small degree $n$ on each subinterval.
+
+::: {.eg}
+#### Composite trapezium rule
+
+Applying the trapezium rule $I_1(f)$ on each subinterval gives
+$$
+\begin{aligned}
+C_{1,m}(f) &= \frac{h}{2}\left[f(x_0) + f(x_1) + f(x_1) + f(x_2) + \ldots + f(x_{m-1}) + f(x_m) \right],\\
+&= h\left[\tfrac12 f(x_0) + f(x_1) + f(x_2) + \ldots + f(x_{m-1}) + \tfrac12 f(x_m) \right].
+\end{aligned}
+$$
+We are effectively integrating a piecewise-linear approximation of $f(x)$; here we show $m=3$ for our test problem $f(x)=\mathrm{e}^x$ on $[0,2]$:
+
+![](im/comptrapz.png){width=75% fig-align="center"}
+
+Look at what happens as we increase $m$ for our test problem:
+
+| $m$  | $h$     | $C_{1,m}(f)$ | $|I(f) - C_{1,m}(f)|$ |
+|------|---------|--------------|-----------------------|
+| 1    | 2       | 8.389        | 2.000                 |
+| 2    | 1       | 6.912        | 0.524                 |
+| 4    | 0.5     | 6.522        | 0.133                 |
+| 8    | 0.25    | 6.422        | 0.033                 |
+| 16   | 0.125   | 6.397        | 0.008                 |
+| 32   | 0.0625  | 6.391        | 0.002                 |
+
+When we halve the sub-interval $h$, the error goes down by a factor $4$, suggesting that we have quadratic convergence, i.e., ${\cal O}(h^2)$.
+
+To show this theoretically, we can apply the Newton-Cotes error theorem in each subinterval. In $[x_{i-1},x_i]$ we have
+$$
+\big|I(f) - I_1(f)\big| \leq \frac{\max_{\xi\in[x_{i-1},x_i]}|f''(\xi)|}{2!}\int_{x_{i-1}}^{x_i}\big|(x-x_{i-1})(x-x_i)\big|\,\mathrm{d}x
+$$
+Note that
+$$
+\begin{aligned}
+\int_{x_{i-1}}^{x_i}\big|(x-x_{i-1})(x-x_i)\big|\,\mathrm{d}x &= \int_{x_{i-1}}^{x_i}(x-x_{i-1})(x_i-x)\,\mathrm{d}x \\
+&= \int_{x_{i-1}}^{x_i}\big[-x^2 + (x_{i-1} + x_i)x - x_{i-1}x_i\big]\,\mathrm{d}x\\
+&= \big[-\tfrac13x^3 + \tfrac12(x_{i-1}+x_i)x^2 - x_{i-1}x_ix\big]_{x_{i-1}}^{x_i} \\
+&= \tfrac16 x_{i}^3 - \tfrac12x_{i-1}x_i^2 + \tfrac12x_{i-1}^2x_i - \tfrac16x_{i-1}^3\\
+&= \tfrac16(x_i - x_{i-1})^3 = \tfrac16 h^3.
+\end{aligned}
+$$
+So overall
+$$
+\begin{aligned}
+\big| I(f) - C_{1,m}(f) \big| &\leq \tfrac12 \max_i\left(\max_{\xi\in[x_{i-1},x_i]}|f''(\xi)|\right) m\frac{h^3}{6}\\
+  &= \frac{mh^3}{12}\max_{\xi\in[a,b]}|f''(\xi)| =  \frac{b-a}{12}h^2\max_{\xi\in[a,b]}|f''(\xi)|.
+ \end{aligned}
+$$
+As long as $f$ is sufficiently smooth, this shows that the composite trapezium rule will converge as $m\to\infty$. Moreover, the convergence will be ${\cal O}(h^2)$.
+:::
+
+### Exactness
+
+From the Newton-Cotes error theorem, we see that the Newton-Cotes formula $I_n(f)$ will give the exact answer if $f^{(n+1)}=0$. In other words, it will be exact if $f \in{\cal P}_n$.
+
+::: {.eg}
+The trapezium rule $I_1(f)$ is exact for all linear polynomials $f\in{\cal P}_1$.
+:::
+
+The **degree of exactness** of a quadrature formula is the largest integer $n$ for which the formula is exact for all polynomials in ${\cal P}_n$.
+
+To check whether a quadrature formula has degree of exactness $n$, it suffices to check whether it is exact for the basis $1$, $x$, $x^2, \ldots, x^n$.
+
+::: {.eg}
+#### Simpson's rule
+
+This is the $n=2$ closed Newton-Cotes formula
+$$
+I_2(f) = \frac{b-a}{6}\left[f(a) + 4f\left(\frac{a+b}{2}\right) + f(b)\right],
+$$
+derived by integrating a quadratic interpolating polynomial. Let us find its degree of exactness:
+$$
+\begin{aligned}
+I(1) &= \int_a^b\,\mathrm{d}x = (b-a), \\
+I_2(1) &= \frac{b-a}{6}[1 + 4 + 1] = b-a = I(1),\\
+I(x) &= \int_a^b x\,\mathrm{d}x = \frac{b^2-a^2}{2}, \\
+I_2(x) &= \frac{b-a}{6}\left[a + 2(a+b) + b\right] = \frac{(b-a)(b+a)}{2} = I(x),\\
+I(x^2) &= \int_a^b x^2\,\mathrm{d}x = \frac{b^3 - a^3}{3}, \\
+I_2(x^2) &= \frac{b-a}{6}\left[a^2 + (a+b)^2 + b^2\right] = \frac{2(b^3 - a^3)}{6} = I(x^2),\\
+I(x^3) &= \int_a^b x^3\,\mathrm{d}x = \frac{b^4 - a^4}{4}, \\
+I_2(x^3) &= \frac{b-a}{6}\left[a^3 + \tfrac12(a+b)^3 + b^3 \right] = \frac{b^4-a^4}{4} = I(x^3).
+\end{aligned}
+$$
+This shows that the degree of exactness is at least 3 (contrary to what might be expected from the interpolation picture). You can verify that $I_2(x^4)\neq I(x^4)$, so the degree of exactness is exactly 3.
+:::
+
+This shows that the term $f'''(\xi)$ in the error formula for Simpson's rule is misleading. In fact, it is possible to write an error bound proportional to $f^{(4)}(\xi)$.
+
+In terms of degree of exactness, Simpson's formula does better than expected. In general, Newton-Cotes formulae with even $n$ have degree of exactness $n+1$. But this is by no means the highest possible (see next section).
+
+### Gaussian quadrature
+
+The idea of **Gaussian quadrature** is to choose not only the weights $\sigma_k$ but also the nodes $x_k$, in order to achieve the highest possible degree of exactness.
+
+Firstly, we will illustrate the brute force **method of undetermined coefficients**.
+
+::: {.eg}
+## Gaussian quadrature formula $G_1(f)=\sum_{k=0}^1\sigma_kf(x_k)$ on the interval $[-1,1]$
+
+Here we have four unknowns $x_0$, $x_1$, $\sigma_0$ and $\sigma_1$, so we can impose four conditions:
+$$
+\begin{aligned}
+G_1(1) &= I(1) \implies \sigma_0 + \sigma_1 = \int_{-1}^1\,\mathrm{d}x = 2,\\
+G_1(x) &= I(x) \implies \sigma_0x_0 + \sigma_1x_1 = \int_{-1}^1x\,\mathrm{d}x = 0,\\
+G_1(x^2) &= I(x^2) \implies \sigma_0x_0^2 + \sigma_1x_1^2 = \int_{-1}^1x^2\,\mathrm{d}x = \tfrac23,\\
+G_1(x^3) &= I(x^3) \implies \sigma_0x_0^3 + \sigma_1x_1^3 = \int_{-1}^1x^3\,\mathrm{d}x = 0.
+\end{aligned}
+$$
+To solve this system, the symmetry suggests that $x_1=-x_0$ and $\sigma_0=\sigma_1$. This will automatically satisfy the equations for $x$ and $x^3$, leaving the two equations
+$$
+2\sigma_0 = 2, \qquad 2\sigma_0x_0^2 = \tfrac23,
+$$
+so that $\sigma_0=\sigma_1=1$ and $x_1=-x_0 = 1/\sqrt{3}$. The resulting Gaussian quadrature formula is
+$$
+G_1(f) = f\left(-\frac{1}{\sqrt{3}}\right) + f\left(\frac{1}{\sqrt{3}}\right).
+$$
+This formula has degree of exactness 3.
+:::
+
+In general, the Gaussian quadrature formula with $n$ nodes will have degree of exactness $2n+1$.
+
+The method of undetermined coefficients becomes unworkable for larger numbers of nodes, because of the nonlinearity of the equations. A much more elegant method uses orthogonal polynomials. In addition to what we learned before, we will need the following result.
+
+::: {.theorem}
+If $\{\phi_0,\phi_1,\ldots,\phi_n\}$ is a set of orthogonal polynomials on $[a,b]$ under the inner product $(f,g) = \int_a^b f(x)g(x)w(x)\,\mathrm{d}x$ and $\phi_k$ is of degree $k$ for each $k=0,1,\ldots,n$, then $\phi_k$ has $k$ distinct real roots, and these roots lie in the interval $[a,b]$.
+:::
+
+**Proof:**  
+Let $x_1,\ldots,x_j$ be the points where $\phi_k(x)$ changes sign in $[a,b]$. If $j=k$ then we are done. Otherwise, suppose $j<k$, and consider the polynomial
+$$
+q_j(x) = (x-x_1)(x-x_2)\cdots(x-x_j).
+$$
+Since $q_j$ has lower degree than $\phi_k$, they must be orthogonal, meaning
+$$
+(q_j,\phi_k)=0 \implies \int_a^b q_j(x)\phi_k(x)w(x)\,\mathrm{d}x = 0.
+$$
+On the other hand, notice that the product $q_j(x)\phi_k(x)$ cannot change sign in $[a,b]$, because each sign change in $\phi_k(x)$ is cancelled out by one in $q_j(x)$. This means that
+$$
+\int_a^b q_j(x)\phi_k(x)w(x)\,\mathrm{d}x \neq 0,
+$$
+which is a contradiction. $\Box$
+
+Remarkably, these roots are precisely the optimum choice of nodes for a quadrature formula to approximate the (weighted) integral
+$$
+I_{w}(f) = \int_a^b f(x)w(x)\,\mathrm{d}x.
+$$
+
+::: {.theorem}
+## Gaussian quadrature
+
+Let $\phi_{n+1}$ be a polynomial in ${\cal P}_{n+1}$ that is orthogonal on $[a,b]$ to all polynomials in ${\cal P}_{n}$, with respect to the weight function $w(x)$. If $x_0,x_1,\ldots,x_n$ are the roots of $\phi_{n+1}$, then the quadrature formula
+$$
+G_{n,w}(f) := \sum_{k=0}^n\sigma_kf(x_k), \qquad \sigma_k = \int_a^b\ell_k(x)w(x)\,\mathrm{d}x
+$$
+approximates $I_w(f)$ with degree of exactness ${2n+1}$ (the largest possible).
+:::
+
+Like Newton-Cotes, we see that Gaussian quadrature is based on integrating an interpolating polynomial, but now the nodes are the roots of an orthogonal polynomial, rather than equally spaced points.
+
+::: {.eg}
+## Gaussian quadrature with $n=1$ on $[-1,1]$ and $w(x)=1$ (again)
+
+To find the nodes $x_0$, $x_1$, we need to find the roots of the orthogonal polynomial $\phi_2(x)$. For this inner product, we already computed this (Legendre polynomial) in Chapter 3, where we found
+$$
+\phi_2(x) = x^2 - \tfrac13.
+$$
+Thus the nodes are $x_0= -1/\sqrt{3}, x_1=1/\sqrt{3}$. Integrating the Lagrange polynomials gives the corresponding weights
+$$
+\begin{aligned}
+\sigma_0 &= \int_{-1}^1\ell_0(x)\,\mathrm{d}x = \int_{-1}^1\frac{x-\tfrac1{\sqrt{3}}}{-\tfrac2{\sqrt{3}}}\,\mathrm{d}x = -\tfrac{\sqrt{3}}{2}\left[\tfrac12x^2 - \tfrac1{\sqrt{3}}x\right]_{-1}^1 = 1,\\
+\sigma_1 &= \int_{-1}^1\ell_1(x)\,\mathrm{d}x = \int_{-1}^1\frac{x+\tfrac1{\sqrt{3}}}{\tfrac2{\sqrt{3}}}\,\mathrm{d}x = \tfrac{\sqrt{3}}{2}\left[\tfrac12x^2 + \tfrac1{\sqrt{3}}x\right]_{-1}^1 = 1,
+\end{aligned}
+$$
+as before.
+:::
+
+::: {.callout-note}
+Using an appropriate weight function $w(x)$ can be useful for integrands with a singularity, since we can incorporate this in $w(x)$ and still approximate the integral with $G_{n,w}$.
+:::
+
+::: {.eg}
+#### Gaussian quadrature for $\int_0^1 \cos(x)x^{-1/2}\,\mathrm{d}x$, with $n=0$
+
+This is a Fresnel integral, with exact value $1.80905\ldots$ Let us compare the effect of using an appropriate weight function.
+
+1. *Unweighted quadrature ($w(x)\equiv 1$).* The orthogonal polynomial of degree 1 is
+   $$
+   \phi_1(x) = x - \frac{\int_0^1x\,\mathrm{d}x}{\int_0^1\,\mathrm{d}x} = x-\tfrac12 \implies x_0=\tfrac12.
+   $$
+   The corresponding weight may be found by imposing $G_{0}(1)=I(1)$, which gives $\sigma_0=\int_0^1\,\mathrm{d}x = 1$. Then our estimate is
+   $$
+   G_0\left(\frac{\cos(x)}{\sqrt{x}}\right) = \frac{\cos\left(\tfrac12\right)}{\sqrt{\tfrac12}} = 1.2411\ldots
+   $$
+
+2. *Weighted quadrature with $w(x) = x^{-1/2}$.* This time we get
+   $$
+   \phi_1(x) = x - \frac{\int_0^1x^{1/2}\,\mathrm{d}x}{\int_0^1x^{-1/2}\,\mathrm{d}x} = x-\frac{2/3}{2} \implies x_0=\tfrac13.
+   $$
+   The corresponding weight is $\sigma_0 = \int_0^1x^{-1/2}\,\mathrm{d}x = 2$, so the new estimate is the more accurate
+   $$
+   G_{0,w}\big(\cos(x)\big) = 2\cos\left(\tfrac13\right) = 1.8899\ldots
+   $$
+:::
+
+**Proof:**
+
+First, recall that any interpolatory quadrature formula based on $n+1$ nodes will be exact for all polynomials in ${\cal P}_n$ (this follows from the Newton-Cotes theorem, which can be modified to include the weight function $w(x)$). So in particular, $G_{n,w}$ is exact for $p_n\in{\cal P}_n$.
+
+Now let $p_{2n+1}\in{\cal P}_{2n+1}$. The trick is to divide this by the orthogonal polynomial $\phi_{n+1}$ whose roots are the nodes. This gives
+$$
+p_{2n+1}(x) = \phi_{n+1}(x)q_n(x) + r_n(x) \quad \textrm{for some} \quad q_n,r_n \in{\cal P}_n.
+$$
+Then
+$$
+\begin{aligned}
+G_{n,w}(p_{2n+1}) &= \sum_{k=0}^n\sigma_kp_{2n+1}(x_k) = \sum_{k=0}^n\sigma_k\Big[\phi_{n+1}(x_k)q_n(x_k) + r_n(x_k) \Big] \\ &= \sum_{k=0}^n\sigma_kr_n(x_k) = I_w(r_n),
+\end{aligned}
+$$
+where we have used the fact that $G_{n,w}$ is exact for $r_n\in{\cal P}_n$. Now, since $q_n$ has lower degree than $\phi_{n+1}$, it must be orthogonal to $\phi_{n+1}$, so
+$$
+I_w(\phi_{n+1}q_n) = \int_a^b\phi_{n+1}(x)q_n(x)w(x)\,\mathrm{d}x = 0
+$$
+and hence
+$$
+\begin{aligned}
+G_{n,w}(p_{2n+1}) &= I_w(r_n) + 0= I_w(r_n) + I_w(\phi_{n+1}q_n) \\ &= I_w( \phi_{n+1}q_n + r_n) = I_w(p_{2n+1}).
+\end{aligned}
+$$
+
+Unlike Newton-Cotes formulae with equally-spaced points, it can be shown that $G_{n,w}(f)\to I_w(f)$ as $n\to\infty$, for any continuous function $f$. This follows (with a bit of analysis) from the fact that all of the weights $\sigma_k$ are positive, along with the fact that they sum to a fixed number $\int_a^bw(x)\,\mathrm{d}x$. For Newton-Cotes, the signed weights still sum to a fixed number, but  $\sum_{k=0}^n|\sigma_k|\to\infty$, which destroys convergence.
+
+Not surprisingly, we can derive an error formula that depends on $f^{(2n+2)}(\xi)$ for some $\xi\in(a,b)$. To do this, we will need the following result from calculus.
+
+::: {.theorem}
+## Mean value theorem for integrals
+
+If $f,g$ are continuous on $[a,b]$ and $g(x)\geq 0$ for all $x\in[a,b]$, then there exists $\xi\in(a,b)$ such that 
+$$
+\int_a^bf(x)g(x)\,\mathrm{d}x = f(\xi)\int_a^bg(x)\,\mathrm{d}x.
+$$
+:::
+
+**Proof:**  
+Let $m$ and $M$ be the minimum and maximum values of $f$ on $[a,b]$, respectively. Since $g(x)\geq 0$, we have that
+$$
+m\int_a^bg(x)\,\mathrm{d}x \leq \int_a^bf(x)g(x)\,\mathrm{d}x \leq M\int_a^bg(x)\,\mathrm{d}x.
+$$
+Now let $I=\int_a^bg(x)\,\mathrm{d}x$. If $I=0$ then $g(x)\equiv 0$, so $\int_a^bf(x)g(x)\,\mathrm{d}x=0$ and the theorem holds for every $\xi\in(a,b)$. Otherwise, we have
+$$
+m \leq \frac{1}{I}\int_a^bf(x)g(x)\,\mathrm{d}x \leq M.
+$$
+By the Intermediate Value Theorem, $f(x)$ attains every value between $m$ and $M$ somewhere in $(a,b)$, so in particular there exists $\xi\in(a,b)$ with
+$$
+f(\xi) = \frac{1}{I}\int_a^bf(x)g(x)\,\mathrm{d}x.
+$$
+
+::: {.theorem}
+## Error estimate for Gaussian quadrature
+
+Let $\phi_{n+1}\in{\cal P}_{n+1}$ be monic and orthogonal on $[a,b]$ to all polynomials in ${\cal P}_n$, with respect to the weight function $w(x)$. Let $x_0,x_1,\ldots,x_n$ be the roots of $\phi_{n+1}$, and let $G_{n,w}(f)$ be the Gaussian quadrature formula defined above. If $f$ has $2n+2$ continuous derivatives on $(a,b)$, then there exists $\xi\in(a,b)$ such that
+$$
+I_w(f) - G_{n,w}(f) = \frac{f^{(2n+2)}(\xi)}{(2n+2)!}\int_a^b\phi_{n+1}^2(x)w(x)\,\mathrm{d}x.
+$$
+:::
+
+**Proof:**  
+A neat trick is to use Hermite interpolation. Since the $x_k$ are distinct, there exists a unique polynomial $p_{2n+1}$ such that
+$$
+p_{2n+1}(x_k) = f(x_k), \quad p_{2n+1}'(x_k) = f'(x_k) \quad \textrm{for $k=0,\ldots,n$}.
+$$
+In addition (see problem sheet), there exists $\lambda\in(a,b)$, depending on $x$, such that
+$$
+f(x) - p_{2n+1}(x) = \frac{f^{(2n+2)}(\lambda)}{(2n+2)!}\prod_{i=0}^n(x-x_i)^2.
+$$
+Now we know that $(x-x_0)(x-x_1)\cdots(x-x_n)=\phi_{n+1}(x)$, since we fixed $\phi_{n+1}$ to be monic. Hence
+$$
+\int_a^bf(x)w(x)\,\mathrm{d}x - \int_a^bp_{2n+1}(x)w(x)\,\mathrm{d}x = \int_a^b\frac{f^{(2n+2)}(\lambda)}{(2n+2)!}\phi_{n+1}^2(x)w(x)\,\mathrm{d}x.
+$$
+Now we know that $G_{n,w}$ must be exact for $p_{2n+1}$, so
+$$
+\int_a^bp_{2n+1}(x)w(x)\,\mathrm{d}x = G_{n,w}(p_{2n+1}) = \sum_{k=0}^n\sigma_kp_{2n+1}(x_k) = \sum_{k=0}^n\sigma_kf(x_k)=G_{n,w}(f).
+$$
+For the right-hand side, we can't take $f^{(2n+2)}(\lambda)$ outside the integral since $\lambda$ depends on $x$. But $\phi_{n+1}^2(x)w(x)\geq 0$ on $[a,b]$, so we can apply the mean value theorem for integrals and get
+$$
+I_w(f) - G_{n,w}(f) = \frac{f^{(2n+2)}(\xi)}{(2n+2)!}\int_a^b\phi_{n+1}^2(x)w(x)\,\mathrm{d}x
+$$
+for some $\xi\in(a,b)$ that does not depend on $x$.
+
