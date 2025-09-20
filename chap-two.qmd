@@ -34,7 +34,7 @@ then we only need to store the $n+1$ coefficients $a_0,\ldots,a_n$. Operations s
 To approximate functions like $1/x$, there is a well-developed theory of rational function interpolation, which is beyond the scope of this course.
 :::
 
-In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—that is, requiring $p_n(x_i) = f(x_i)$ at a finite set of points $x_i$, usually called **nodes**. Sometimes we will also require the derivative(s) of $p_n$ to match those of $f$. This type of function approximation where we want to match values of the function that we know at particular points is very natural in many applications. For example, weather forecasts involve numerically solving huge systems of partial differential equations (PDEs), which means actually solving them on a discrete grid of points. If we want weather predictions between grid points, we must **interpolate**. Figure @fig-MET shows the spatial resolutions of a range of current and past weather models produced by the UK Met Office.
+In this chapter, we look for a suitable polynomial $p_n$ by **interpolation**—that is, requiring $p_n(x_i) = f(x_i)$ at a finite set of points $x_i$, usually called **nodes**. Sometimes we will also require the derivative(s) of $p_n$ to match those of $f$. This type of function approximation where we want to match values of the function that we know at particular points is very natural in many applications. For example, weather forecasts involve numerically solving huge systems of partial differential equations (PDEs), which means actually solving them on a discrete grid of points. If we want weather predictions between grid points, we must **interpolate**. @fig-MET shows the spatial resolutions of a range of current and past weather models produced by the UK Met Office.
 
 ![Chart showing a range of weather models produce by the UK Met Office. Even the highest spatial resolution models have more than 1.5km between grid point due to computational constraints.](im/met_office.png){#fig-MET width=85% fig-align="center"}
 
@@ -70,7 +70,7 @@ The next term will be $-0.1^7/7! \approx -10^{-7}/10^3 = -10^{-10}$, which won't
 :::
 
 ::: {.callout-note}
-The exact answer is $\sin(0.1)=0.09983341$.
+The exact answer is $\sin(0.1)=0.09983341\dots$.
 :::
 
 Mathematically, we can write the remainder as follows.

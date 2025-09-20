@@ -239,7 +239,7 @@ $$
 :::
 
 ::: {.callout-note}
-Lewis Fry Richardson (1881--1953) was from Newcastle and an undergraduate there. He was the first person to apply mathematics (finite differences) to weather prediction, and was ahead of his time: in the absence of electronic computers, he estimated that 60,000 people would be needed to predict the next day's weather!
+Lewis Fry Richardson (1881--1953) was from Newcastle and an undergraduate there (when it was still a College of Durham). He was the first person to apply mathematics (finite differences) to weather prediction, and was ahead of his time: in the absence of electronic computers, he estimated that 60,000 people would be needed to predict the next day's weather!
 :::
 
 ## Numerical integration {#s-int}
