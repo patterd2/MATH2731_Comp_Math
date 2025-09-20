@@ -232,9 +232,32 @@ $$
 
 The moral of the story is that sometimes care is needed to ensure that we carry out a calculation accurately and as intended!
 
-## Symbolic computing
+## Example: Weather Modelling
+
+::: {.callout-example title="The Lorenz equations."}
+A very simplistic description of an atmospheric fluid is given by the [Lorenz system of differential equations](https://en.wikipedia.org/wiki/Lorenz_system):
+$$
+\begin{aligned}
+\frac{dx}{dt} &= \sigma(y-x),\\
+\frac{dy}{dt} &= x(\rho-z)-y,\\
+\frac{dz}{dt} &= xy-\beta z,
+\end{aligned}
+$$
+where $\sigma$, $\rho$, and $\beta$ are positive constants 
+:::
+We will describe how to solve such equations numerically in Chapter 5. For now, let's look at a simulation of these equations computed by just iterating a bunch of addition and multiplication steps:
+
+![](im/Lorenz.png){width=70% fig-align="center"}
+
+Here we plot all three variables over a particular window of time (loosely corresponding to something between minutes to hours, depending on several details of the physics we are neglecting). For each variable, we have ran two simulations with two different values of $\beta$. One simulation has $\beta = 8/3 = 2.66666666666\dots$ and the other has $\beta = 8/3 + 10^{-10} = 2.66666666676\dots$. Nevertheless, you can clearly see that this tiny difference in parameters (well below what is experimentally measurable) has a huge impact on the solution. The reason for this, and a key reason why weather is fundamentally hard to predict, is the existence of [chaos](https://en.wikipedia.org/wiki/Chaos_theory) in many models of physical phenomena. However truncation errors and floating point errors also contribute to the discrepancies in this simulation.
+
+The overall lesson of this Chapter so far is that small errors can exist due to analytically-understood reasons such as the *truncation error* in a Taylor series approximation, or the *floating point error* in the numerical methods used. Such errors can not only impact individual calculations, but they can accumulate and entirely change outcomes of simulations, as we will see throughout the course. Nevertheless, computational methods still underly an enormous range of scientific fields, so understanding these sources of error (and how they can become amplified) is a central theme of this course.
+
+## Exact and symbolic computing
 
 Symbolic computations require different data types from numerical ones; in MATLAB we can use the [Symbolic Math Toolbox](https://uk.mathworks.com/help/symbolic/symbolic-computations-in-matlab.html). In the following chapters, we will compare symbolic and numerical approaches to solving mathematical problems. One key difference is that symbolic computations are exact, but much more expensive to scale up to solve larger problems; for example, we will tackle numerical problems involving matrices of size $10^4 \times 10^4$ or larger, which would not be possible to successfully manipulate symbolically on a modern computer.
+
+Symbolic computations are used to check or do laborious analytical work, but also to rigorously prove mathematical Theorems which would be too onerous to carry out by hand. FOr instance, while Lorenz equations above were first noted to have strange dependencies on initial conditions, it was only in 2002 that this was mathematically proved to be a chaotic system. Among other tools, the proof relied on [interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic), which is a method to exactly operate on intervals defined in terms of two rational numbers.
 
 ## Knowledge checklist {.unnumbered}
 
