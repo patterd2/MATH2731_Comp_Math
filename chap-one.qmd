@@ -114,6 +114,21 @@ To round $x$ to $n$ s.f., replace $x$ by the nearest number with $n$ s.f. An app
 
 ## Rounding error
 
+There are two common ways of measuring the error of an approximation in numerical analysis that we will use throughout the course:
+
+::: {.definition}
+## Absolute and relative errors
+If $x$ is the true value of a number and $\hat{x}$ is an approximation, we define the **absolute error** of this approximation as the quantity
+$$
+|\hat{x} - x|,
+$$
+while the **relative error** of the approximation is given by
+$$
+\frac{|\hat{x} - x|}{|x|},
+$$
+assuming $x \neq 0$.
+:::
+
 If $|x|$ lies between the smallest non-zero number in $F$ and the largest number in $F$, then
 $$
 \mathrm{fl}(x) = x(1+\delta),

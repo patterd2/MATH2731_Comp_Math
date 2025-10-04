@@ -91,3 +91,8 @@ custom-numbered-blocks:
       boxstyle: foldbox.simple
       colors: [fcebee, ea3342]
       label: Proof
+    definition:
+      collapse: False
+      boxstyle: foldbox.simple
+      colors: [fcebee, ea3342]
+      label: Definition

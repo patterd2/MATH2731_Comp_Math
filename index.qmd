@@ -50,7 +50,7 @@ Each week for the first six weeks of the course, we will release a short set of 
 
 ### E-assessments
 
-Each week for the first six weeks of the course, we will release an e-assessment based on the lectures from the previous week. These exercises are designed to complement the lab reports by focusing exclusively on coding skills. The e-assessments will involve submitting code auto-marked by an online grading tool, and hence give immediate feedback. As with the lab reports, **the e-assessment for a given week will be due at noon on Monday of the following week**. There will be six e-assessments in total, and **your mark is based on your four highest-scoring submissions.**
+Each week for the first six weeks of the course, we will release a set of e-assessments based on the lectures from the previous week. These exercises are designed to complement the lab reports by focusing exclusively on coding skills. The e-assessments will involve submitting code auto-marked by an online grading tool, and hence give immediate feedback. As with the lab reports, **the set of e-assessments for a given week will be due at noon on Monday of the following week**. There will be six sets of e-assessments in total, and **your mark is based on your four highest-scoring submissions.**
 
 ### Project
 
@@ -92,7 +92,7 @@ Code for all of the examples and exercises will be available on the course Githu
 
 ## Contact details and Reading Materials
 
-If you have questions or need clarification on any of the above, please speak to us during lectures, drop-in sessions, or office hours. Alternatively, email one or both of us at [denis.d.patterson@durham.ac.uk](mailto:denis.d.patterson@durham.ac.uk) or [andrew.krause@durham.ac.uk](mailto:andrew.krause@durham.ac.uk).
+If you have questions or need clarification on any of the above, please speak to us during lectures and drop-in sessions. Alternatively, email one or both of us at [denis.d.patterson@durham.ac.uk](mailto:denis.d.patterson@durham.ac.uk) or [andrew.krause@durham.ac.uk](mailto:andrew.krause@durham.ac.uk).
 
 The lecture notes are designed to be sufficient and self-contained. Hence, students do not need to purchase a textbook to complete the course successfully. References for additional reading will also be given at the end of each chapter.
 
