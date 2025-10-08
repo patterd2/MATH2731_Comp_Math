@@ -185,7 +185,8 @@ so $r_n(x)$ has $n+1$ roots. From the Fundamental Theorem of Algebra, this is po
 Note that the unique polynomial through $n+1$ points may have degree $< n$. This happens when $a_0=0$ in the solution to the Vandermonde system above.
 :::
 
-::: {.callout-example title="Interpolate $f(x)=\cos(x)$ with $p_2\in\mathcal{P}_2$ at the nodes $\{0, \tfrac{\pi}{2}, \pi\}$."}
+::: {.eg }
+## Interpolate $f(x)=\cos(x)$ with $p_2\in\mathcal{P}_2$ at the nodes $\{0, \tfrac{\pi}{2}, \pi\}$.
 
 We have $x_0=0$, $x_1=\tfrac{\pi}{2}$, $x_2=\pi$, so $f(x_0)=1$, $f(x_1)=0$, $f(x_2)=-1$. Clearly the unique interpolant is a straight line $p_2(x) = 1 - \tfrac2\pi x$.
 
