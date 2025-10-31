@@ -14,6 +14,7 @@ book:
     - chap-two.qmd
     - chap-three.qmd
     - chap-four.qmd
+    - chap-five.qmd
     
 
 format:
