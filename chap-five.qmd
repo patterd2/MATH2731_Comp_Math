@@ -20,7 +20,7 @@ We will focus on general systems of \(n\) first-order differential equations of 
 $$
 \dot{\mathbf{u}} = \frac{\mathrm{d}\mathbf{u}}{\mathrm{d}t} = \mathbf{f}(t,\mathbf{u}), \quad \mathbf{u}(t_0)=\mathbf{u}_0 \in \mathbb{R}^n.
 $$
-Many general classes of equations can be written in this form, and such systems also arise when discretising partial differential equations, as well as other kinds of models involving derivatives. When \(\mathbf{f}(t,\mathbf{u})=\mathbf{f}(\mathbf{u})\) (i.e. does not depend on time) we call the system **autonomous**.
+Many general classes of equations can be written in this form, and such systems also arise when discretising partial differential equations, as well as other kinds of models involving derivatives. When $\mathbf{f}(t,\mathbf{u})=\mathbf{f}(\mathbf{u})$ (i.e. does not depend on time) we call the system **autonomous**.
 
 #### Preliminary ODE theory
 
