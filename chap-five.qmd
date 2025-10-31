@@ -22,7 +22,7 @@ $$
 $$
 Many general classes of equations can be written in this form, and such systems also arise when discretising partial differential equations, as well as other kinds of models involving derivatives. When $\mathbf{f}(t,\mathbf{u})=\mathbf{f}(\mathbf{u})$ (i.e. does not depend on time) we call the system **autonomous**.
 
-#### Preliminary ODE theory
+### Preliminary ODE theory
 
 Before discussing practical aspects of solving such equations, recall the basic existence and uniqueness theory. For ODEs this theory is not too complicated, provided the right-hand side is sufficiently well behaved.
 
@@ -148,3 +148,54 @@ which implies an LTE of $O(\Delta t)$. These two definitions are both used, desp
 :::
 
 An integration scheme which has an LTE of the form $O(\Delta t)$ or smaller is called **consistent.** Essentially, a consistent scheme is one where the approximations are equivalent to a collection of Taylor series approximations, and hence, subject to various smoothness assumptions, we expect to be able to make the error tend to $0$ for small enough time steps. However, consistency is not enough to ensure that a numerical scheme converges to the analytical solution of the original ODE.
+
+## Stability of Finite Difference Schemes
+
+A consistent scheme may fail to converge to the true solution if the method is not stable. To illustrate stability, we can explore the plot above of the van der Pol oscillator, but for $C=4$ instead. The code gives us this output:
+
+![](im/C4_FE_vanderPol.png){width=70% fig-align="center"}
+
+The solutions for $\Delta t \leq 0.01$ appear very much as they did before, but the solution for $\Delta t = 0.1$ now rapidly increases. MATLAB reports that it has reached $u_{70} \approx 10^{172}$, meaning that after 70 timesteps (i.e., $t \approx 7$), it has blown up in such a way that numerical calculations on these values are no longer meaningful. This illustrates a general property of numerical methods for differential equations known as **stability**, which is essentially the idea that we want numerical methods not to make successive iterations worse by compounding small errors. To be precise requires focusing on a particular class of methods or equations.
+
+### The Dahlquist Problem
+
+We consider the **Dahlquist test problem**, which is the following simple linear equation:
+$$
+\frac{\mathrm{d}u}{\mathrm{d}t} = \lambda u,
+$$
+where $\lambda \in \mathbb{R}$ is a given parameter. While this equation is simple, it gives insight into any solution of our original problem if we "linearize" the equations around a single point in time. Importantly, this problem also allows us to make analytical progress in determining the stability of a general numerical scheme.
+
+::: {.eg}
+**Stability of forward Euler**
+
+Let's apply the method for forward Euler to the Dahlquist problem. We have the iterations:
+$$
+u_{n+1} = u_n + \Delta t \lambda u_n = (1+\Delta t \lambda)u_n = (1+\Delta t \lambda)^n u_0,
+$$
+where we have explicitly "solved" the difference equation by iterating it back to the initial condition. Importantly, this will now blow up if $|1 + \Delta t \lambda| \geq 1$, meaning that for real $\lambda$, stability requires:
+$$
+-2 < \Delta t \lambda < 0.
+$$
+:::
+
+::: {.eg}
+**A consistent but unstable method**
+
+Consider the following numerical method for the test problem:
+$$
+u_{n+1} = -4u_n + 5u_{n-1} + \Delta t(4\lambda u_n + 2\lambda u_{n-1}),
+$$
+which can be rewritten as:
+$$
+u_{n+1} = 4(\Delta t \lambda - 1)u_n + (5 + 2\Delta t \lambda)u_{n-1}.
+$$
+We can solve this difference equation by rewriting it as a system, or by noting that it must have two solutions of the form $u_n = C\mu^n$ for some $\mu$ (analogous to how linear ODEs have solutions of the form $e^{\mu t}$). Substituting this in, and dividing by $u_n$, we find that $\mu$ satisfies:
+$$
+\mu^2 = 4(\Delta t \lambda - 1)\mu + (5 + 2\Delta t \lambda),
+$$
+which simplifies to:
+$$
+\mu = 2(\Delta t \lambda - 1) \pm \sqrt{4(\Delta t \lambda)^2 - 6 \Delta t \lambda + 9}.
+$$
+For $|\Delta t| \ll 1$, we see that one of these solutions approaches $\mu \approx -5$, so that $u_n \sim (-5)^n$, implying that we expect this scheme to be unstable for all $\lambda$ as long as $\Delta t$ is sufficiently small.
+:::
