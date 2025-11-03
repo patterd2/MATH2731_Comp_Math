@@ -16,7 +16,7 @@ Symbolic tools can solve many of the analytically-tractable classes of different
 
 ## Basic Concepts
 
-We will focus on general systems of \(n\) first-order differential equations of the form
+We will focus on general systems of $n$$ first-order differential equations of the form
 $$
 \dot{\mathbf{u}} = \frac{\mathrm{d}\mathbf{u}}{\mathrm{d}t} = \mathbf{f}(t,\mathbf{u}), \quad \mathbf{u}(t_0)=\mathbf{u}_0 \in \mathbb{R}^n.
 $$
@@ -151,11 +151,11 @@ An integration scheme which has an LTE of the form $O(\Delta t)$ or smaller is c
 
 ## Stability of Finite Difference Schemes
 
-A consistent scheme may fail to converge to the true solution if the method is not stable. To illustrate stability, we can explore exactly the plot above of the van der Pol oscillator, but for \(C=4\) instead. The code gives us this output:
+A consistent scheme may fail to converge to the true solution if the method is not stable. To illustrate stability, we can explore exactly the plot above of the van der Pol oscillator, but for $$C=4$ instead. The code gives us this output:
 
 ![](im/C4_FE_vanderPol.png){width=70% fig-align="center"}
 
-The solutions for \(\Delta t \leq 0.01\) appear very much as they did before, but the solution for \(\Delta t = 0.1\) now rapidly increases. MATLAB says that it has reached \(u_{70} \approx 10^{172}\), meaning that after 70 timesteps (i.e., \(t \approx 7\)), it has blown up in such a way that numerical calculations on these values are no longer meaningful. This illustrates a general property of numerical methods for differential equations known as **stability**, which is essentially the idea that we want numerical methods not to make successive iterations worse by compounding small errors. To be precise, let's focus on a particular equation which serves as a model for this phenomenon.
+The solutions for $\Delta t \leq 0.01$ appear very much as they did before, but the solution for $\Delta t = 0.1$ now rapidly increases. MATLAB says that it has reached $u_{70} \approx 10^{172}$, meaning that after 70 timesteps (i.e., $t \approx 7$), it has blown up in such a way that numerical calculations on these values are no longer meaningful. This illustrates a general property of numerical methods for differential equations known as **stability**, which is essentially the idea that we want numerical methods not to make successive iterations worse by compounding small errors. To be precise, let's focus on a particular equation which serves as a model for this phenomenon.
 
 ### The Dahlquist Problem
 
