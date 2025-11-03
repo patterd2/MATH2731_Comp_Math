@@ -121,13 +121,13 @@ end
 
 Running this code and plotting the outputs, we obtain the following graph:
 
-![](im/Forward_Euler_SHO.png){width=70% fig-align="center"}
+![](im/Forward_Euler_SHO.png){width=75% fig-align="center"}
 
 The inset shows that the first few steps of the method match the solution reasonably well. However, over time it appears that the error builds up, and the amplitudes grow (despite the correct solution having the same amplitude for all time). Reducing the timestep will improve this, but eventually the amplitude will always begin to grow, at a rate which will become approximately exponential.
 
 We can see how this scheme behaves with the timestep more clearly by considering the nonlinear van der Pol oscillator with $C=3$, shown below for four different choices of timestep $\Delta t$:
 
-![](im/C3_FE_vanderPol.png){width=70% fig-align="center"}
+![](im/C3_FE_vanderPol.png){width=75% fig-align="center"}
 
 We observe convergence towards a similar solution profile as $\Delta t$ decreases. However, there is still a buildup of error as $t$ increases, meaning that we will need to consider local errors over one timestep, as well as global errors over iterative schemes for many timesteps.
 
@@ -151,11 +151,11 @@ An integration scheme which has an LTE of the form $O(\Delta t)$ or smaller is c
 
 ## Stability of Finite Difference Schemes
 
-A consistent scheme may fail to converge to the true solution if the method is not stable. To illustrate stability, we can explore the plot above of the van der Pol oscillator, but for $C=4$ instead. The code gives us this output:
+A consistent scheme may fail to converge to the true solution if the method is not stable. To illustrate stability, we can explore exactly the plot above of the van der Pol oscillator, but for \(C=4\) instead. The code gives us this output:
 
 ![](im/C4_FE_vanderPol.png){width=70% fig-align="center"}
 
-The solutions for $\Delta t \leq 0.01$ appear very much as they did before, but the solution for $\Delta t = 0.1$ now rapidly increases. MATLAB reports that it has reached $u_{70} \approx 10^{172}$, meaning that after 70 timesteps (i.e., $t \approx 7$), it has blown up in such a way that numerical calculations on these values are no longer meaningful. This illustrates a general property of numerical methods for differential equations known as **stability**, which is essentially the idea that we want numerical methods not to make successive iterations worse by compounding small errors. To be precise requires focusing on a particular class of methods or equations.
+The solutions for \(\Delta t \leq 0.01\) appear very much as they did before, but the solution for \(\Delta t = 0.1\) now rapidly increases. MATLAB says that it has reached \(u_{70} \approx 10^{172}\), meaning that after 70 timesteps (i.e., \(t \approx 7\)), it has blown up in such a way that numerical calculations on these values are no longer meaningful. This illustrates a general property of numerical methods for differential equations known as **stability**, which is essentially the idea that we want numerical methods not to make successive iterations worse by compounding small errors. To be precise, let's focus on a particular equation which serves as a model for this phenomenon.
 
 ### The Dahlquist Problem
 
@@ -163,16 +163,16 @@ We consider the **Dahlquist test problem**, which is the following simple linear
 $$
 \frac{\mathrm{d}u}{\mathrm{d}t} = \lambda u,
 $$
-where $\lambda \in \mathbb{R}$ is a given parameter. While this equation is simple, it gives insight into any solution of our original problem if we "linearize" the equations around a single point in time. Importantly, this problem also allows us to make analytical progress in determining the stability of a general numerical scheme.
+where $\lambda \in \mathbb{C}$ is a given complex parameter. While this equation is simple, it gives insight into any solution of our original problem if we "linearize" the equations around a single point in time. Importantly, this problem also allows us to make analytical progress in determining the stability of a general numerical scheme. Analytically, we expect the ODE to have decaying solutions for $\Re(\lambda)<0$, but the iterations themselves can sometimes cause the opposite behavior of solutions growing without bound. It is easiest to see this by working with an example.
 
 ::: {.eg}
 **Stability of forward Euler**
 
-Let's apply the method for forward Euler to the Dahlquist problem. We have the iterations:
+Let's apply the forward Euler method to the Dahlquist problem. We have the iterations:
 $$
 u_{n+1} = u_n + \Delta t \lambda u_n = (1+\Delta t \lambda)u_n = (1+\Delta t \lambda)^n u_0,
 $$
-where we have explicitly "solved" the difference equation by iterating it back to the initial condition. Importantly, this will now blow up if $|1 + \Delta t \lambda| \geq 1$, meaning that for real $\lambda$, stability requires:
+where we have explicitly "solved" the difference equation by iterating it back to the initial condition. Importantly, this will now blow up if $|1 + \Delta t \lambda| \geq 1$, meaning that for real $\lambda$, stability requires
 $$
 -2 < \Delta t \lambda < 0.
 $$
@@ -197,5 +197,116 @@ which simplifies to:
 $$
 \mu = 2(\Delta t \lambda - 1) \pm \sqrt{4(\Delta t \lambda)^2 - 6 \Delta t \lambda + 9}.
 $$
-For $|\Delta t| \ll 1$, we see that one of these solutions approaches $\mu \approx -5$, so that $u_n \sim (-5)^n$, implying that we expect this scheme to be unstable for all $\lambda$ as long as $\Delta t$ is sufficiently small.
+For $|\Delta t| \ll 1$, we see that one of these solutions approaches $\mu \approx -5$, so that $u_n \sim (-5)^n$, implying that we expect this scheme to be unstable for all $\lambda$ as long as $\Delta t$ is sufficiently small. With more work, we can in fact show that at least one of the solutions $\mu$ will always have $|\mu| \geq \sqrt{19} > 1$ for all $\lambda \in \mathbb{C}$ and $\Delta t \in \mathbb{R}$, so this scheme is *always* unstable.
+:::
+
+### Stability Regions and A-Stability
+
+For a given numerical method, we can use the Dahlquist problem to define **stability regions** for complex $\lambda$. These essentially tell us for what values of $\lambda$ we expect the numerical method to behave well. Importantly, this also gives us insight into how they impact the growth of truncation errors, which is why these stability regions apply to the method more generally.
+
+![](im/Euler_Stability.png){width=77% fig-align="center"}
+
+We see that, as long as $\Re(\lambda)<0$, then for sufficiently small $\Delta t$, this scheme is stable. In practice, this criterion means that we have to take extremely small time steps. A numerical method that is stable for all $\Re(\lambda)<0$ is called **A-Stable**, which is a very desirable property. For such methods, we can (usually) mostly ignore aspects of stability and decide on suitable timesteps based solely on accuracy considerations.
+
+The simplest example of an A-Stable alternative is to consider a slight modification of the Euler scheme, where instead of taking a forward derivative, we take a backward derivative. This results in the **backward Euler** scheme:
+$$
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \mathbf{f}(\mathbf{u}_{n+1}).
+$$
+While this method looks very similar, in practice it is harder to implement as it is an **implicit** scheme, where the unknown $\mathbf{u}_{n+1}$ appears inside of the function on the right-hand side. This means that to actually take a step, we have to solve the problem:
+$$
+\mathbf{G}(\mathbf{u}_{n+1}) := \mathbf{u}_{n+1} - \Delta t \mathbf{f}(\mathbf{u}_{n+1}) = \mathbf{u}_n \implies \mathbf{u}_{n+1} = \mathbf{G}^{-1}(\mathbf{u}_n),
+$$
+where $\mathbf{G}^{-1}$ is the inverse of the function $\mathbf{G}$. In practice, this becomes a (possibly high-dimensional) rootfinding problem, though for some special functions $\mathbf{f}$, it may be possible to evaluate it directly (e.g., when $\mathbf{f}$ is a linear function).
+
+You can show (try this yourself) that this scheme has the same LTE as the forward Euler method. But its real advantage is in its stability.
+
+::: {.eg}
+**Stability of backward Euler**
+
+As before, we have the iterations:
+$$
+u_{n+1} - \Delta t \lambda u_{n+1} = u_n \implies u_{n+1} = \frac{1}{1-\Delta t \lambda}u_n = \left| \frac{1}{1-\Delta t \lambda} \right|^n u_0.
+$$
+Now, for any complex number $z$ with $\Re(z)<0$, we have that $|1-z|^2 = 1 - 2\Re(z) + z^2 > 0$. Hence, as $\Delta t > 0$, if $\Re(\lambda)<0$, then we have that this scheme is A-Stable.
+:::
+
+### Convergence
+
+In general, it is difficult to prove that a numerical scheme converges in a suitable sense to the actual solution of an ODE system, as this requires some heavy machinery from analysis involving how the solutions of difference equations can embed into spaces of functions properly. One way to short-circuit these deep issues, however, is the use of the following theorem.
+
+::: {.theorem}
+**Lax Equivalence Theorem**  
+Assume that the system satisfies the conditions of the Picard–Lindelöf theorem. A finite difference method converges (in a suitable sense) to the unique solution of the system
+$$
+\dot{\mathbf{u}} = \frac{\mathrm{d}\mathbf{u}}{\mathrm{d}t} = \mathbf{f}(t, \mathbf{u}), \quad \mathbf{u}(t_0) = \mathbf{u}_0 \in \mathbb{R}^N,
+$$
+as $\Delta t \to 0$ if the method is both consistent and stable.
+:::
+
+One important caveat here is that this theorem only holds in the theoretical case of infinite-precision arithmetic; rounding error can build up if we need to simulate the equation for a long time interval, or to use very small time steps (as we have to for methods that are not A-stable). There is a related concept known as **global truncation error**, which is one way to keep track of how the LTE can build up over many timesteps, but we will not discuss this further except to say that the LTE being sufficiently small is usually the most desirable measure of accuracy.
+
+---
+
+## Higher-Order Methods
+
+So far we have discussed just the Euler stepping methods, which both have an LTE of $O(\Delta t)$. There are a variety of higher-order methods commonly used, which broadly fall into classes of **explicit** or **implicit** as described before, as well as **single-step** and **multi-step**. Here we will focus on explicit methods and give an example from each class. For simplicity of notation, let's consider a single ODE (i.e., $N=1$), and let's only consider autonomous problems where $\dot{u} = f(u)$. While the basic ideas will be essentially identical for larger systems, adding in explicit time-dependence will make the formulae messier (but conceptually the same).
+
+### Single-step (Runge-Kutta) methods
+
+One can take a single integration step broken up over different points within an interval. Let $t_n = n\Delta t$ be the current time corresponding to the approximate solution $u_n$. Then these methods can be written as:
+$$
+u_{n+1} = u_n + \Delta t \sum_{i=1}^s a_i k_i, \quad k_1 = f(u_n), \quad 
+k_i = f\left(u_n + \Delta t \sum_{j=1}^{i-1} a_{ij} k_j\right).
+$$
+These schemes are typically referred to as explicit Runge-Kutta methods (specifically having order $s$). They involve taking a single timestep using multiple function evaluations, essentially in order to get a better approximation of the derivative. They are derived in a similar way to how higher-order differentiation schemes can be derived; namely by taking different points within the interval of one timestep, and considering function evaluations and Taylor series on those points. It is easiest to see this with an example.
+
+::: {.eg}
+**Derivation of RK2 Methods**  
+
+Let's consider three time points $t_n, t_n+\Delta t/2,$ and $t_{n+1} = t_n + \Delta t$. In this case, we can expand the Taylor series for $u(t_n+\Delta t)$ as:
+$$
+\begin{aligned}
+u(t_n+\Delta t) &= u(t_n) + \Delta t \dot{u}(t_n) + \frac{\Delta t^2}{2} \ddot{u}(t_n) + O(\Delta t^3) \\
+&= u(t_n) + \Delta t f(u(t_n)) + \frac{\Delta t^2}{2} f_u(u(t_n)) \dot{u}(t_n) + O(\Delta t^3),
+\end{aligned}
+$$
+where we have used the chain rule to evaluate $\ddot{u}(t_n)$. The goal will be to derive a formula which includes the $O(\Delta t^2)$ term explicitly, so that the method is exact up to this order. We perform a Taylor expansion of $f$ evaluated at the midpoint as:
+$$
+\begin{aligned}
+&f(u(t_n) + (\Delta t/2) f(u(t_n))) \\ = &f(u(t_n)) + \frac{\Delta t}{2} f_u(u(t_n)) \dot{u}(t_n) + O(\Delta t^2).
+\end{aligned}
+$$
+Now, if we multiply this expansion by $\Delta t$, we see that it exactly matches the expansion of $u(t+\Delta t)$ up to $O(\Delta t^2)$. So if we consider the numerical scheme:
+$$
+u_{n+1} = u_n + \Delta t f(u_n + (\Delta t/2) f(u_n)),
+$$
+we see that this scheme has an LTE of $O(\Delta t^2)$, which is an improvement over the Euler methods at the cost of one additional function evaluation.
+:::
+
+One can work out that this method also very slightly improves the region of numerical stability compared to forward Euler, though it is not an A-stable method and hence will require sufficiently small timesteps to be stable.
+
+---
+
+### Linear multistep methods
+
+One disadvantage of the Runge-Kutta methods is that they require multiple function evaluations to arrive at a single timestep with a desired accuracy. A different approach is to use information from multiple timesteps to predict the next one in such a way that higher-order accuracy is maintained. Such methods are known as linear multistep methods, which have the general form:
+$$
+u_{n+s} = \Delta t \sum_{j=0}^s \beta_j f(u_{n+j}),
+$$
+where $\beta_j$ are constants chosen to ensure the scheme is consistent, has a good LTE, etc. If $\beta_k = 0$, then the method is explicit, as everything on the right-hand side involves earlier function values. An example of such a method is the two-step **Adams-Bashforth** scheme given by:
+$$
+u_{n+2} = u_{n+1} + \frac{\Delta t}{2} \left( 3 f(u_{n+1}) - f(u_n) \right).
+$$
+One can work out that this method is second-order accurate, just like the RK2 method above, but only requires one new function evaluation at each timestep as opposed to two.
+
+One disadvantage to these methods is that the initial-value problem given in the ODE system is not enough data to start them, as it only contains the solution at one time point $u_0$. So a typical method is to use a high-order Runge-Kutta scheme to start a multistep method.
+
+---
+
+## Beyond the Basics
+
+What we have covered here is a very brief sketch of the core ideas which were all mostly well-understood before 1960 or so. Since then, enormous progress has been made on a number of topics to develop increasingly sophisticated algorithms for simulating differential equations. A key idea from a "user" perspective is to be aware of how the stability of a method is important, but often difficult to ensure. There are no explicit methods of the forms described which are A-stable, and all implicit methods require some form of (often difficult) rootfinding.
+
+::: {.callout-note}
+A **stiff** differential equation is one which is difficult to integrate from a stability perspective; often these correspond to equations which have large (in magnitude) values of $\lambda$ when linearized, though making the idea precise to cover all known cases is not so easy.
 :::
