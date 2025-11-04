@@ -12,7 +12,7 @@ The ability to simulate random numbers on a computer is essential for modeling a
 
 But what exactly do we mean by randomness or random numbers? For our purposes, we will consider "random numbers" to mean sequences of numbers that mimic the statistical properties of realisations of random variables drawn with a given distribution.  
 
-## Uniform Random Numbers
+### Uniform Random Numbers
 
 If we know how to create a sample from a uniform distribution, then we can obtain a sample with a given distribution $F$ using the following result:
 
@@ -22,8 +22,6 @@ Let $U$ be a uniformly distributed random variable, and let $F(x)$ be a c.d.f. I
 :::
 
  Therefore it is often enough to have samples from the uniform distribution and hence this distribution plays a central role in the theory of random number generation.
-
-### On creating uniform samples
 
 In some sense, there are no *truly* random number generators. Computers can only execute algorithms, which are deterministic instructions, and thus they can only yield samples which appear random. We call these numbers **pseudorandom numbers**, and the algorithms which produce these numbers are called **pseudorandom number generators**.
 
@@ -147,13 +145,13 @@ In applications, the following considerations are typically the most important w
 
 Linear congruential generators are no longer (and have not been for some time) used practically, although they are a useful illustration of pseudorandom number generation. The Mersenne Twister family of algorithms is among the most popular in practice, and modern implementations are appropriate for most applications. It is notable for its extremely long period ($2^{19937} - 1$), strong statistical properties, and fast performance (see *Mersenne Twister: A 623-dimensionally equidistributed uniform pseudorandom number generator* by Matsumoto and Nishimura, 1998).
 
-## Testing uniformity
+### Testing uniformity
 
 Previously, we have only checked for a full period, to see whether a pseudorandom number generator is reasonable or not. In this section, we demonstrate more elaborate means to test the quality of a pseudorandom number generator.
 
 Given a sample from a supposedly uniform distribution, one can use statistical tests to reject the hypothesis of uniformity. The samples provided by a computer are fake since they are totally deterministic, and therefore not random (as such they cannot be uniformly distributed). However, they are so "well chosen", that they might appear random. Hence we require statistical tests of randomness in order to judge the quality of a candidate PRNG.
 
-### Chi-Squared Test
+#### Chi-Squared Test
 
 ::: {.definition}
 Let $k\geq 1$, and let $X_1,\dots,X_k$ be a sequence of i.i.d. standard normally distributed random variables. The distribution of the sum of squares
@@ -201,7 +199,7 @@ The following is given without proof.
 As $n\rightarrow\infty$, $T$ converges, in distribution, to the chi-square distribution $\chi_{k-1}$ with $k-1$ degrees of freedom.
 :::
 
-### The Kolmogorov–Smirnov Test
+#### The Kolmogorov–Smirnov Test
 
 Another simple test uses the empirical distribution function of the sample. The Kolmogorov–Smirnov test is based on the following intuition: If the sample is uniformly distributed, the deviation of the empirical distribution function from the theoretical distribution function, as given in Lemma 4.2, should be small.
 
