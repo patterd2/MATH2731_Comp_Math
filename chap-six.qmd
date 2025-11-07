@@ -14,11 +14,43 @@ But what exactly do we mean by randomness or random numbers? For our purposes, w
 
 ### Uniform Random Numbers
 
-If we know how to create a sample from a uniform distribution, then we can obtain a sample with a given distribution $F$ using the following result:
+Recall that a **continuous** random variable is a "random experiment" that takes values in $\mathbb{R}^n$ (or some other uncountably infinite set). A **discrete** random variable is one that takes values in a countably infinite or finite set, like a subset of $\mathbb{Z}$, for example. A continuous random variable is typically described in terms of its **probability density function (PDF)**, while a discrete random variable is most often described by its **probability mass function (PMF)**.
+
+:::{.eg}
+Let $X$ be a uniformly distributed random variable on $[a,b]$. Then $X$ has probability density function given by
+$$
+f(x) = \begin{cases}
+        \frac{1}{b-a} & \text{if } a \leq x \leq b \\
+        0             & \text{otherwise}.
+    \end{cases}
+$$
+If $Y$ is a random variable that is uniformly distributed on the integers $\{0,\dots,n-1\}$, then its probability mass function is given by
+$$
+P(k) = \mathbb{P}[X = k] = 
+    \begin{cases}
+        \frac{1}{n} & \text{if } k \in \{0, 1, \ldots, n-1\} \\
+        0           & \text{otherwise}.
+    \end{cases}
+$$
+
+![](im/examp.png){width=95% fig-align="center"}
+
+:::
+
+We will mainly be concerned with continuous random variables, and each continuous real-valued random variable $X$ has an associated **cumulative distribution function (CDF)** (distribution function for short) that is defined by:
+$$
+F(x) = \mathbb{P}[X \leq x].
+$$
+Moreoever, for reasonably behaved real-valued random variables, the PDF and CDF can be related by the Fundamental Theorem of Calculus as follows:
+$$
+f(x) = \frac{d}{dx}F(x), \quad F(x) = \int_{-\infty}^x f(y)\,dy.
+$$
+
+If we know how to create a sample from a uniform distribution, then we can obtain a sample with a given distribution using the following result:
 
 :::{.theorem}
 ## The Inverse Transform Method
-Let $U$ be a uniformly distributed random variable, and let $F(x)$ be a c.d.f. If $F$ is invertible, then $X=F^{-1}(U)$ is distributed according to $F$. 
+Let $U$ be a uniformly distributed random variable on $[0,1]$, and let $F(x)$ be a cumulative distribution function. If $F$ is invertible, then $X=F^{-1}(U)$ is distributed according to $F$. 
 :::
 
  Therefore it is often enough to have samples from the uniform distribution and hence this distribution plays a central role in the theory of random number generation.
@@ -209,6 +241,8 @@ $$
 F_n(x) = \frac{1}{n}\sum_{i=1}^n \mathbb{1}_{(-\infty,x)}(x_i), \quad x \in \mathbb{R}.
 $$
 :::
+
+![](im/emp_cdf.png){width=80% fig-align="center"}
 
 The **Kolmogorov–Smirnov test for uniformity** is constituted by the following:
 - The null hypothesis $H_0$: The sample is from a given distribution $F$ against the alternative hypothesis $H_a$ that it is not.
