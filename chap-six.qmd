@@ -2,13 +2,13 @@
 title: Further Topics
 ---
 
-## Numerical Solutions to Partial Differential Equations
+## Partial Differential Equations
 
 ## Random Number Generation
 
 > *How do we generate random numbers on a computer?*
 
-The ability to simulate random numbers on a computer is essential for modeling and understanding systems where chance and variability play a central role. Robust and repeatable random number generation is thus central to statistics, finance, queuing systems, cryptography, and a whole host of algorithms and applications.
+The ability to simulate random numbers on a computer is essential for modelling and understanding systems where chance and variability play a central role. Robust and repeatable random number generation is thus central to statistics, finance, queuing systems, cryptography, and a host of algorithms and other applications.
 
 But what exactly do we mean by randomness or random numbers? For our purposes, we will consider "random numbers" to mean sequences of numbers that mimic the statistical properties of realisations of random variables drawn with a given distribution.  
 

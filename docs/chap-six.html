@@ -3889,6 +3889,18 @@ background: #68246D;
 }
 </style>
 <style>
+.algorithm {
+--color1: #e7efea;
+--color2: #53b57b;
+}
+.theorem {
+--color1: #fcebee;
+--color2: #ea3342;
+}
+.eg {
+--color1: #E7D6EA;
+--color2: #68246D;
+}
 .definition {
 --color1: #fcebee;
 --color2: #ea3342;
@@ -3896,18 +3908,6 @@ background: #68246D;
 .doit {
 --color1: #e7efea;
 --color2: #53b57b;
-}
-.algorithm {
---color1: #e7efea;
---color2: #53b57b;
-}
-.eg {
---color1: #E7D6EA;
---color2: #68246D;
-}
-.theorem {
---color1: #fcebee;
---color2: #ea3342;
 }
 .proof {
 --color1: #fcebee;
@@ -4164,7 +4164,6 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#uniform-random-numbers" id="toc-uniform-random-numbers" class="nav-link" data-scroll-target="#uniform-random-numbers"><span class="header-section-number">6.2.1</span> Uniform Random Numbers</a></li>
   <li><a href="#linear-congruential-generators" id="toc-linear-congruential-generators" class="nav-link" data-scroll-target="#linear-congruential-generators"><span class="header-section-number">6.2.2</span> Linear Congruential Generators</a></li>
-  <li><a href="#testing-uniformity" id="toc-testing-uniformity" class="nav-link" data-scroll-target="#testing-uniformity"><span class="header-section-number">6.2.3</span> Testing uniformity</a></li>
   </ul></li>
   <li><a href="#stochastic-processes" id="toc-stochastic-processes" class="nav-link" data-scroll-target="#stochastic-processes"><span class="header-section-number">6.3</span> Stochastic Processes</a></li>
   </ul>
@@ -4341,13 +4340,13 @@ c=0,\quad m=2^3-1=7,\quad a=3.
 <li>Randomness (i.e.&nbsp;robust statistical properties)</li>
 </ul>
 <p>Linear congruential generators are no longer (and have not been for some time) used practically, although they are a useful illustration of pseudorandom number generation. The Mersenne Twister family of algorithms is among the most popular in practice, and modern implementations are appropriate for most applications. It is notable for its extremely long period (<span class="math inline">\(2^{19937} - 1\)</span>), strong statistical properties, and fast performance (see <em>Mersenne Twister: A 623-dimensionally equidistributed uniform pseudorandom number generator</em> by Matsumoto and Nishimura, 1998).</p>
-</section>
-<section id="testing-uniformity" class="level3" data-number="6.2.3">
-<h3 data-number="6.2.3" class="anchored" data-anchor-id="testing-uniformity"><span class="header-section-number">6.2.3</span> Testing uniformity</h3>
+<section id="testing-uniformity" class="level4" data-number="6.2.2.1">
+<h4 data-number="6.2.2.1" class="anchored" data-anchor-id="testing-uniformity"><span class="header-section-number">6.2.2.1</span> Testing uniformity</h4>
 <p>Previously, we have only checked for a full period, to see whether a pseudorandom number generator is reasonable or not. In this section, we demonstrate more elaborate means to test the quality of a pseudorandom number generator.</p>
 <p>Given a sample from a supposedly uniform distribution, one can use statistical tests to reject the hypothesis of uniformity. The samples provided by a computer are fake since they are totally deterministic, and therefore not random (as such they cannot be uniformly distributed). However, they are so “well chosen”, that they might appear random. Hence we require statistical tests of randomness in order to judge the quality of a candidate PRNG.</p>
-<section id="chi-squared-test" class="level4" data-number="6.2.3.1">
-<h4 data-number="6.2.3.1" class="anchored" data-anchor-id="chi-squared-test"><span class="header-section-number">6.2.3.1</span> Chi-Squared Test</h4>
+</section>
+<section id="chi-squared-test" class="level4" data-number="6.2.2.2">
+<h4 data-number="6.2.2.2" class="anchored" data-anchor-id="chi-squared-test"><span class="header-section-number">6.2.2.2</span> Chi-Squared Test</h4>
 <div id="definition-6.3" class="definition">
 <p></p><details class="definition fbx-simplebox fbx-default" open=""><summary><strong>Definition 6.3</strong></summary><div>Let <span class="math inline">\(k\geq 1\)</span>, and let <span class="math inline">\(X_1,\dots,X_k\)</span> be a sequence of i.i.d. standard normally distributed random variables. The distribution of the sum of squares <span class="math display">\[
 S=X_1^2+\dots+X_k^2
@@ -4375,8 +4374,8 @@ X_1,X_2,\dots, X_n
 </div></details>
 </div>
 </section>
-<section id="the-kolmogorovsmirnov-test" class="level4" data-number="6.2.3.2">
-<h4 data-number="6.2.3.2" class="anchored" data-anchor-id="the-kolmogorovsmirnov-test"><span class="header-section-number">6.2.3.2</span> The Kolmogorov–Smirnov Test</h4>
+<section id="the-kolmogorovsmirnov-test" class="level4" data-number="6.2.2.3">
+<h4 data-number="6.2.2.3" class="anchored" data-anchor-id="the-kolmogorovsmirnov-test"><span class="header-section-number">6.2.2.3</span> The Kolmogorov–Smirnov Test</h4>
 <p>Another simple test uses the empirical distribution function of the sample. The Kolmogorov–Smirnov test is based on the following intuition: If the sample is uniformly distributed, the deviation of the empirical distribution function from the theoretical distribution function, as given in Lemma 4.2, should be small.</p>
 <div id="definition-6.4" class="definition">
 <p></p><details class="definition fbx-simplebox fbx-default" open=""><summary><strong>Definition 6.4</strong></summary><div>If <span class="math inline">\(x=(x_1,\dots,x_n)\)</span> is a sample, then the <strong>empirical distribution function</strong> of <span class="math inline">\(x\)</span> is given by <span class="math display">\[

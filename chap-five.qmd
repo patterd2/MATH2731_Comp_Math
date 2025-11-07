@@ -16,11 +16,84 @@ Symbolic tools can solve many of the analytically-tractable classes of different
 
 ## Basic Concepts
 
-We will focus on general systems of $n$$ first-order differential equations of the form
+We will focus on general systems of $n$ first-order differential equations of the form
 $$
 \dot{\mathbf{u}} = \frac{\mathrm{d}\mathbf{u}}{\mathrm{d}t} = \mathbf{f}(t,\mathbf{u}), \quad \mathbf{u}(t_0)=\mathbf{u}_0 \in \mathbb{R}^n.
 $$
 Many general classes of equations can be written in this form, and such systems also arise when discretising partial differential equations, as well as other kinds of models involving derivatives. When $\mathbf{f}(t,\mathbf{u})=\mathbf{f}(\mathbf{u})$ (i.e. does not depend on time) we call the system **autonomous**.
+
+It is reasonable to then ask: Why do we only focus on first order differential equations? This ie because any ordinary differential equation of order $n$ can be written as a system of $n$ first-order ordinary differential equations by introducing new variables to represent each derivative up to order $n-1$. This is a standard step in both numerical and analytical solution methods as most modern solvers only handle systems of first-order ODEs.
+
+Suppose we have an $n$th order ODE:
+$$
+u^{(n)} = f\big(t, u, u', u'',\dotsc, u^{(n-1)}\big),
+$$
+where $u^{(n)} := d^nu(t)/du^n$. Now introduce the auxiliary variables:
+$$
+y_0 = u, \quad y_1 = u', \quad \ldots, \quad y_{n-1} = u^{(n-1)}
+$$
+Then, the new system is:
+$$
+\begin{aligned}
+y_0' &= y_1 \\
+y_1' &= y_2 \\
+&\;\;\vdots \\
+y_{n-2}' &= y_{n-1} \\
+y_{n-1}' &= f\big(t, y_0, y_1, \dotsc, y_{n-1}\big)
+\end{aligned}
+$$
+This approach allows the use of vectorized notation and standard solution methods for systems of first-order ODEs.
+
+::: {.eg}
+Convert the third-order ODE
+$$
+u''' = t + 2u + 3u''
+$$
+with initial conditions $u(0) = 1$, $u'(0) = 2$, $u''(0) = 3$, into a system of three first-order ODEs.
+
+Let
+$$
+y_0 = u \qquad y_1 = u' \qquad y_2 = u'',
+$$
+and then deduce that
+$$
+\begin{aligned}
+y_0' &= y_1 \\
+y_1' &= y_2 \\
+y_2' &= t + 2y_0 + 3y_2
+\end{aligned}
+$$
+with initial conditions
+$$
+y_0(0) = 1, \quad y_1(0) = 2, \quad y_2(0) = 3.
+$$
+We can also represent this system in matrix form as follows:
+$$
+\frac{d}{dt}
+\begin{bmatrix}
+y_0 \\
+y_1 \\
+y_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 & 1 & 0 \\
+0 & 0 & 1 \\
+2 & 0 & 3
+\end{bmatrix}
+\begin{bmatrix}
+y_0 \\
+y_1 \\
+y_2
+\end{bmatrix}
++ 
+\begin{bmatrix}
+0 \\
+0 \\
+t
+\end{bmatrix}.
+$$
+:::
 
 ### Preliminary ODE theory
 
