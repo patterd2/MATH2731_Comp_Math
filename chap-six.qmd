@@ -510,5 +510,19 @@ $$
 \mu \pm z_{1-\alpha/2} \frac{2}{\sqrt{9n}}.
 $$
 :::
-## Stochastic Processes
+
+### Application: Stochastic Processes
+
+Random variables are our standard mathematical model or formalisation of a random experiment. However, in many real-world scenarios we are observing a collection of observations from the same random experiment as time evolves. Hence, we need the concept of a **stochastic process**, which is simply a collection of random variables indexed by time. The simplest example is the **random walk**:
+
+:::{.eg}
+## Random walk
+We take time to be discrete, i.e. the set of times is $\{0,1,2,\dots\}$. A simple symmetric random walk can be written as
+$$
+S_0 = 0, \quad S_n = Z_1 + Z_2 + \cdots + Z_n,
+$$
+where each $Z_i$ is an independent random variable taking the value $+1$ or $-1$ with equal probability. Given that we know how to simulate random numbers on a comuputer, we can immediately simulate a random walk directly from the formula above.
+
+![Three simulated paths of a symmetric random walk.](im/rand_walk.png){width=80% fig-align="center"}
+:::
 
