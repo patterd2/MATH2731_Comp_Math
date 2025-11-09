@@ -225,15 +225,85 @@ The **chi-squared test for uniformity** is constituted by the following:
   and $n_j$ is the number of observations in the $j$th bin.
 - The confidence level $\alpha$ (to be chosen).
 
-The following is given without proof.
+The following theorem is stated without proof.
 
 ::: {.theorem}
 As $n\rightarrow\infty$, $T$ converges, in distribution, to the chi-square distribution $\chi_{k-1}$ with $k-1$ degrees of freedom.
 :::
 
+:::{.eg}
+## Using the Chi-Square Test for Uniformity
+
+Suppose you have a sample of pseudorandom numbers generated on the interval $[0,1]$ and you wish to test if these are consistent with being independent and uniformly distributed.
+
+Let's set up the test with the following parameters:
+- The number of bins: $k = 10$
+- The sample size: $n = 1000$
+- The observed counts in each bin: $n_j$ for $j = 1, \ldots, 10$
+
+**Step 1: Compute the Test Statistic**
+
+Partition the interval $[0,1]$ into 10 bins: $[0, 0.1), [0.1, 0.2), \ldots, [0.9, 1]$.
+
+Count how many values fall in each bin, giving counts $n_1, n_2, \ldots, n_{10}$.
+
+The theoretical expected count in each bin is $n/k = 1000/10 = 100$.
+
+The chi-square test statistic is
+$$
+T = \frac{k}{n} \sum_{j=1}^k \left( n_j - \frac{n}{k} \right)^2
+$$
+
+Suppose the observed bin counts based on the pseudorandom sample are:
+
+| Bin | Observed Count $n_j$ |
+|-----|---------|
+| 1   | 98                     |
+| 2   | 104                    |
+| 3   | 112                    |
+| 4   | 107                    |
+| 5   | 94                     |
+| 6   | 95                     |
+| 7   | 108                    |
+| 8   | 97                     |
+| 9   | 96                     |
+| 10  | 89                     |
+
+Compute the sum:
+$$
+T = \frac{10}{1000} \sum_{j=1}^{10} (n_j - 100)^2
+$$
+$$
+T = 0.01 \left[ (98-100)^2 + (104-100)^2 + (112-100)^2 + \cdots + (89-100)^2 \right]
+$$
+$$
+T = 0.01 [4 + 16 + 144 + 49 + 36 + 25 + 64 + 9 + 16 + 121]
+$$
+$$
+T = 0.01 \times 484 = 4.84
+$$
+
+**Step 2: Find the Critical Value**
+
+The null hypothesis is rejected if $T$ exceeds the critical value from the chi-square distribution with $k-1 = 9$ degrees of freedom at significance level $\alpha$ (e.g., $\alpha = 5%$).
+
+For $\chi^2_{0.95,9}$, the critical value is approximately 16.919 (which can be computed using the Matlab function [chi2inv](https://www.mathworks.com/help/stats/chi2inv.html)).
+
+**Step 3: Compare $T$ to the critical value:**
+
+- If $T < 16.919$, do **not** reject the null hypothesis (the sample is consistent with being uniform).
+- If $T > 16.919$, **reject** the null hypothesis (the sample is not uniform).
+
+In this example:
+$$
+4.84 < 16.919
+$$
+So we **do not reject** the null hypothesis; the sample passes the uniformity test.
+:::
+
 #### The Kolmogorov–Smirnov Test
 
-Another simple test uses the empirical distribution function of the sample. The Kolmogorov–Smirnov test is based on the following intuition: If the sample is uniformly distributed, the deviation of the empirical distribution function from the theoretical distribution function, as given in Lemma 4.2, should be small.
+Another simple test uses the empirical distribution function of the sample, which we define below:
 
 ::: {.definition}
 If $x=(x_1,\dots,x_n)$ is a sample, then the **empirical distribution function** of $x$ is given by
@@ -242,7 +312,12 @@ F_n(x) = \frac{1}{n}\sum_{i=1}^n \mathbb{1}_{(-\infty,x)}(x_i), \quad x \in \mat
 $$
 :::
 
-![](im/emp_cdf.png){width=80% fig-align="center"}
+
+:::{.eg}
+![Comparison of the empirical and true CDFs for a sample of normally distributed pseudorandom numbers. We observe increasingly good agreement for larger sample sizes, as expected if the PRNG has good statistical properties.](im/emp_cdf.png){width=80% fig-align="center"}
+:::
+
+The Kolmogorov–Smirnov test is based on the following intuition: If the sample is uniformly distributed, the deviation of the empirical distribution function from the theoretical distribution function should be small, as shown in the figure above.
 
 The **Kolmogorov–Smirnov test for uniformity** is constituted by the following:
 - The null hypothesis $H_0$: The sample is from a given distribution $F$ against the alternative hypothesis $H_a$ that it is not.
@@ -257,7 +332,7 @@ As $n\rightarrow\infty$, $\sqrt{n} D_n$ converges to
 $$
 \sup_{t\in\mathbb R}\vert B(F(t))\vert,
 $$
-in distribution, where $B$ is a Brownian bridge (i.e., the quantity $\sup_{t\in\mathbb R}\vert B(F(t))\vert$ is a random variable).
+in distribution, where $B$ is a [Brownian Bridge](https://en.wikipedia.org/wiki/Brownian_bridge) (i.e., the quantity $\sup_{t\in\mathbb R}\vert B(F(t))\vert$ is a random variable).
 
 For $F(t)=t$, the uniform distribution, the critical values of the Kolmogorov statistics $D_n$ are known. For large $n$, the statistics converge in distribution to the so-called **Kolmogorov distribution**, which satisfies
 $$
@@ -268,5 +343,172 @@ $$
 \mathbb P[K\leq x]=1-2\sum_{k=1}^\infty (-1)^{k-1}e^{-2k^2x^2}, \quad x \in \mathbb{R}^+.
 $$
 
+:::{.callout-note}
+Along with the statistical tests outlined above, popular test suites such as [Diehard](https://en.wikipedia.org/wiki/Diehard_tests) and [Dieharder](https://webhome.phy.duke.edu/~rgb/General/dieharder.php) provide batteries of statistical tests for evaluating the quality of pseudorandom number generators (PRNGs). These suites assess a PRNG's output for statistical randomness and are widely used in research and industry to ensure reliability and unpredictability.
+:::
+
+## Monte Carlo Integration
+
+### A motivating example
+
+The basic idea of Monte Carlo Integration is that we can use random sampling to estimate the value of integrals. The method is named for the famous Monte Carlo casinos. The following example illustrates the basic idea, which can be generalised and applied to a wide variety of situations.
+
+:::{.eg}
+Consider the unit circle in $\mathbb{R}^2$, i.e. the set of points
+$$
+\{(x,y) : x^2 + y^2 \leq 1 \}.
+$$
+
+We know that the area of the unit circle is $\pi$ and we could hence consider the following way to estimate $\pi$ by random sampling. If we take two indepedent random numbers, $X_i$ and $Y_i$, each uniformly random on $[-1,1]$, then $(X_i,\,Y_i)$ is a uniform random number on the square $[-1,1] \times [-1,1]$. Since the distribution is uniform, the probability that a random pair $(X_i,\,Y_i)$ falls into the unit circle is $\pi/4$. 
+
+Looking at the two numerical experiments below, we see that in the left panel, we have $8$ of $10$ points falling in unit circle. This gives us an estimate of $\pi$ of about $3.2$. For $N = 1000$, we can't count so easily by eye but the estimate in fact improves to about $3.1523$. Put another way, we are estimating the integral
+$$
+\int\int_{x^2 + y^2 \leq 1}^{} dx dy = \int_{-1}^1 \int_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}} dx dy.
+$$
+This connection between probabilities, areas and integration is the basis of the Monte Carlow method, and we will spend the rest of this section formalising these connections.
+
+![](im/MC_circle.png){width=80% fig-align="center"}
+
+:::
+
+### The Monte Carlo Estimator
+
+For a continuous real-valued random variable $X$ with PDF $f$, its mean or **expectation** can be computed via the formula:
+
+$$
+\mathbb{E}[X] = \int_\mathbb{R} x f(x)\,dx
+$$
+
+Moreoever, if we want to calculate an expectation of a random variable $Y = A(X)$, for some smooth function $x \mapsto A(x)$, this is given by the related formula:
+
+$$
+\mu := \mathbb{E}[A(X)] = \int_{\mathbb{R}} A(x) f(x)\, dx.
+$$
+
+However, often the function $A$ is sufficiently complicated that the integral cannot be derived in closed form. For example, in financial applications, $A$ might be the payoff function of an exotic option or be related to the claims policy on an insurance contract. The Monte-Carlo method (MCM) uses simulations to derive an approximation of $\mu$ as follows:
+
+Suppose we have a sample from the same distribution as $X$, namely
+
+$$
+X_1,\ldots,X_n.
+$$
+
+Then
+
+$$
+A(X_1), \ldots, A(X_n)
+$$
+
+is a sample with the distribution of $A(X)$. The **strong law of large numbers** says that the **sample average** converges **almost surely** to the expectation $\mu$, i.e.,
+
+$$
+\lim_{n \to \infty} \frac{A(X_1) + \cdots + A(X_n)}{n} = \mathbb{E}[A(X)] = \mu, \quad \text{almost surely}.
+$$
+
+The strong law applies under mild conditions (finite means and variances of the random variables), and allows us to use the **sample average** as an estimator for the true value of $\mu$ for large values of $n$.
+
+:::{.callout}
+**Almost sure** convergence is a mode of convergence appropriate to sequences of random variables. It is a very strong form of convergence (there are weaker forms) and roughly means that if you repeatedly observe values from a sequence of random variables, eventually the sequence will settle down and stay close to the limit for all future observations.
+:::
+
+In practice, one runs a simulation and obtains a sample, say
+
+$$
+x_1, \ldots, x_n,
+$$
+
+and thus a sample from the same distribution as $A(X)$,
+
+$$
+A(x_1), \ldots, A(x_n).
+$$
+
+For large $n$, the SLLN therefore allows us to use the **sample average**, also called the **Monte Carlo estimator** in this context,  as a proxy for $\mu$, i.e.
+$$
+\hat{\mu}_n := \frac{A(x_1) + \cdots + A(x_n)}{n} \approx \mu.
+$$
+
+However, each time we run a new simulation the sample average delivers a new value. This begs the question:
+
+### How good is the approximation?
+
+The Monte Carlo estimator has several desirable properties as a statistical estimator. In particular, the Monte Carlo estimator is:
+
+- **Unbiased**, i.e. $\mathbb{E}[\hat{\mu}_n] = \mu$, or “the sample mean is equal to the true mean”.
+- **Strongly consistent**, i.e. $\lim_{n\rightarrow\infty} \hat{\mu}_n = \mu$ almost surely.
+
+Furthermore, we can quantify the error of the Monte Carlo estimator. If $\sigma^2 = \text{Var}[A(X)] = \mathbb{E}[(A(X) - \mu)^2]$, the variance of $A(X)$, was known, then we could use the Central Limit Theorem to quantify the quality of approximation of the Monte Carlo estimator. In fact,
+$$
+\frac{\sqrt{n}}{\sigma}(\hat{\mu}_n-\mu) \approx \mathcal{N}(0,1), \quad \text{as }n \to\infty.
+$$
+In practice, we can estimate the variance of $A(X)$ from random samples as part of the Monte Carlo Method.
+
+Therefore, the $\alpha$ confidence interval of $\hat{\mu}_n$ is approximately equal to
+$$
+\mu \pm z_{1-\alpha/2} \frac{\sigma}{\sqrt{n}},
+$$
+where $z_{\beta}$ is the $\beta$-quantile of $\mathcal{N}(0,1)$ distribution, i.e.
+$$
+\mathbb{P}[- z_{\beta} \leq Z \leq z_{\beta}] = \beta, \quad Z \sim \mathcal{N}(0,1).
+$$
+
+### The practical approach
+
+Recall that for a sample $y_1, \ldots, y_n$, the sample mean and variance are given by
+$$
+\bar{y} = \frac{y_1 + \cdots + y_n}{n} \qquad
+s = \frac{\sum_{k=1}^{n}(y_k - \bar{y})^2}{n-1}.
+$$
+
+Often, one does not know the precise values of $\mu$ or $\sigma^2$ (especially $\mu$, otherwise we don’t need to run Monte-Carlo simulations at all!). One thus replaces $\mu$ and $\sigma^2$ by their empirical estimates as follows:
+$$
+\hat{\mu}_n \pm z_{1-\alpha/2} \frac{\hat{\sigma}_n}{\sqrt{n}},
+$$
+where $\hat{\mu}_n, \hat{\sigma}_n^2$ are the empirical mean and variance of the given sample
+$$
+A(x_1), \ldots, A(x_n).
+$$
+
+The quantity $\hat{\sigma}_n/\sqrt{n}$ is called **standard error**. Summarizing, we have
+$$
+S.E. = \sqrt{\frac{\sum_{i=1}^n (A(x_i) - \hat{\mu}_n)^2}{n(n-1)}}.
+$$
+
+The standard error expression tells us that the error scales like $n^{-1/2}$. For example, if we wish to make our estimate 10 times more accurate we need to increase $n$ by a factor of 100!
+**This is a key feature of the Monte Carlo method and persists even in a higher dimensional setting.**
+In one-dimensional the simple trapezoidal rule has an error which scales like $n^{-2}$ and is hence far superior to the MCM. However, in $d$-dimensions the trapezoidal rule error scales like $n^{-2/d}$ while the MCM retains its $n^{-1/2}$ error scaling. Therefore MCMs are attractive methods for quickly and accurately evaluating higher dimensional integrals whose closed form expressions are not available.
+
+:::{.eg}
+Let $X$ be a uniformly distributed r.v. on the unit interval and consider
+$$
+\mu = \mathbb{E}[X^2].
+$$
+
+For size $n$, let us sample from the uniform distribution, which gives us
+$$
+x_1, x_2, \ldots, x_n
+$$
+independent copies of $X$. The Monte Carlo estimator for $\mu$ is just the sample average
+$$
+\mu \approx \frac{x_1^2 + \cdots + x_n^2}{n} =: \hat{\mu}_n.
+$$
+
+The theoretical value of $\mu$ can actually be calculated explicitly, and it is given by
+$$
+\mu = \int_0^1 x^2 f(x)\,dx = \int_0^1 x^2 dx = \left.\frac{x^3}{3}\right|_0^1 = \frac{1}{3},
+$$
+where we recall that the uniform distribution has density $f \equiv 1$ on $[0,1]$.
+
+The variance $\sigma^2$ of the Monte Carlo estimator is the Variance of $X^2$ divided by $n$, $\sigma^2/n$, where
+$$
+\sigma^2 = \mathbb{E}\left[(X^2 - \mu)^2\right] = \mathbb{E}[X^4] - \mathbb{E}\left[(X^2)\right]^2
+= 1/5 - (1/3)^2 = \frac{9-5}{45} = \frac{4}{45}.
+$$
+
+We conclude that the $\alpha$ confidence interval of $\hat{\mu}_n$ is approximately
+$$
+\mu \pm z_{1-\alpha/2} \frac{2}{\sqrt{9n}}.
+$$
+:::
 ## Stochastic Processes
 
