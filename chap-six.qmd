@@ -53,6 +53,34 @@ If we know how to create a sample from a uniform distribution, then we can obtai
 Let $U$ be a uniformly distributed random variable on $[0,1]$, and let $F(x)$ be a cumulative distribution function. If $F$ is invertible, then $X=F^{-1}(U)$ is distributed according to $F$. 
 :::
 
+:::{.eg}
+## Inverse Transform Sampling for the Pareto Distribution
+
+The PDF of the Pareto distribution with scale parameter $x_m > 0$ and shape parameter $\alpha > 0$ is given by:
+$$
+f(x) = \frac{\alpha x_m^\alpha}{x^{\alpha+1}}, \quad x \geq x_m
+$$
+
+The cumulative distribution function (CDF) is thus
+$$
+F(x) = 1 - \left( \frac{x_m}{x} \right)^\alpha, \quad x \geq x_m
+$$
+
+To use the inverse transform method, we need to compute $F^{-1}(x)$. We know that
+$$
+F(F^{-1}(x)) = x
+$$
+and hence we can solve for $F^{-1}(x)$ as follows:
+$$
+\left(\frac{x_m}{F^{-1}(x)}\right)^{\alpha} - 1 \implies F^{-1}(x)
+ = \frac{x_m}{(1-x)^{1/\alpha}}.
+$$
+Thus if $U\sim \text{uniform([0,1])}$, then
+$$
+\frac{x_m}{(1-U)^{1/\alpha}} \sim \text{Pareto}(x_m,\alpha).
+$$
+:::
+
  Therefore it is often enough to have samples from the uniform distribution and hence this distribution plays a central role in the theory of random number generation.
 
 In some sense, there are no *truly* random number generators. Computers can only execute algorithms, which are deterministic instructions, and thus they can only yield samples which appear random. We call these numbers **pseudorandom numbers**, and the algorithms which produce these numbers are called **pseudorandom number generators**.
@@ -347,11 +375,11 @@ $$
 Along with the statistical tests outlined above, popular test suites such as [Diehard](https://en.wikipedia.org/wiki/Diehard_tests) and [Dieharder](https://webhome.phy.duke.edu/~rgb/General/dieharder.php) provide batteries of statistical tests for evaluating the quality of pseudorandom number generators (PRNGs). These suites assess a PRNG's output for statistical randomness and are widely used in research and industry to ensure reliability and unpredictability.
 :::
 
-## Monte Carlo Integration
+## Monte Carlo Methods
 
 ### A motivating example
 
-The basic idea of Monte Carlo Integration is that we can use random sampling to estimate the value of integrals. The method is named for the famous Monte Carlo casinos. The following example illustrates the basic idea, which can be generalised and applied to a wide variety of situations.
+The basic idea of the "Monte Carlo Method" is that we can use random sampling to estimate the value of integrals. The method is named for the famous Monte Carlo casinos. The following example illustrates the basic idea, which can be generalised and applied to a wide variety of situations.
 
 :::{.eg}
 Consider the unit circle in $\mathbb{R}^2$, i.e. the set of points
