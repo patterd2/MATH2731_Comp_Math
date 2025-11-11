@@ -554,3 +554,29 @@ where each $Z_i$ is an independent random variable taking the value $+1$ or $-1$
 ![Three simulated paths of a symmetric random walk.](im/rand_walk.png){width=80% fig-align="center"}
 :::
 
+The Monte Carlo method for estimating integrals using repeated random sampling is especially useful for estimating complicated integrals arising in applications. In many cases, closed form expressions are difficult or impossible to obtain, but we can easily approximate their values with simple direct simulations.
+
+:::{.eg}
+## Expected meal time for a hungry forager
+
+Suppose an animal starts foraging for food in a meadow. We suppose they move within a patchy landscape of possible food locations, i.e. each point $(i,j)$ for $i,j \in \mathbb{Z}_+$ is a patch, with their starting coordinate denoted by $(0, 0)$. At each step, the animal moves to one of four neighboring patches (up, down, left, right) with equal probability. There is food located in the square $\mathcal{D}$ of patches with vertices $[4,4]$, $[4,8]$, $[8,4]$, $[8,8]$. To ensure that the forager stays in $\mathbb{Z}^2_+$, we must impose a **reflecting** boundary condition on the random walk, so that if the forager tries to take a step that would result in them leaving $\mathbb{Z}^2_+$, they are pushed back inside.
+
+How long do we expect it to take the animal to successfully secure some food?
+
+If $S_n$ denotes the position of forager at time $n \in \mathbb{N}$, we are looking to estimate the expected value (mean) of the hitting time $\tau$, where
+$$
+\tau := \inf_{\{n \geq 0\}}\{ S_n \in \mathcal{D} \}.
+$$
+It is challenging (but possible) to write down an analytic expression for the value of $\mathbb{E}[\tau]$. However, this becomes increasingly hard for more realistic models of animal movement! Instead we will directly simualate the random walk the forager is taking and record the number of steps it takes to reach $\mathcal{D}$. 
+
+If $\hat{\tau}_i$ is the number of steps to reach $\mathcal{D}$ in simulation $i$, then our Monte Carlo approximation is this
+$$
+\mathbb{E}[\tau] \approx\frac{\hat{\tau}_1 + \hat{\tau}_2 + \dots \hat{\tau}_n}{n}.
+$$
+
+![Three simulated paths of the hungry forager searching for food.](im/forager.png){width=100% fig-align="center"}
+
+Simulating the process gives us $\tau \approx 113$ and we can also use the values of $\hat{\tau}_i$ to make the following plot of the PDF of $\tau$:
+
+![](im/hitting_dist.png){width=100% fig-align="center"}
+:::
