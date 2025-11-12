@@ -3889,29 +3889,29 @@ background: #68246D;
 }
 </style>
 <style>
-.proof {
---color1: #fcebee;
---color2: #ea3342;
+.doit {
+--color1: #e7efea;
+--color2: #53b57b;
 }
 .algorithm {
 --color1: #e7efea;
 --color2: #53b57b;
 }
+.theorem {
+--color1: #fcebee;
+--color2: #ea3342;
+}
 .definition {
+--color1: #fcebee;
+--color2: #ea3342;
+}
+.proof {
 --color1: #fcebee;
 --color2: #ea3342;
 }
 .eg {
 --color1: #E7D6EA;
 --color2: #68246D;
-}
-.theorem {
---color1: #fcebee;
---color2: #ea3342;
-}
-.doit {
---color1: #e7efea;
---color2: #53b57b;
 }
 </style>
 
@@ -4159,7 +4159,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#partial-differential-equations" id="toc-partial-differential-equations" class="nav-link active" data-scroll-target="#partial-differential-equations"><span class="header-section-number">6.1</span> Partial Differential Equations</a></li>
+  <li><a href="#partial-differential-equations" id="toc-partial-differential-equations" class="nav-link active" data-scroll-target="#partial-differential-equations"><span class="header-section-number">6.1</span> Partial Differential Equations</a>
+  <ul class="collapse">
+  <li><a href="#the-heat-equation-and-boundary-conditions" id="toc-the-heat-equation-and-boundary-conditions" class="nav-link" data-scroll-target="#the-heat-equation-and-boundary-conditions"><span class="header-section-number">6.1.1</span> The heat equation and boundary conditions</a></li>
+  <li><a href="#spatial-discretisation-finite-differences" id="toc-spatial-discretisation-finite-differences" class="nav-link" data-scroll-target="#spatial-discretisation-finite-differences"><span class="header-section-number">6.1.2</span> Spatial discretisation: finite differences</a></li>
+  <li><a href="#the-method-of-lines-formulation" id="toc-the-method-of-lines-formulation" class="nav-link" data-scroll-target="#the-method-of-lines-formulation"><span class="header-section-number">6.1.3</span> The method of lines formulation</a></li>
+  <li><a href="#time-discretisation-and-stability" id="toc-time-discretisation-and-stability" class="nav-link" data-scroll-target="#time-discretisation-and-stability"><span class="header-section-number">6.1.4</span> Time discretisation and stability</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6.1.5</span> Summary</a></li>
+  </ul></li>
   <li><a href="#random-number-generation" id="toc-random-number-generation" class="nav-link" data-scroll-target="#random-number-generation"><span class="header-section-number">6.2</span> Random Number Generation</a>
   <ul class="collapse">
   <li><a href="#uniform-random-numbers" id="toc-uniform-random-numbers" class="nav-link" data-scroll-target="#uniform-random-numbers"><span class="header-section-number">6.2.1</span> Uniform Random Numbers</a></li>
@@ -4187,6 +4194,89 @@ window.Quarto = {
 
 <section id="partial-differential-equations" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="partial-differential-equations"><span class="header-section-number">6.1</span> Partial Differential Equations</h2>
+<blockquote class="blockquote">
+<p><em>How can we solve Partial Differential Equations numerically?</em></p>
+</blockquote>
+<p>We have seen how to approximate solutions to systems of Ordinary Differential Equations (ODEs) using various timestepping schemes. Many Partial Differential Equations (PDEs) can also be reduced to large systems of ODEs using the <strong>method of lines</strong>. In this section, we will illustrate this idea for one of the simplest PDEs: the one-dimensional heat equation.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>As in the last Chapter, this topic is also vast. Entire fields of science, such as numerical General Relativity, Computational Fluid Mechanics, and Finite Element Analysis, are essentially subfields within the broad topic of Numerical PDEs. Each of those topics has dozens or hundreds of textbooks written on particular aspects of it. We will therefore be extremely cursory, giving a flavour of some ideas that underlie <a href="https://VisualPDE.com">VisualPDE.com</a> and many standard numerical PDE tools, but leaving a “deep” exploration for future study.</p>
+</div>
+</div>
+</div>
+<section id="the-heat-equation-and-boundary-conditions" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="the-heat-equation-and-boundary-conditions"><span class="header-section-number">6.1.1</span> The heat equation and boundary conditions</h3>
+<p>The one-dimensional heat equation describes the diffusion of temperature <span class="math inline">\(u(x,t)\)</span> in a homogeneous medium: <span class="math display">\[
+\frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}, \quad x \in [0,L], \quad t &gt; 0,
+\]</span> where <span class="math inline">\(\alpha &gt; 0\)</span> is the diffusivity constant. To fully specify the problem, we must also prescribe initial and boundary conditions.</p>
+<p>We will use an initial condition: <span class="math display">\[
+u(x,0) = u_0(x),
+\]</span> and homogeneous <strong>Neumann boundary conditions</strong>: <span class="math display">\[
+\frac{\partial}{\partial x}u(0,t) = \frac{\partial}{\partial x}u(L,t) = 0,
+\]</span> which correspond physically to an insulated domain where no heat flows in or out through the boundaries.</p>
+<hr>
+</section>
+<section id="spatial-discretisation-finite-differences" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="spatial-discretisation-finite-differences"><span class="header-section-number">6.1.2</span> Spatial discretisation: finite differences</h3>
+<p>To apply the method of lines, we first discretise the spatial variable <span class="math inline">\(x\)</span> using a uniform grid of <span class="math inline">\(N\)</span> nodes. Let: <span class="math display">\[
+x_j = j \Delta x, \quad j = 1, 2, \dots, N, \quad \Delta x = L / (N-1),
+\]</span> and define: <span class="math display">\[
+u_j(t) \approx u(x_j, t).
+\]</span> The spatial derivatives in the heat equation can be approximated using finite differences. For the second derivative, a centred difference gives: <span class="math display">\[
+\frac{\partial^2}{\partial x^2}u(x_j,t) \approx \frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}.
+\]</span></p>
+<p>For the Neumann boundary conditions, we use the concept of <strong>ghost nodes</strong>, introducing extra nodes at <span class="math inline">\(u_0\)</span> and <span class="math inline">\(u_{N+1}\)</span>. To determine these, we approximate the first derivative at the endpoints using forward and backward differences: <span class="math display">\[
+\frac{u_1 - u_0}{\Delta x} = 0 \quad \Rightarrow \quad u_1 = u_0,
+\]</span> <span class="math display">\[
+\frac{u_{N+1} - u_{N}}{\Delta x} = 0 \quad \Rightarrow \quad u_{N+1} = u_{N}.
+\]</span></p>
+<hr>
+</section>
+<section id="the-method-of-lines-formulation" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="the-method-of-lines-formulation"><span class="header-section-number">6.1.3</span> The method of lines formulation</h3>
+<p>Plugging the finite difference approximation into the heat equation leads to the large system of ODEs for the approximate solution at each gridpoint, <span class="math inline">\(u_j(t)\)</span>: <span class="math display">\[
+\frac{d}{dt} u_j(t) = \alpha\frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}, \quad j = 1,2,\dots N,
+\]</span> where we recall that <span class="math inline">\(u_0=u_1\)</span> and <span class="math inline">\(u_{N+1} = u_N\)</span>, so that two of these equations have a slightly different form.</p>
+<p>We can also write this system for the vector: <span class="math display">\[
+\mathbf{u}(t) = (u_0(t), u_1(t), \dots, u_N(t))^\top.
+\]</span> We obtain: <span class="math display">\[
+\frac{d}{dt}\mathbf{u}(t) = \alpha \mathbf{A} \mathbf{u}(t),
+\]</span> where <span class="math inline">\(\mathbf{A}\)</span> is the <span class="math inline">\((N+1)\times(N+1)\)</span> matrix defined by: <span class="math display">\[
+\mathbf{A} = \frac{1}{(\Delta x)^2}
+\begin{pmatrix}
+-1 &amp; 1 &amp; 0 &amp; 0 &amp; \cdots &amp; 0\\
+1 &amp; -2 &amp; 1 &amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; 1 &amp; -2 &amp; 1 &amp; \cdots &amp; 0\\
+\vdots &amp; &amp; \ddots &amp; \ddots &amp; \ddots &amp; \vdots\\
+0 &amp; \cdots &amp; 0 &amp; 1 &amp; -2 &amp; 1\\
+0 &amp; \cdots &amp; 0 &amp; 0 &amp; 1 &amp; -1
+\end{pmatrix}.
+\]</span> This matrix represents the discrete Laplacian operator with Neumann boundary conditions.</p>
+<hr>
+</section>
+<section id="time-discretisation-and-stability" class="level3" data-number="6.1.4">
+<h3 data-number="6.1.4" class="anchored" data-anchor-id="time-discretisation-and-stability"><span class="header-section-number">6.1.4</span> Time discretisation and stability</h3>
+<p>For example, applying the forward Euler method gives: <span class="math display">\[
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_n.
+\]</span> This scheme is simple to implement, but its stability depends strongly on the size of <span class="math inline">\(\Delta t\)</span>. For the one-dimensional heat equation, it can be shown that stability requires: <span class="math display">\[
+\Delta t \leq \frac{(\Delta x)^2}{2\alpha}.
+\]</span> Violating this condition leads to rapidly growing (unphysical) numerical oscillations.</p>
+<p>Alternatively, we can use the backward Euler scheme, which gives: <span class="math display">\[
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_{n+1}.
+\]</span> This is an implicit system, requiring the solution of a linear system at each timestep: <span class="math display">\[
+(\mathbf{I} - \Delta t \alpha \mathbf{A})\mathbf{u}_{n+1} = \mathbf{u}_n.
+\]</span> However, the backward Euler method is A-stable, and therefore unconditionally stable for the heat equation. This means that we can take arbitrarily large timesteps without introducing instability, though accuracy may still require small <span class="math inline">\(\Delta t\)</span>.</p>
+<hr>
+</section>
+<section id="summary" class="level3" data-number="6.1.5">
+<h3 data-number="6.1.5" class="anchored" data-anchor-id="summary"><span class="header-section-number">6.1.5</span> Summary</h3>
+<p>The method of lines converts a PDE into a large system of ODEs by discretising only in space. The resulting ODE system can then be integrated using any of the timestepping methods from Chapter 5. The stability and accuracy of the full PDE scheme are determined by both the spatial discretisation and the ODE integrator used in time.</p>
+<p>On the Blackboard page are several code demos for the Heat equation, using both the matrix approach and a for-loop approach to discretising this equation. A demo is also provided for the Schnakenberg system of reaction-diffusion equations.</p>
+</section>
 </section>
 <section id="random-number-generation" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="random-number-generation"><span class="header-section-number">6.2</span> Random Number Generation</h2>

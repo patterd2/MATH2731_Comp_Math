@@ -4,6 +4,121 @@ title: Further Topics
 
 ## Partial Differential Equations
 
+> *How can we solve Partial Differential Equations numerically?*
+
+We have seen how to approximate solutions to systems of Ordinary Differential Equations (ODEs) using various timestepping schemes. Many Partial Differential Equations (PDEs) can also be reduced to large systems of ODEs using the **method of lines**. In this section, we will illustrate this idea for one of the simplest PDEs: the one-dimensional heat equation.
+
+::: {.callout-note}
+As in the last Chapter, this topic is also vast. Entire fields of science, such as numerical General Relativity, Computational Fluid Mechanics, and Finite Element Analysis, are essentially subfields within the broad topic of Numerical PDEs. Each of those topics has dozens or hundreds of textbooks written on particular aspects of it. We will therefore be extremely cursory, giving a flavour of some ideas that underlie [VisualPDE.com](https://VisualPDE.com) and many standard numerical PDE tools, but leaving a "deep" exploration for future study.
+:::
+
+### The heat equation and boundary conditions
+
+The one-dimensional heat equation describes the diffusion of temperature $u(x,t)$ in a homogeneous medium:
+$$
+\frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}, \quad x \in [0,L], \quad t > 0,
+$$
+where $\alpha > 0$ is the diffusivity constant. To fully specify the problem, we must also prescribe initial and boundary conditions.
+
+We will use an initial condition:
+$$
+u(x,0) = u_0(x),
+$$
+and homogeneous **Neumann boundary conditions**:
+$$
+\frac{\partial}{\partial x}u(0,t) = \frac{\partial}{\partial x}u(L,t) = 0,
+$$
+which correspond physically to an insulated domain where no heat flows in or out through the boundaries.
+
+---
+
+### Spatial discretisation: finite differences
+
+To apply the method of lines, we first discretise the spatial variable $x$ using a uniform grid of $N$ nodes. Let:
+$$
+x_j = j \Delta x, \quad j = 1, 2, \dots, N, \quad \Delta x = L / (N-1),
+$$
+and define:
+$$
+u_j(t) \approx u(x_j, t).
+$$
+The spatial derivatives in the heat equation can be approximated using finite differences. For the second derivative, a centred difference gives:
+$$
+\frac{\partial^2}{\partial x^2}u(x_j,t) \approx \frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}.
+$$
+
+For the Neumann boundary conditions, we use the concept of **ghost nodes**, introducing extra nodes at $u_0$ and $u_{N+1}$. To determine these, we approximate the first derivative at the endpoints using forward and backward differences:
+$$
+\frac{u_1 - u_0}{\Delta x} = 0 \quad \Rightarrow \quad u_1 = u_0,
+$$
+$$
+\frac{u_{N+1} - u_{N}}{\Delta x} = 0 \quad \Rightarrow \quad u_{N+1} = u_{N}.
+$$
+
+---
+
+### The method of lines formulation
+
+Plugging the finite difference approximation into the heat equation leads to the large system of ODEs for the approximate solution at each gridpoint, $u_j(t)$:
+$$
+\frac{d}{dt} u_j(t) = \alpha\frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}, \quad j = 1,2,\dots N,
+$$
+where we recall that $u_0=u_1$ and $u_{N+1} = u_N$, so that two of these equations have a slightly different form.
+
+We can also write this system for the vector:
+$$
+\mathbf{u}(t) = (u_0(t), u_1(t), \dots, u_N(t))^\top.
+$$
+We obtain:
+$$
+\frac{d}{dt}\mathbf{u}(t) = \alpha \mathbf{A} \mathbf{u}(t),
+$$
+where $\mathbf{A}$ is the $(N+1)\times(N+1)$ matrix defined by:
+$$
+\mathbf{A} = \frac{1}{(\Delta x)^2}
+\begin{pmatrix}
+ -1 & 1 & 0 & 0 & \cdots & 0\\
+ 1 & -2 & 1 & 0 & \cdots & 0\\
+ 0 & 1 & -2 & 1 & \cdots & 0\\
+ \vdots & & \ddots & \ddots & \ddots & \vdots\\
+ 0 & \cdots & 0 & 1 & -2 & 1\\
+ 0 & \cdots & 0 & 0 & 1 & -1
+\end{pmatrix}.
+$$
+This matrix represents the discrete Laplacian operator with Neumann boundary conditions.
+
+---
+
+### Time discretisation and stability
+
+For example, applying the forward Euler method gives:
+$$
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_n.
+$$
+This scheme is simple to implement, but its stability depends strongly on the size of $\Delta t$. For the one-dimensional heat equation, it can be shown that stability requires:
+$$
+\Delta t \leq \frac{(\Delta x)^2}{2\alpha}.
+$$
+Violating this condition leads to rapidly growing (unphysical) numerical oscillations.
+
+Alternatively, we can use the backward Euler scheme, which gives:
+$$
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_{n+1}.
+$$
+This is an implicit system, requiring the solution of a linear system at each timestep:
+$$
+(\mathbf{I} - \Delta t \alpha \mathbf{A})\mathbf{u}_{n+1} = \mathbf{u}_n.
+$$
+However, the backward Euler method is A-stable, and therefore unconditionally stable for the heat equation. This means that we can take arbitrarily large timesteps without introducing instability, though accuracy may still require small $\Delta t$.
+
+---
+
+### Summary
+
+The method of lines converts a PDE into a large system of ODEs by discretising only in space. The resulting ODE system can then be integrated using any of the timestepping methods from Chapter 5. The stability and accuracy of the full PDE scheme are determined by both the spatial discretisation and the ODE integrator used in time.
+
+On the Blackboard page are several code demos for the Heat equation, using both the matrix approach and a for-loop approach to discretising this equation. A demo is also provided for the Schnakenberg system of reaction-diffusion equations.
+
 ## Random Number Generation
 
 > *How do we generate random numbers on a computer?*
