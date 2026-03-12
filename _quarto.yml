@@ -16,6 +16,7 @@ book:
     - chap-four.qmd
     - chap-five.qmd
     - chap-six.qmd
+    - projects.qmd
     
 
 format:
