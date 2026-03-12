@@ -23,7 +23,7 @@ format:
   html:
     theme:
       - litera
-      # - custom.scss
+      - custom.scss
     fontsize: 1.0em
     callout-appearance: simple
     # callout-icon: false
