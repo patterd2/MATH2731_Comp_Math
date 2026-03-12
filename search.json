@@ -408,5 +408,15 @@
     "crumbs": [
       "<span class='chapter-number'>6</span>  <span class='chapter-title'>Further Topics</span>"
     ]
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "7  Projects",
+    "section": "",
+    "text": "7.1 Outstanding Projects 2025/2026 (selection)\n$$ \\def\\eb{\\boldsymbol{e}} \\def\\fb{\\boldsymbol{f}} \\def\\hb{\\boldsymbol{h}} \\def\\xb{\\boldsymbol{x}} \\def\\Rb{\\boldsymbol{R}} \\def\\Real{\\mathbb{R}} \\def\\bfzero{\\boldsymbol{0}} \\newcommand{\\ddy}[2]{\\frac{\\partial{#1}}{\\partial{#2}}} $$\nThis page showcases some of the outstanding student projects from the course that were awarded prizes. All prize-winning project videos are available on the course YouTube channel.\nWe are very grateful to MathWorks for generously providing the prizes!",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Projects</span>"
+    ]
   }
 ]
