@@ -6,7 +6,7 @@ This page showcases some of the outstanding student projects from this course th
 
 We are very grateful to [MathWorks](https://www.mathworks.com) for generously providing the prizes for this competition.
 
-![Prize-winning students with their MathWorks prizes.](im/prize-winners.jpg){fig-align="center" width="80%"}
+![Prize-winning students with their MathWorks prizes.](im/prize-winners.png){fig-align="center" width="80%"}
 
 ## Project 1
 
