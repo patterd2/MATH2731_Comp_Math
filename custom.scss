@@ -1,8 +1,8 @@
 /*-- scss:rules --*/
 
-.quarto-title-banner {
-  background-image: url('https://www.durham.ac.uk/media/durham-university/site-assets/image/logo-white.svg');
-  background-repeat: no-repeat;
-  background-position: right 2rem center;
-  background-size: auto 55%;
+.quarto-title-block .quarto-title-banner {
+  background-image: url('im/du-logo-white.png') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 2rem center !important;
+  background-size: auto 55% !important;
 }
