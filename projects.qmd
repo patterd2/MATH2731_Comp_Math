@@ -1,0 +1,29 @@
+---
+title: Projects
+---
+
+This page showcases some of the outstanding student projects from this course that were awarded prizes. All prize-winning project videos are available on the [course YouTube channel](https://www.youtube.com/@CompMathDurham/videos).
+
+We are very grateful to [MathWorks](https://www.mathworks.com) for generously providing the prizes for this competition.
+
+![Prize-winning students with their MathWorks prizes.](im/prize-winners.jpg){fig-align="center" width="80%"}
+
+## Project 1
+
+{{< video https://youtu.be/KC3DfIlTm70?si=L4ZokO1Y-G2rH7Wa >}}
+
+## Project 2
+
+{{< video https://youtu.be/xJmd4d4s780?si=4k9b0GviL3cY7o5t >}}
+
+## Project 3
+
+{{< video https://youtu.be/SJZ00sMg6bM?si=QrhE99O-LTkGMJra >}}
+
+## Project 4
+
+{{< video https://youtu.be/AubzcrxZSYY?si=yFiGkbPtdtFpZajU >}}
+
+## Project 5
+
+{{< video https://youtu.be/VU289wUaajE?si=ONpkdOj7Cas4ptbF >}}
