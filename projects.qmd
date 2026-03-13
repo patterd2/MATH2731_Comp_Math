@@ -1,21 +1,44 @@
----
-title: Projects
----
+# Projects Showcase {.unnumbered}
 
-This page showcases some of the outstanding student projects from the course that were awarded prizes. All prize-winning project videos are available on the [course YouTube channel](https://www.youtube.com/@CompMathDurham/videos).
+The largest component of the assessment of this module is the **project**. There are approximately eight different project options to choose from across different areas of mathematics (e.g., pure, applied, probability, mathematical physics, etc.); each project has a distinct member of the Maths Department as supervisor. Each project consists of two parts: a **guided component** that is completed as part of a small group and an **extension component** that is open-ended and completed as an individual.
+
+This page showcases some of the outstanding student projects (**individual extension component**) that were awarded prizes for their excellence. All prize-winning project videos are available on the [course YouTube channel](https://www.youtube.com/@CompMathDurham/videos).
 
 We are very grateful to [MathWorks](https://www.mathworks.com) for generously providing the prizes!
 
-![Prize-winning students with their MathWorks prizes.](im/prize-winners.png){fig-align="center" width="80%"}
+![Some of our prize-winning students with their MathWorks prizes.](im/prize-winners.png){fig-align="center" width="90%"}
 
 ## Outstanding Projects 2025/2026 (selection)
 
+**Jack Guilfoyle**: "Dependence of Initial Speed on Kink-Antikink Collisions"
+
 {{< video https://youtu.be/KC3DfIlTm70?si=L4ZokO1Y-G2rH7Wa >}}
+
+**Talia Tobias**: "Paper Aeroplanes and Dynamical Systems"
 
 {{< video https://youtu.be/xJmd4d4s780?si=4k9b0GviL3cY7o5t >}}
 
+**Abigail Weersing**: "Power Output of a Wind Farm"
+
 {{< video https://youtu.be/SJZ00sMg6bM?si=QrhE99O-LTkGMJra >}}
+
+**Thomas Newbury**: "Finite Size Scaling in the 2D Ising Model"
 
 {{< video https://youtu.be/AubzcrxZSYY?si=yFiGkbPtdtFpZajU >}}
 
+**Sam Todd**: "Gradient and Invasion Percolation"
+
 {{< video https://youtu.be/VU289wUaajE?si=ONpkdOj7Cas4ptbF >}}
+
+**Ashwin Iyer**: "The Foucault Pendulum"
+
+{{< video https://youtu.be/mpOjZGvJYck?si=OVHz_RibkYmGUj7f >}}
+
+**Joshua Thompson**: "Random Braid Words and Link Properties"
+
+{{< video https://youtu.be/ZB9UXGwqjXA?si=OQslzJzPaEtFH0-x >}}
+
+**Cameron Connor**: "Structural Credit Risk Models"
+
+{{< video https://youtu.be/JUfVuVp3QfU?si=I0zXNizm_1RF6x_P >}}
+
