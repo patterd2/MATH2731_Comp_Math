@@ -30,7 +30,7 @@ The module's content is divided into six chapters of roughly equal length; some 
     - Timestepping: explicit and implicit methods
     - Stability and convergence order
 - **Chapter 6: Selected Further Topics**
-    - Intro. to random numbers and stochastic processes
+    - Intro. to the Monte Carlo method and stochastic processes
     - Intro. to partial differential equations
 
 ---
@@ -39,18 +39,18 @@ The module's content is divided into six chapters of roughly equal length; some 
 
 The final grade for this module is determined as follows:
 
-- **Weekly lab reports (weeks 1-6)** – 20%
-- **Weekly e-assessments (weeks 1-6)** – 30%
+- **Weekly lab reports (weeks 1-6)** – 25%
+- **Weekly e-assessments (weeks 1-6)** – 25%
 - **Project (weeks 7-10)** – 50%
 
 ### Lab reports
 
 Each week for the first six weeks of the course, we will release a short set of exercises based on the lectures from the previous week. Students will be expected to submit a brief report (1-2 pages A4, including figures) with their solutions to the set of exercises -- the report will consist of written answers and figures/plots. The reports will be evaluated for correctness and quality of the presentation and communication (quality of figures, clarity of argumentation, etc.).  
-**The lab report for a given week will be due at noon on Monday of the following week** (e.g., week one's lab report is due on Monday of week two and so on). Solutions and generalised feedback will be provided to the class on common mistakes and issues arising in each report. Students can also seek detailed feedback on their submission from the lecturers during drop-in sessions and office hours. There will be six lab reports in total, and **your mark is based on your four highest-scoring submissions.**
+**The lab report for a given week will be due at noon on Monday of the following week** (e.g., week one's lab report is due on Monday of week two and so on). Solutions and generalised feedback will be provided to the class on common mistakes and issues arising in each report. Students can also seek detailed feedback on their submission from the lecturers during drop-in sessions and office hours. The first lab report (due on Monday of Week 2) will be formative. There will be five summative lab reports in total, and **your mark is based on your four highest-scoring submissions.**
 
 ### E-assessments
 
-Each week for the first six weeks of the course, we will release a set of e-assessments based on the lectures from the previous week. These exercises are designed to complement the lab reports by focusing exclusively on coding skills. The e-assessments will involve submitting code auto-marked by an online grading tool, and hence give immediate feedback. As with the lab reports, **the set of e-assessments for a given week will be due at noon on Monday of the following week**. There will be six sets of e-assessments in total, and **your mark is based on your four highest-scoring submissions.**
+Each week for the first six weeks of the course, we will release a set of e-assessments based on the lectures from the previous week. These exercises are designed to complement the lab reports by focusing exclusively on coding skills. The e-assessments will involve submitting code auto-marked by an online grading tool, and hence give immediate feedback. As with the lab reports, **the set of e-assessments for a given week will be due at noon on Monday of the following week**. The first set of e-assessments is formative and there will be five summative sets of e-assessments in total; **your mark is based on your four highest-scoring submissions.**
 
 ### Project
 
@@ -59,8 +59,8 @@ The single largest component of the assessment for this module is the project. *
 - There will be approximately eight different project options to choose from across different areas of mathematics (e.g., pure, applied, probability, mathematical physics, etc.); each project has a distinct member of the Maths Department as supervisor.
 - Students will submit their preferred project options (ranked choice preferences) in Week 4 of the term and be allocated to projects by the end of Week 6 (there are maximum subscription numbers for each option to ensure equity of supervision).
 - Each project consists of two parts: a **guided component** that is completed as part of a small group and an **extension component** that is open-ended and completed as an individual. Group allocations will be done by the lecturers.
-- Each group will jointly submit a five-page report for the guided component of the project, and this is worth 60% of the project grade.
-- Each student will also submit a three-page report and a six-minute video presentation on their extension component. This submission is worth 40% of the project grade.
+- Each group will jointly submit a five-page report for the guided component of the project, and this is worth 50% of the project grade.
+- Each student will also submit a three-page report and a six-minute video presentation on their extension component. This submission is worth 50% of the project grade.
 
 In Weeks 7-10 of the term, lectures will be replaced by project workshop sessions during which students can discuss their project with the designated supervisor. This will be an opportunity to discuss progress, ask questions, and seek clarification. Each student only needs to attend the one project drop-in weekly session relevant to their project. Computing drop-in sessions will continue as scheduled in the first six weeks to provide additional support for coding pertinent tasks for the projects -- there will be two timetabled computing drop-ins per week and students are encouraged to attend at least one of them.
 
@@ -75,18 +75,20 @@ Code for all of the examples and exercises will be available on the course Githu
 [https://github.com/patterd2/MATH2731_Comp_Math](https://github.com/patterd2/MATH2731_Comp_Math)
 -->
 
-|            | Activities                        | Content    |
-|:----------:|:----------------------------------|:-----------|
-| **Week 1** | Introductory lecture, 2 lectures  | Chapter 1  |
-| **Week 2** | 3 lectures, 1 computing drop-in   | Chapter 2  |
-| **Week 3** | 3 lectures, 1 computing drop-in   | Chapter 3  |
-| **Week 4** | 3 lectures, 1 computing drop-in   | Chapter 4  |
-| **Week 5** | 3 lectures, 1 computing drop-in   | Chapter 5  |
-| **Week 6** | 3 lectures, 1 computing drop-in   | Chapter 5/6|
-| **Week 7** | 0 lectures, 1 project workshop    | Project    |
-| **Week 8** | 0 lectures, 1 project workshop    | Project    |
-| **Week 9** | 0 lectures, 1 project workshop    | Project    |
-| **Week 10**| 0 lectures, 1 project workshop    | Project    |
+|             | Lecture 1           | Lecture 2           | Lecture 3           | Other activities    |
+|:-----------:|:--------------------|:--------------------|:--------------------|:--------------------|
+| **Week 1**  | Chapter 1           | Chapter 2           | Chapter 2           | 2 computing drop-ins|
+| **Week 2**  | Chapter 2           | Chapter 3           | Chapter 3           | 2 computing drop-ins|
+| **Week 3**  | Chapter 3           | Chapter 4           | Chapter 4           | 2 computing drop-ins|
+| **Week 4**  | Chapter 4           | Chapter 5           | Chapter 5           | 2 computing drop-ins|
+| **Week 5**  | Chapter 5           | Chapter 6           | Chapter 6           | 2 computing drop-ins|
+| **Week 6**  | Chapter 6           | Project preparation | Project preparation | 2 computing drop-ins|
+| **Week 7**  | --                  | --                  | --                  | 1 project workshop  |
+| **Week 8**  | --                  | --                  | --                  | 1 project workshop  |
+| **Week 9**  | --                  | --                  | --                  | 1 project workshop  |
+| **Week 10** | --                  | --                  | --                  | 1 project workshop  |
+
+: Chapter 1 is covered in a single lecture; Chapters 2--6 each run over three consecutive lectures, so each chapter starts partway through one week and finishes at the start of the next. {tbl-colwidths="[10,20,20,20,30]"}
 
 ---
 
