@@ -261,24 +261,6 @@ The technique is used not only in differentiation but also in **Romberg integrat
 Lewis Fry Richardson (1881--1953) was from Newcastle and an undergraduate there (when it was still a College of Durham). He was the first person to apply mathematics (finite differences) to weather prediction, and was ahead of his time: in the absence of electronic computers, he estimated that 60,000 people would be needed to predict the next day's weather!
 :::
 
-::: {.eg title="MATLAB demonstration: truncation error, rounding error and Richardson extrapolation"}
-```matlab
-f = @(x) log(x);  x0 = 2;  exact = 0.5;
-h  = 10.^(-(0:0.25:12))';
-Df = (f(x0 + h) - f(x0)) ./ h;                 % forward difference
-Dc = (f(x0 + h) - f(x0 - h)) ./ (2*h);         % central difference
-Dc2 = (f(x0 + h/2) - f(x0 - h/2)) ./ h;        % central difference with h/2
-Dr = (4*Dc2 - Dc) / 3;                         % Richardson extrapolation
-
-figure
-loglog(h, abs(Df - exact), 'o-', h, abs(Dc - exact), 's-', h, abs(Dr - exact), '^-', ...
-    'LineWidth', 2, 'MarkerSize', 6)
-legend('forward difference', 'central difference', 'Richardson', 'Location', 'southwest')
-xlabel('step size h'), ylabel('|error|'), grid on, set(gca, 'FontSize', 18)
-```
-Each curve falls with slope $1$, $2$ and $4$ respectively, until rounding error takes over and the error grows again like $\epsilon_{\rm M}/h$. Notice that the higher-order methods reach their best accuracy at larger values of $h$.
-:::
-
 ## Numerical integration {#s-int}
 
 > *How do we calculate integrals numerically?*
@@ -506,6 +488,14 @@ $$
 \big|I(f) - C_{2,m}(f)\big| \leq \frac{b-a}{180}h^4\max_{\xi\in[a,b]}\big|f^{(4)}(\xi)\big|.
 $$
 So the composite Simpson's rule converges with order ${\cal O}(h^4)$, using the same function values as the composite trapezium rule.
+
+::: {.callout-note title="The midpoint rule"}
+Another simple and widely used rule is the **midpoint rule**
+$$
+M(f) = (b-a)\,f\Big(\frac{a+b}{2}\Big),
+$$
+which approximates $f$ by a constant (its value at the midpoint). Despite using only one node, it is exact for all linear polynomials, because the errors on either side of the midpoint cancel; in fact, it is the one-node Gaussian quadrature rule (see below). Its error satisfies $|I(f) - M(f)| \leq \frac{(b-a)^3}{24}\max_{\xi\in[a,b]}|f''(\xi)|$, and the **composite midpoint rule** $h\sum_{i=1}^m f\big(\tfrac{x_{i-1}+x_i}{2}\big)$ converges with order ${\cal O}(h^2)$, like the composite trapezium rule but with half the error constant.
+:::
 
 ::: {.eg}
 ## Composite rules for $\int_0^2\mathrm{e}^x\,\mathrm{d}x = 6.389056\ldots$
@@ -763,30 +753,6 @@ $$
 I_w(f) - G_{n,w}(f) = \frac{f^{(2n+2)}(\xi)}{(2n+2)!}\int_a^b\phi_{n+1}^2(x)w(x)\,\mathrm{d}x
 $$
 for some $\xi$ that does not depend on $x$.
-:::
-
-::: {.eg title="MATLAB demonstration: comparing quadrature rules"}
-```matlab
-f = @(x) exp(x);  a = 0;  b = 2;  exact = exp(2) - 1;
-ms = 2.^(1:7);                                 % numbers of subintervals (even)
-errT = zeros(size(ms));  errS = errT;  errG = errT;
-for j = 1:length(ms)
-    m = ms(j);  x = linspace(a, b, m+1);  h = (b - a)/m;
-    errT(j) = abs(trapz(x, f(x)) - exact);
-    errS(j) = abs(h/3*(f(x(1)) + 4*sum(f(x(2:2:end-1))) + 2*sum(f(x(3:2:end-2))) + f(x(end))) - exact);
-    % composite two-point Gauss: two nodes in each of the m subintervals
-    mid = (x(1:end-1) + x(2:end))/2;
-    errG(j) = abs(h/2*sum(f(mid - h/(2*sqrt(3))) + f(mid + h/(2*sqrt(3)))) - exact);
-end
-figure
-loglog(ms, errT, 'o-', ms, errS, 's-', ms, errG, '^-', 'LineWidth', 2.5, 'MarkerSize', 8)
-legend('composite trapezium', 'composite Simpson', 'composite 2-point Gauss', 'Location', 'southwest')
-xlabel('number of subintervals m'), ylabel('|error|'), grid on, set(gca, 'FontSize', 18)
-
-% MATLAB's adaptive quadrature handles the singular Fresnel integral directly
-integral(@(x) cos(x)./sqrt(x), 0, 1)
-```
-The trapezium errors fall like $h^2$, while Simpson's rule and the two-point Gauss rule both fall like $h^4$. MATLAB's `integral` uses an adaptive Gaussian-type rule, which places extra nodes where the integrand is hardest to approximate.
 :::
 
 ## Knowledge checklist {.unnumbered}
