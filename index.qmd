@@ -83,10 +83,10 @@ Code for all of the examples and exercises will be available on the course Githu
 | **Week 4**  | Chapter 4           | Chapter 5           | Chapter 5           | 2 computing drop-ins|
 | **Week 5**  | Chapter 5           | Chapter 6           | Chapter 6           | 2 computing drop-ins|
 | **Week 6**  | Chapter 6           | Project preparation | Project preparation | 2 computing drop-ins|
-| **Week 7**  | --                  | --                  | --                  | 1 project workshop  |
-| **Week 8**  | --                  | --                  | --                  | 1 project workshop  |
-| **Week 9**  | --                  | --                  | --                  | 1 project workshop  |
-| **Week 10** | --                  | --                  | --                  | 1 project workshop  |
+| **Week 7**  | --                  | --                  | --                  | 1 project workshop, 2 computing drop-ins |
+| **Week 8**  | --                  | --                  | --                  | 1 project workshop, 2 computing drop-ins |
+| **Week 9**  | --                  | --                  | --                  | 1 project workshop, 2 computing drop-ins |
+| **Week 10** | --                  | --                  | --                  | 1 project workshop, 2 computing drop-ins |
 
 : Chapter 1 is covered in a single lecture; Chapters 2--6 each run over three consecutive lectures, so each chapter starts partway through one week and finishes at the start of the next. {tbl-colwidths="[10,20,20,20,30]"}
 
