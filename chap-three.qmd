@@ -240,6 +240,10 @@ $$
 (A careful count, including the divisions, gives exactly $N = \tfrac23n^3 - \tfrac12n^2 - \tfrac16n$.) So the number of operations required to find $U$ is ${\cal O}(n^3)$: doubling $n$ multiplies the cost by about $8$. This is much more than the ${\cal O}(n^2)$ cost of the substitution step.
 
 ::: {.callout-note}
+This is the same big-O notation as in Chapter 2, but now describing what happens as $n\to\infty$ rather than as $h\to 0$: $N = {\cal O}(n^3)$ means that $N\leq Mn^3$ for some constant $M$ and all sufficiently large $n$.
+:::
+
+::: {.callout-note}
 In theory, matrix multiplication (and hence inversion) can be done faster than ${\cal O}(n^3)$: the best known bound (as of 2024) is about ${\cal O}(n^{2.371})$, and it is an open question whether ${\cal O}(n^{2+\epsilon})$ is possible for every $\epsilon > 0$. However, these algorithms are impractical for real-world use due to massive constant factors and implementation overhead.
 :::
 

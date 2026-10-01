@@ -804,6 +804,10 @@ x_*-x_{k+1} = -\frac{f''(x_*)}{2f'(x_*)}(x_*-x_k)^2 + {\cal O}\big((x_*-x_k)^3\b
 $$
 so the convergence is quadratic (order $\alpha=2$), provided that $f''(x_*)\neq 0$.
 
+::: {.callout-note title="Big-O notation"}
+Here we used **big-O notation**: we write $g(h) = {\cal O}(h^p)$ as $h\to 0$ if there is a constant $M$ such that $|g(h)|\leq M|h|^p$ for all sufficiently small $h$. In other words, $g(h)$ gets smaller at least as fast as $h^p$. Above, $h = x_*-x_k$, so the remainder is bounded by a constant times $|x_*-x_k|^3$.
+:::
+
 ::: {.eg}
 ## Calculate $a^{-1}$ using $f(x)=\frac1x - a$ for $a>0$.
 
