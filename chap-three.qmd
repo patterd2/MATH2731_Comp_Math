@@ -25,7 +25,7 @@ where $A$ is an $n\times n$ square matrix with elements $a_{ij}$, and $\mathbf{x
 
 We will need some basic facts from linear algebra:
 
-1. $A^\top$ is the **transpose** of $A$, so $(a^\top)_{ij} = a_{ji}$.
+1. $A^\top$ is the **transpose** of $A$, so $(A^\top)_{ij} = a_{ji}$.
 
 2. $A$ is **symmetric** if $A=A^\top$.
 
@@ -39,11 +39,10 @@ It follows from fact 5 above that $A\mathbf{x} = \mathbf{b}$ has a unique soluti
 
 In this chapter, we will see how to solve $A\mathbf{x} = \mathbf{b}$ both **efficiently** and **accurately**.
 
-Although this seems like a conceptually easy problem (just use Gaussian elimination!), it is actually a hard one when $n$ gets large. Nowadays, linear systems with $n=1$ million arise routinely in computational problems. And even for small $n$ there are some potential pitfalls, as we will see.
-
+Although this seems like a conceptually easy problem (just use Gaussian elimination!), it is actually a hard one when $n$ gets large. Nowadays, linear systems with $n=1$ million arise routinely in computational problems. For example, in Chapter 6 we will solve the heat equation using the backward Euler method, which requires solving a linear system $(I - \Delta t\,\alpha A)\mathbf{u}_{n+1} = \mathbf{u}_n$ at *every* time step, where $n$ is the number of spatial grid points. And even for small $n$ there are some potential pitfalls, as we will see.
 
 ::: {.callout-note}
-If $A$ is instead rectangular ($m\times n$), then there are different numbers of equations and unknowns, and we do not expect a unique solution. Nevertheless, we can still look for an approximate solution in this case and there are methods for this problem in the course reading list.
+If $A$ is instead rectangular ($m\times n$ with $m > n$), then there are more equations than unknowns, and there is usually no exact solution. Instead, we can look for the **least-squares** solution, which minimises $\|A\mathbf{x} - \mathbf{b}\|_2$ (norms are defined later in this chapter). In MATLAB, `x = A\b` returns the least-squares solution when $A$ is rectangular.
 :::
 
 Many algorithms are based on the idea of rewriting $A\mathbf{x} = \mathbf{b}$ in a form where the matrix is easier to invert. Easiest to invert are diagonal matrices, followed by orthogonal matrices (where $A^{-1}=A^\top$). However, the most common method for solving $A\mathbf{x} = \mathbf{b}$ transforms the system to *triangular* form.
@@ -197,7 +196,7 @@ $$
 \begin{aligned}
 x_1 + 2x_2 + x_3 &= 0,\\
 -4x_2 + x_3 &= 4,\\
--2x_3 = 12.
+-2x_3 &= 12.
 \end{aligned}
 $$
 $$
@@ -232,66 +231,32 @@ Let $A^{(1)}=A$ and  $\mathbf{b}^{(1)}=\mathbf{b}$. Then for each $k$ from 1 to 
 The final matrix $A^{(n)}=U$ will then be upper triangular.
 :::
 
-This procedure will work providing $a_{kk}^{(k)}\neq 0$ for every $k$. (We will worry about this later.)
+This procedure works provided that the **pivots** $a_{kk}^{(k)}$ are non-zero for every $k$. We will see how to remove this restriction (and avoid a more subtle loss of accuracy) using **pivoting** below.
 
-What about the computational cost of Gaussian elimination?
+What about the computational cost of Gaussian elimination? At stage $k$, we compute $n-k$ multipliers, and then update the $(n-k)\times(n-k)$ block of entries below and to the right of the pivot, which costs one multiplication and one subtraction per entry. So stage $k$ costs about $2(n-k)^2$ operations, and in total
+$$
+N \approx \sum_{k=1}^{n-1}2(n-k)^2 = 2\sum_{j=1}^{n-1}j^2 \approx \tfrac23n^3.
+$$
+(A careful count, including the divisions, gives exactly $N = \tfrac23n^3 - \tfrac12n^2 - \tfrac16n$.) So the number of operations required to find $U$ is ${\cal O}(n^3)$: doubling $n$ multiplies the cost by about $8$. This is much more than the ${\cal O}(n^2)$ cost of the substitution step.
 
-::: {.eg}
-## Number of operations required to find $U$.
-
-Computing $A^{(k+1)}$ requires:
-- $n-(k+1)+1 = n-k$ divisions to compute $m_{ik}$.
-- $(n-k)^2$ subtractions and the same number of multiplications to compute $a_{ij}^{(k+1)}$.
-
-So in total $A^{(k+1)}$ requires $2(n-k)^2 + n-k$ operations. Overall, we need to compute $A^{(k+1)}$ for $k=1,\ldots,n-1$, so the total number of operations is
-$$
-\begin{aligned}
-N &= \sum_{k=1}^{n-1}\Big(2n^2 + n - (4n+1)k + 2k^2\Big) \\
-  &= n(2n+1)\sum_{k=1}^{n-1}1 - (4n+1)\sum_{k=1}^{n-1}k + 2\sum_{k=1}^{n-1}k^2.
-\end{aligned}
-$$
-Recalling that
-$$
-\sum_{k=1}^n k = \tfrac12n(n+1), \,\, \sum_{k=1}^n k^2 = \tfrac16n(n+1)(2n+1),
-$$
-we find
-$$
-\begin{aligned}
-N &= n(2n+1)(n-1) - \tfrac12(4n+1)(n-1)n + \tfrac13(n-1)n(2n-1) \\
-&= \tfrac23n^3 - \tfrac12n^2 - \tfrac16n.
-\end{aligned}
-$$
-So the number of operations required to find $U$ is ${\cal O}(n^3)$.
+::: {.callout-note}
+In theory, matrix multiplication (and hence inversion) can be done faster than ${\cal O}(n^3)$: the best known bound (as of 2024) is about ${\cal O}(n^{2.371})$, and it is an open question whether ${\cal O}(n^{2+\epsilon})$ is possible for every $\epsilon > 0$. However, these algorithms are impractical for real-world use due to massive constant factors and implementation overhead.
 :::
 
-It is known that ${\cal O}(n^3)$ is not optimal, and the best theoretical algorithm known for inverting a matrix takes ${\cal O}(n^{2.3728639})$ operations. However, algorithms achieving this bound are highly impractical for most real-world uses due to massive constant factors and implementation overhead. It remains an open conjecture that there exists an ${\cal O}(n^{2+\epsilon})$ algorithm, for $\epsilon$ arbitrarily small. 
+::: {.eg title="MATLAB demonstration: cubic cost of solving a linear system"}
+```matlab
+for n = [1000 2000 4000 8000]
+    A = rand(n);  b = rand(n, 1);
+    tic;  x = A \ b;  t = toc;
+    fprintf('n = %4d: time = %.3f s\n', n, t);
+end
+```
+For large enough $n$, each doubling of $n$ should increase the time by a factor of roughly $8$ (on a multi-core computer, the scaling is less clean).
+:::
 
 ## LU decomposition
 
-In Gaussian elimination, both the final matrix $U$ and the sequence of row operations are determined solely by $A$, and do not depend on $\mathbf{b}$. We will see that the sequence of row operations that transforms $A$ to $U$ is equivalent to left-multiplying by a matrix $F$, so that
-$$
-FA = U, \qquad U\mathbf{x} = F\mathbf{b}.
-$$
-To see this, note that step $k$ of Gaussian elimination can be written in the form
-$$
-A^{(k+1)} = F^{(k)}A^{(k)}, \quad \mathbf{b}^{(k+1)} = F^{(k)}\mathbf{b}^{(k)},
-$$
-where
-$$
-F^{(k)} := \begin{pmatrix}
-1 & 0&\cdots & \cdots &\cdots&0\\
-0 & \ddots & \ddots&&&\vdots \\
-\vdots & \ddots& 1 &\ddots&&\vdots \\
-\vdots & & -m_{k+1,k} & \ddots &\ddots&\vdots \\
-\vdots & & \vdots & \ddots& \ddots &0\\
-0& \cdots  & -m_{n,k} &\cdots&0&1
-\end{pmatrix}.
-$$
-Multiplying by $F^{(k)}$ has the effect of subtracting $m_{ik}$ times row $k$ from row $i$, for $i=k+1,\ldots,n$. 
-
-::: {.callout-note}
-A matrix with this structure (the identity except for a single column below the diagonal) is called a **Frobenius matrix**.
-:::
+In Gaussian elimination, both the final matrix $U$ and the multipliers $m_{ik}$ are determined solely by $A$, and do not depend on $\mathbf{b}$. In fact, each stage of Gaussian elimination is equivalent to left-multiplying by a lower triangular matrix $F^{(k)}$, which is the identity matrix except for the entries $-m_{ik}$ below the diagonal in column $k$.
 
 ::: {.eg}
 You can check in the earlier example that
@@ -337,24 +302,9 @@ $$
 
 It follows that
 $$
-U = A^{(n)} = F^{(n-1)}F^{(n-2)}\cdots F^{(1)}A.
+U = F^{(n-1)}F^{(n-2)}\cdots F^{(1)}A \quad \implies \quad A = (F^{(1)})^{-1}(F^{(2)})^{-1}\cdots (F^{(n-1)})^{-1}U.
 $$
-Now the $F^{(k)}$ are invertible, and the inverse is just given by adding rows instead of subtracting:
-$$
-(F^{(k)})^{-1} = \begin{pmatrix}
-1 & 0&\cdots & \cdots &\cdots&0\\
-0 & \ddots & \ddots&&&\vdots \\
-\vdots & \ddots& 1 &\ddots&&\vdots \\
-\vdots & & m_{k+1,k} & \ddots &\ddots&\vdots \\
-\vdots & & \vdots & \ddots& \ddots &0\\
-0& \cdots  & m_{n,k} &\cdots&0&1
-\end{pmatrix}.
-$$
-So we could write
-$$
-A = (F^{(1)})^{-1}(F^{(2)})^{-1}\cdots (F^{(n-1)})^{-1}U.
-$$
-Since the successive operations don't "interfere" with each other, we can write
+Each $F^{(k)}$ is inverted simply by flipping the signs of the multipliers (adding rows instead of subtracting them). Moreover, multiplying these inverses together just places all of the multipliers into a single lower triangular matrix:
 $$
   (F^{(1)})^{-1}(F^{(2)})^{-1}\cdots (F^{(n-1)})^{-1} =  \begin{pmatrix}
 1 & 0& \cdots&\cdots&\cdots&0\\
@@ -368,24 +318,24 @@ $$
 Thus we have established the following result.
 
 ::: {.theorem title="LU decomposition"}
-Let $U$ be the upper triangular matrix from Gaussian elimination of $A$ (without pivoting), and let $L$ be the unit lower triangular matrix above. Then
+Let $U$ be the upper triangular matrix from Gaussian elimination of $A$ (without pivoting), and let $L$ be the unit lower triangular matrix of multipliers above. Then
 $$
 A = LU.
 $$
 :::
 
 ::: {.callout-note}
-*Unit* lower triangular means that there are all 1's on the diagonal.
+*Unit* lower triangular means that there are all 1's on the diagonal. With this normalisation, the LU decomposition of a non-singular matrix is unique (when it exists).
 :::
 
-The theorem above says that Gaussian elimination is equivalent to factorising $A$ as the product of a lower triangular and an upper triangular matrix. This is not at all obvious from the algorithm! The decomposition is unique up to a scaling $LD$, $D^{-1}U$ for some diagonal matrix $D$.
+The theorem above says that Gaussian elimination is equivalent to factorising $A$ as the product of a lower triangular and an upper triangular matrix. This is not at all obvious from the algorithm!
 
 The system $A\mathbf{x}=\mathbf{b}$ becomes $LU\mathbf{x}=\mathbf{b}$, which we can readily solve by setting $U\mathbf{x}=\mathbf{y}$. We first solve $L\mathbf{y}=\mathbf{b}$ for $\mathbf{y}$, then $U\mathbf{x}=\mathbf{y}$ for $\mathbf{x}$. Both are triangular systems.
 
-Moreover, if we want to solve several systems $A\mathbf{x} = \mathbf{b}$ with different $\mathbf{b}$ but the same matrix, we just need to compute $L$ and $U$ once. This saves time because, although the initial $LU$ factorisation takes ${\cal O}(n^3)$ operations, the evaluation takes only ${\cal O}(n^2)$.
+Moreover, if we want to solve several systems $A\mathbf{x} = \mathbf{b}$ with different $\mathbf{b}$ but the same matrix, we just need to compute $L$ and $U$ once. This saves time because, although the initial $LU$ factorisation takes ${\cal O}(n^3)$ operations, each subsequent solve takes only ${\cal O}(n^2)$. This is exactly the situation in the backward Euler method for the heat equation, where the same matrix appears at every time step.
 
 ::: {.callout-note}
-This matrix factorisation viewpoint dates only from the 1940s, and LU decomposition was introduced by Alan Turing in a 1948 paper (*Q. J. Mechanics Appl. Mat.* **1**, 287). Other common factorisations used in numerical linear algebra are **QR** (which we will see later) and *Cholesky*.
+This matrix factorisation viewpoint dates only from the 1940s, and LU decomposition was introduced by Alan Turing in a 1948 paper (*Q. J. Mechanics Appl. Mat.* **1**, 287). Other common factorisations used in numerical linear algebra include *QR* and *Cholesky* (for symmetric positive definite matrices), which are beyond the scope of this course.
 :::
 
 ::: {.eg}
@@ -478,9 +428,98 @@ $$
 $$
 :::
 
+::: {.callout-note}
+Notice that we never need to compute $A^{-1}$. Computing the inverse costs about $2n^3$ operations (three times as much as the LU decomposition) and is generally less accurate, so in practice we always solve linear systems by factorisation. In MATLAB, use `x = A\b` rather than `x = inv(A)*b`.
+:::
+
+::: {.eg title="MATLAB demonstration: LU decomposition and reusing the factorisation"}
+```matlab
+A = [1 2 1; 1 -2 2; 2 12 -2];
+[L, U, P] = lu(A)       % MATLAB pivots (see below), so P is a permutation matrix
+
+% Reusing the factorisation for many right-hand sides
+n = 2000;  A = rand(n);  B = rand(n, 100);     % 100 right-hand sides
+tic
+for j = 1:100
+    x = A \ B(:, j);                           % factorises A every time
+end
+t1 = toc;
+tic
+[L, U, P] = lu(A);                             % factorise once...
+for j = 1:100
+    x = U \ (L \ (P*B(:, j)));                 % ...then two triangular solves each time
+end
+t2 = toc;
+fprintf('Backslash each time: %.2f s,  LU once then reuse: %.2f s\n', t1, t2);
+```
+Because MATLAB swaps rows to choose good pivots, its `L` and `U` for the $3\times 3$ example differ from the ones we computed by hand.
+:::
+
+## Pivoting
+
+Gaussian elimination fails if a pivot $a_{kk}^{(k)}$ is zero, as happens immediately for
+$$
+A = \begin{pmatrix}
+0 & 1\\
+1 & 1
+\end{pmatrix},
+$$
+even though $A$ is non-singular. More subtly, a *small* pivot can destroy the accuracy of the solution in floating-point arithmetic.
+
+::: {.eg}
+## A small pivot.
+
+Let $\epsilon$ be a small positive number and consider
+$$
+\begin{aligned}
+\epsilon x_1 + x_2 &= 1,\\
+x_1 + x_2 &= 2,
+\end{aligned}
+$$
+whose exact solution is $x_1 = \frac{1}{1-\epsilon} \approx 1$, $x_2 = \frac{1-2\epsilon}{1-\epsilon} \approx 1$.
+
+*Without pivoting*, the multiplier is $m_{21} = 1/\epsilon$, so the second equation becomes
+$$
+\Big(1 - \frac1\epsilon\Big)x_2 = 2 - \frac1\epsilon.
+$$
+If $\epsilon = 10^{-20}$ (smaller than $\epsilon_{\rm M}$), then in double precision $\mathrm{fl}(1 - 1/\epsilon) = \mathrm{fl}(2-1/\epsilon) = -1/\epsilon$, so we get $x_2 = 1$, which is fine. But back substitution then gives $x_1 = (1 - x_2)/\epsilon = 0$, which is completely wrong!
+
+*With the rows swapped*, the multiplier is $m_{21} = \epsilon$, and the second equation becomes $(1-\epsilon)x_2 = 1 - 2\epsilon$. In double precision this gives $x_2 = 1$, and then $x_1 = 2 - x_2 = 1$, which is correct to machine precision.
+:::
+
+The problem is the huge multiplier $1/\epsilon$, which swamps the information in the other entries (this is another example of loss of significance from Chapter 1). The fix is to swap rows so that the multipliers stay small.
+
+::: {.algorithm title="Partial pivoting"}
+At each stage $k$ of Gaussian elimination, before computing the multipliers, find the row $p\geq k$ for which $|a_{pk}^{(k)}|$ is largest, and swap rows $k$ and $p$ (in both $A^{(k)}$ and $\mathbf{b}^{(k)}$). Then all of the multipliers satisfy $|m_{ik}|\leq 1$.
+:::
+
+The row swaps can be recorded in a **permutation matrix** $P$ (the identity matrix with its rows reordered), and Gaussian elimination with partial pivoting then produces the factorisation
+$$
+PA = LU.
+$$
+To solve $A\mathbf{x}=\mathbf{b}$, we solve $L\mathbf{y} = P\mathbf{b}$ and then $U\mathbf{x} = \mathbf{y}$. Partial pivoting costs very little extra, and in practice it makes Gaussian elimination reliable for almost all matrices. MATLAB's `lu` and backslash use partial pivoting automatically.
+
+::: {.eg title="MATLAB demonstration: the danger of small pivots"}
+```matlab
+ep = 1e-20;
+A = [ep 1; 1 1];  b = [1; 2];
+
+% Gaussian elimination WITHOUT pivoting
+m   = A(2,1)/A(1,1);
+u22 = A(2,2) - m*A(1,2);
+y2  = b(2) - m*b(1);
+x2  = y2/u22;
+x1  = (b(1) - A(1,2)*x2)/A(1,1);
+disp([x1; x2])          % gives [0; 1]: x1 is completely wrong
+
+% Backslash uses partial pivoting
+disp(A \ b)             % gives [1; 1]
+```
+:::
+
 ## Vector norms
 
-To measure the error when the solution is a vector, as opposed to a scalar, we usually summarize the error in a single number called a **norm**. A **norm** effectively gives us a way to define a notion of distance in higher dimensions.
+To measure the error when the solution is a vector, as opposed to a scalar, we usually summarise the error in a single number called a **norm**. A **norm** effectively gives us a way to define a notion of distance in higher dimensions.
 
 A **vector norm** on $\mathbb{R}^n$ is a real-valued function that satisfies:
 1. $\|\mathbf{x} + \mathbf{y}\| \leq \|\mathbf{x}\| + \|\mathbf{y}\|$ for every $\mathbf{x},\mathbf{y}\in \mathbb{R}^n$ (**triangle inequality**).
@@ -488,19 +527,19 @@ A **vector norm** on $\mathbb{R}^n$ is a real-valued function that satisfies:
 3. $\|\mathbf{x}\| \geq 0$ for every $\mathbf{x}\in \mathbb{R}^n$, and $\|\mathbf{x}\|=0$ implies $\mathbf{x}=0$.
 
 ::: {.eg title="There are three common examples:"}
-1. The **$\ell_2$-norm**  
+1. The **$\ell_2$-norm**
    $$
    \|\mathbf{x}\|_2 := \sqrt{\sum_{k=1}^n x_k^2} = \sqrt{\mathbf{x}^\top \mathbf{x}}.
    $$
    This is just the usual Euclidean length of $\mathbf{x}$.
 
-2. The **$\ell_1$-norm**  
+2. The **$\ell_1$-norm**
    $$
    \|\mathbf{x}\|_1 := \sum_{k=1}^n |x_k|.
    $$
    This is sometimes known as the **taxicab** or **Manhattan** norm, because it corresponds to the distance that a taxi has to drive on a rectangular grid of streets to get to $\mathbf{x}\in\mathbb{R}^2$.
 
-3. The **$\ell_\infty$-norm**  
+3. The **$\ell_\infty$-norm**
    $$
    \|\mathbf{x}\|_\infty := \max_{k=1,\ldots,n} |x_k|.
    $$
@@ -558,14 +597,8 @@ A **matrix norm** is a real-valued function $\|\cdot\|$ on $\mathbb{R}^{n\times 
 
 ::: {.callout-note}
 We usually want this additional axiom because matrices are more than just vectors. Some books call this a **submultiplicative norm** and define a "matrix norm" to satisfy just the first three properties, perhaps because (4) only works for square matrices.
-:::
 
-::: {.eg title="Frobenius norm"}
-If we treat a matrix as a big vector with $n^2$ components, then the $\ell_2$-norm is called the **Frobenius norm** of the matrix:
-$$
-\|A\|_F = \sqrt{\sum_{i=1}^n\sum_{j=1}^n a_{ij}^2}.
-$$
-This norm is rarely used in numerical analysis because it is not induced by any vector norm (as we are about to define).
+Treating a matrix as a vector with $n^2$ components and taking its $\ell_2$-norm gives the **Frobenius norm** $\|A\|_F = \big(\sum_{i,j} a_{ij}^2\big)^{1/2}$. This is a matrix norm, but it is not induced by any vector norm in the sense defined below (for example, $\|I\|_F = \sqrt{n}$, whereas every induced norm has $\|I\|=1$).
 :::
 
 The most important matrix norms are so-called **induced** or **operator** norms. Remember that $A$ is a linear map on $\mathbb{R}^n$, meaning that it maps every vector to another vector. So we can measure the size of $A$ by how much it can stretch vectors with respect to a given vector norm. Specifically, if $\|\cdot\|_p$ is a vector norm, then the **induced** norm is defined as
@@ -612,7 +645,7 @@ $$
 The induced norm corresponding to any vector norm is a matrix norm, and the two norms satisfy $\|A\mathbf{x}\| \leq \|A\|\|\mathbf{x}\|$ for any matrix $A\in\mathbb{R}^{n\times n}$ and any vector $\mathbf{x}\in\mathbb{R}^n$.
 :::
 
-**Proof:**  
+::: {.callout-note collapse="true" title="Proof (non-examinable)"}
 Properties (1)-(3) follow from the fact that the vector norm satisfies the corresponding properties. To show (4), note that, by the definition above, we have for any vector $\mathbf{y}\in\mathbb{R}^n$ that
 $$
 \|A\| \geq \frac{\|A\mathbf{y}\|}{\|\mathbf{y}\|} \quad \implies \quad
@@ -624,8 +657,9 @@ $$
 $$
 This holds in particular for the vector $\mathbf{x}$ that maximises $\|AB\mathbf{x}\|$, so
 $$
-\|AB\| = \max_{\|\mathbf{x}\|=1}\|AB\mathbf{x}\| \leq \|A\|\|B\|. 
+\|AB\| = \max_{\|\mathbf{x}\|=1}\|AB\mathbf{x}\| \leq \|A\|\|B\|.
 $$
+:::
 
 It is cumbersome to compute the induced norms from their definition, but fortunately there are some very useful alternative formulae.
 
@@ -641,7 +675,7 @@ $$
 $$
 :::
 
-**Proof:**  
+::: {.callout-note collapse="true" title="Proof (non-examinable)"}
 We will prove the result for the $\ell_1$-norm as an illustration of the method:
 $$
 \|A\mathbf{x}\|_1 = \sum_{i=1}^n\left|\sum_{j=1}^n a_{ij}x_j\right| \leq \sum_{i=1}^n\sum_{j=1}^n|a_{ij}|\,|x_j| = \sum_{j=1}^n|x_j|\sum_{i=1}^n|a_{ij}|.
@@ -658,7 +692,8 @@ Now let $m$ be the column where the maximum sum is attained. If we choose $\math
 $$
 \max_{\|\mathbf{x}\|_1=1}\|A\mathbf{x}\|_1 \geq \|A\mathbf{y}\|_1=c \quad \implies \|A\|_1 \geq c.
 $$
-The only way to satisfy both inequalities is if $\|A\|_1=c$. 
+The only way to satisfy both inequalities is if $\|A\|_1=c$.
+:::
 
 ::: {.eg}
 For the matrix
@@ -718,7 +753,7 @@ $$
 We see that the eigenvalues of $A^\top A$ are $\lambda=1,9$, so  $\|A\|_2=\sqrt{9}=3$ (as we calculated earlier).
 :::
 
-**Proof:**  
+::: {.callout-note collapse="true" title="Proof (non-examinable)"}
 We want to show that
 $$
 \max_{\|\mathbf{x}\|_2 = 1}\|A\mathbf{x}\|_2  = \max\{\sqrt{|\lambda|} \,: \,\textrm{$\lambda$ eigenvalue of $A^\top A$} \}.
@@ -735,11 +770,12 @@ where the last step uses orthonormality of the $\mathbf{u}_k$. It follows that
 $$
 \|A\mathbf{x}\|_2^2 \leq \lambda_n\sum_{k=1}^n\alpha_k^2.
 $$
-But if $\|\mathbf{x}\|_2=1$, then $\|\mathbf{x}\|_2^2=\sum_{k=1}^n\alpha_k^2 = 1$, so $\|A\mathbf{x}\|_2^2 \leq \lambda_n$. To show that the maximum of $\|A\mathbf{x}\|_2^2$ is equal to $\lambda_n$, we can choose $\mathbf{x}$ to be the corresponding eigenvector $\mathbf{x}=\mathbf{u}_n$. In that case, $\alpha_1=\ldots=\alpha_{n-1}=0$ and $\alpha_n=1$, so $\|A\mathbf{x}\|_2^2 =\lambda_n$. 
+But if $\|\mathbf{x}\|_2=1$, then $\|\mathbf{x}\|_2^2=\sum_{k=1}^n\alpha_k^2 = 1$, so $\|A\mathbf{x}\|_2^2 \leq \lambda_n$. To show that the maximum of $\|A\mathbf{x}\|_2^2$ is equal to $\lambda_n$, we can choose $\mathbf{x}$ to be the corresponding eigenvector $\mathbf{x}=\mathbf{u}_n$. In that case, $\alpha_1=\ldots=\alpha_{n-1}=0$ and $\alpha_n=1$, so $\|A\mathbf{x}\|_2^2 =\lambda_n$.
+:::
 
 ## Conditioning
 
-Some linear systems are inherently more difficult to solve than others, because the solution is sensitive to small perturbations in the input. We will examine how to quantify this sensitivity and how to adjust our methods to control for it.
+Some linear systems are inherently more difficult to solve than others, because the solution is sensitive to small perturbations in the input. We will examine how to quantify this sensitivity, and what it means for the accuracy we can expect from our methods.
 
 ::: {.eg}
 Consider the linear system
@@ -757,7 +793,7 @@ x_1\\ x_2
 \implies
 \begin{pmatrix}
 x_1\\ x_2
-\end{pmatrix}= 
+\end{pmatrix}=
 \begin{pmatrix}
 0\\ 1
 \end{pmatrix}.
@@ -777,7 +813,7 @@ x_1\\ x_2
 \implies
 \begin{pmatrix}
 x_1\\ x_2
-\end{pmatrix}= 
+\end{pmatrix}=
 \begin{pmatrix}
 \delta\\ 1
 \end{pmatrix}.
@@ -801,7 +837,7 @@ x_1\\ x_2
 \implies
 \begin{pmatrix}
 x_1\\ x_2
-\end{pmatrix}= 
+\end{pmatrix}=
 \begin{pmatrix}
 \delta/\epsilon\\ 1
 \end{pmatrix}.
@@ -813,10 +849,10 @@ Graphically, this system (right) is more sensitive to $\delta$ than the first sy
 ![](im/conditioning.png){width=80% fig-align="center"}
 :::
 
-To measure the **conditioning** of a linear system, consider the following estimate of the ratio of the relative errors in the output ($x$) versus the input ($b$):
+To measure the **conditioning** of a linear system, suppose that an error $\delta\mathbf{b}$ in the right-hand side causes an error $\delta\mathbf{x}$ in the solution, so that $A(\mathbf{x} + \delta\mathbf{x}) = \mathbf{b} + \delta\mathbf{b}$ and hence $\delta\mathbf{x} = A^{-1}\delta\mathbf{b}$. Then the ratio of the relative errors in the output ($\mathbf{x}$) and the input ($\mathbf{b}$) satisfies
 $$
 \begin{aligned}
-\frac{|\textrm{relative error in }\mathbf{x}|}{|\textrm{relative error in }\mathbf{b}|}
+\frac{\textrm{relative error in }\mathbf{x}}{\textrm{relative error in }\mathbf{b}}
 &= \frac{\|\delta\mathbf{x}\|/\|\mathbf{x}\|}{\|\delta\mathbf{b}\|/\|\mathbf{b}\|}
 = \left(\frac{\|\delta\mathbf{x}\|}{\|\mathbf{x}\|}\right)\left(\frac{\|\mathbf{b}\|}{\|\delta\mathbf{b}\|} \right) \\
 &= \left(\frac{\|A^{-1}\delta\mathbf{b}\|}{\|\mathbf{x}\|}\right)\left(\frac{\|\mathbf{b}\|}{\|\delta\mathbf{b}\|} \right) \\
@@ -868,7 +904,7 @@ B = \begin{pmatrix}
 B^{-1} = \frac{1}{\epsilon}\begin{pmatrix}
 1 & -1\\
 0 & \epsilon
-\end{pmatrix} 
+\end{pmatrix}
 $$
 $$
 \implies
@@ -885,16 +921,48 @@ $$
 These matrices are notoriously ill-conditioned. For example, $\kappa_2(H_5) \approx 4.8\times 10^5$, and $\kappa_2(H_{20})\approx 2.5\times 10^{28}$. Solving an associated linear system in floating-point arithmetic would be hopeless.
 :::
 
-A practical limitation of the condition number is that you have to know $A^{-1}$ before you can calculate it. We can always estimate $\|A^{-1}\|$ by taking some arbitrary vectors $\mathbf{x}$ and using
+What does this mean in practice? Even a perfectly implemented solver (such as Gaussian elimination with partial pivoting) introduces rounding errors of relative size about $\epsilon_{\rm M}$ in the data. So, as a rule of thumb, the computed solution $\hat{\mathbf{x}}$ satisfies
 $$
-\|A^{-1}\| \geq \frac{\|\mathbf{x}\|}{\|\mathbf{b}\|}.
+\frac{\|\hat{\mathbf{x}} - \mathbf{x}\|}{\|\mathbf{x}\|} \lesssim \kappa(A)\,\epsilon_{\rm M}.
 $$
+In other words, we can expect to lose about $\log_{10}\kappa(A)$ significant digits. For the Hilbert matrix $H_{20}$, $\kappa_2(H_{20})\approx 10^{28}$ is far larger than $1/\epsilon_{\rm M}\approx 10^{16}$, so none of the computed digits can be trusted.
+
+::: {.callout-note}
+The Vandermonde matrices from Chapter 2 are another example: for equally spaced nodes, their condition number grows exponentially with $n$. This is why we do not compute high-degree interpolating polynomials by solving the Vandermonde system.
+:::
+
+A practical limitation of the condition number is that computing it exactly requires $A^{-1}$. However, we can cheaply bound $\|A^{-1}\|$ from below: for any $\mathbf{b}$, solving $A\mathbf{x}=\mathbf{b}$ (using the LU decomposition we already have) gives
+$$
+\|A^{-1}\| \geq \frac{\|A^{-1}\mathbf{b}\|}{\|\mathbf{b}\|} = \frac{\|\mathbf{x}\|}{\|\mathbf{b}\|}.
+$$
+Choosing $\mathbf{b}$ cleverly gives good estimates of $\kappa(A)$; this is what MATLAB's `condest` does, while `cond` computes $\kappa_2(A)$ exactly (at greater cost).
+
+::: {.eg title="MATLAB demonstration: conditioning and accuracy"}
+```matlab
+ns = 2:13;  kappa = zeros(size(ns));  err = kappa;
+for j = 1:length(ns)
+    n = ns(j);  H = hilb(n);
+    x = ones(n, 1);  b = H*x;                  % so the exact solution is all ones
+    kappa(j) = cond(H);
+    err(j) = norm(H\b - x)/norm(x);
+end
+figure
+semilogy(ns, kappa, 'o-', ns, err, 's-', ns, kappa*eps/2, '--', ...
+    'LineWidth', 2.5, 'MarkerSize', 8)
+legend('condition number \kappa_2(H_n)', 'relative error in x', ...
+    '\kappa_2(H_n) \epsilon_M', 'Location', 'northwest')
+xlabel('n'), set(gca, 'FontSize', 18), grid on
+```
+The relative error grows roughly in line with (and usually stays below) $\kappa_2(H_n)\,\epsilon_{\rm M}$. For the largest $n$, MATLAB warns that the matrix is close to singular.
+:::
 
 ## Iterative methods
 
-For large systems, the ${\cal O}(n^3)$ cost of Gaussian elimination is prohibitive. Fortunately, many such systems that arise in practice are **sparse**, meaning that most of the entries of the matrix $A$ are zero. In this case, we can often use iterative algorithms to do better than ${\cal O}(n^3)$.
+For large systems, the ${\cal O}(n^3)$ cost of Gaussian elimination is prohibitive. Fortunately, many such systems that arise in practice are **sparse**, meaning that most of the entries of the matrix $A$ are zero. For example, the matrix in the backward Euler method for the heat equation (Chapter 6) is tridiagonal: each row has at most three non-zero entries. With $n = 10^6$ grid points, storing this matrix in full would require $10^{12}$ numbers (8 terabytes), but it has only about $3\times 10^6$ non-zero entries.
 
-In this course, we will only study algorithms for symmetric positive definite matrices. A matrix $A$ is called **symmetric positive definite** (or **SPD**) if $\mathbf{x}^\top A\mathbf{x}>0$ for every vector $\mathbf{x}\neq 0$.
+For a tridiagonal matrix, Gaussian elimination can be carried out cheaply. But for the sparse matrices arising from two- or three-dimensional problems, elimination "fills in" many of the zero entries and becomes very expensive. In this case, we can often do much better than ${\cal O}(n^3)$ using **iterative** algorithms, whose main cost is computing matrix-vector products $A\mathbf{d}$, which only involve the non-zero entries.
+
+In this course, we will only study algorithms for symmetric positive definite matrices. A matrix $A$ is called **symmetric positive definite** (or **SPD**) if it is symmetric and $\mathbf{x}^\top A\mathbf{x}>0$ for every vector $\mathbf{x}\neq 0$.
 
 ::: {.callout-note}
 Recall that a symmetric matrix has real eigenvalues. It is positive definite iff all of its eigenvalues are positive.
@@ -909,47 +977,39 @@ A = \begin{pmatrix}
 -1 & 2 & 5
 \end{pmatrix}.
 $$
-With $\mathbf{x} = (x_1,x_2,x_3)^\top$, we have
+The matrix is clearly symmetric, and its eigenvalues are approximately $1.29$, $4.14$ and $6.57$ (in MATLAB, `eig(A)`), which are all positive, so $A$ is SPD.
+
+Alternatively, with $\mathbf{x} = (x_1,x_2,x_3)^\top$, we can complete the square:
 $$
 \begin{aligned}
 \mathbf{x}^\top A\mathbf{x} &= 3x_1^2 + 4x_2^2 + 5x_3^2 + 2x_1x_2 + 4x_2x_3 - 2x_1x_3\\
-&= x_1^2 + x_2^2 + 2x_3^2 + (x_1+x_2)^2 + (x_1-x_3)^2 + 2(x_2+x_3)^2.
+&= x_1^2 + x_2^2 + 2x_3^2 + (x_1+x_2)^2 + (x_1-x_3)^2 + 2(x_2+x_3)^2,
 \end{aligned}
 $$
-This is positive for any non-zero vector $\mathbf{x}\in\mathbb{R}^3$, so $A$ is SPD (eigenvalues $1.29$, $4.14$ and $6.57$).
+which is positive for any non-zero vector $\mathbf{x}\in\mathbb{R}^3$.
 :::
 
-If $A$ is SPD, then solving $A\mathbf{x} = \mathbf{b}$ is equivalent to minimizing the quadratic functional
+If $A$ is SPD, then solving $A\mathbf{x} = \mathbf{b}$ is equivalent to minimising the quadratic functional
 $$
 f:\mathbb{R}^n \to \mathbb{R}, \qquad f(\mathbf{x}) = \tfrac12\mathbf{x}^\top A\mathbf{x} -\mathbf{b}^\top\mathbf{x}.
 $$
-When $A$ is SPD, this functional behaves like a U-shaped parabola, and has a unique finite global minimizer $\mathbf{x}_*$ such that $f(\mathbf{x}_*)< f(\mathbf{x})$ for all $\mathbf{x}\in\mathbb{R}^n$, $\mathbf{x}\neq\mathbf{x}_*$.
+When $A$ is SPD, this functional behaves like a U-shaped parabola, and has a unique finite global minimiser $\mathbf{x}_*$ such that $f(\mathbf{x}_*)< f(\mathbf{x})$ for all $\mathbf{x}\in\mathbb{R}^n$, $\mathbf{x}\neq\mathbf{x}_*$.
 
-To find $\mathbf{x}_*$, we need to set $\nabla f = \boldsymbol{0}$. We have
-$$
-f(\mathbf{x}) = \tfrac12\sum_{i=1}^n x_i\left(\sum_{j=1}^n a_{ij}x_j\right) - \sum_{j=1}^nb_jx_j
-$$
-so
-$$
-\begin{aligned}
-\frac{\partial f}{\partial x_k} &= \tfrac12\left(\sum_{i=1}^n x_ia_{ik} + \sum_{j=1}^na_{kj}x_j \right) - b_k \\ &= \tfrac12\left(\sum_{i=1}^n a_{ki}x_i + \sum_{j=1}^na_{kj}x_j \right) - b_k = \sum_{j=1}^na_{kj}x_j - b_k.
-\end{aligned}
-$$
-In the penultimate step we used the symmetry of $A$ to write $a_{ik}=a_{ki}$. It follows that
+To find $\mathbf{x}_*$, we set $\nabla f = \boldsymbol{0}$. Writing $f(\mathbf{x}) = \tfrac12\sum_{i,j}x_ia_{ij}x_j - \sum_j b_jx_j$ and differentiating with respect to each $x_k$ (using the symmetry $a_{ik}=a_{ki}$ to combine the two terms from the double sum) gives
 $$
 \nabla f = A\mathbf{x} - \mathbf{b},
 $$
 so locating the minimum of $f(\mathbf{x})$ is indeed equivalent to solving $A\mathbf{x}=\mathbf{b}$.
 
 ::: {.callout-note}
-Minimizing functions is a vast sub-field of numerical analysis known as **optimization**. We will only cover this specific case.
+Minimising functions is a vast sub-field of numerical analysis known as **optimisation**. We will only cover this specific case.
 :::
 
-A popular class of methods for optimization are **line search** methods, where at each iteration the search is restricted to a single **search direction** $\mathbf{d}_k$. The iteration takes the form
+A popular class of methods for optimisation are **line search** methods, where at each iteration the search is restricted to a single **search direction** $\mathbf{d}_k$. The iteration takes the form
 $$
 \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k\mathbf{d}_k.
 $$
-The **step size** $\alpha_k$ is chosen by minimizing $f(\mathbf{x})$ along the line $\mathbf{x} = \mathbf{x}_k + \alpha\mathbf{d}_k$. For our functional above, we have
+The **step size** $\alpha_k$ is chosen by minimising $f(\mathbf{x})$ along the line $\mathbf{x} = \mathbf{x}_k + \alpha\mathbf{d}_k$. For our functional above, we have
 $$
 \begin{aligned}
 f(\mathbf{x}_{k} + \alpha\mathbf{d}_{k}) &= \big(\tfrac12\mathbf{d}_{k}^\top A\mathbf{d}_{k}\big)\alpha^2 + \mathbf{d}_{k}^\top\big(  A\mathbf{x}_k - \mathbf{b} \big)\alpha + \tfrac12\mathbf{x}_k^\top A\mathbf{x}_k - \mathbf{b}^\top\mathbf{x}_k.
@@ -963,6 +1023,10 @@ Defining the **residual** $\mathbf{r}_k := A\mathbf{x}_k - \mathbf{b}$, we see t
 $$
 \alpha_k = - \frac{\mathbf{d}_k^\top\mathbf{r}_k}{\mathbf{d}_k^\top A\mathbf{d}_k}.
 $$
+
+::: {.callout-note}
+Many textbooks (and MATLAB) define the residual with the opposite sign, $\mathbf{b} - A\mathbf{x}_k$. This changes some signs in the formulae, but not the algorithms themselves.
+:::
 
 Different line search methods differ in how the search direction $\mathbf{d}_k$ is chosen at each iteration. For example, the **method of steepest descent** sets
 $$
@@ -996,11 +1060,17 @@ Continuing the iteration, $\mathbf{x}_k$ proceeds towards the solution $(2,-2)^\
 ![](im/linear_steepest.png){width=70% fig-align="center"}
 :::
 
-Unfortunately, the method of steepest descent can be slow to converge. In the **conjugate gradient method**, we still take $\mathbf{d}_0=-\mathbf{r}_0$, but subsequent search directions $\mathbf{d}_k$ are chosen to be **$A$-conjugate**, meaning that
+Unfortunately, the method of steepest descent can be slow to converge, because the iterates zig-zag across the valley of $f$. Its speed depends on the conditioning of $A$: it can be shown that the error decreases by a factor of about
+$$
+\frac{\kappa-1}{\kappa+1}, \qquad \kappa = \kappa_2(A) = \frac{\lambda_{\max}}{\lambda_{\min}},
+$$
+at each iteration (measured in a suitable norm). For an ill-conditioned matrix, this factor is very close to $1$.
+
+In the **conjugate gradient method**, we still take $\mathbf{d}_0=-\mathbf{r}_0$, but subsequent search directions $\mathbf{d}_k$ are chosen to be **$A$-conjugate**, meaning that
 $$
 \mathbf{d}_{k+1}^\top A \mathbf{d}_k = 0.
 $$
-This means that minimization in one direction does not undo the previous minimizations.
+This means that minimisation in one direction does not undo the previous minimisations.
 
 In particular, we construct $\mathbf{d}_{k+1}$ by writing
 $$
@@ -1067,31 +1137,77 @@ The residuals $\mathbf{r}_k:=A\mathbf{x}_k - \mathbf{b}$ at each stage of the co
 
 After $n$ iterations, the only residual vector that can be orthogonal to all of the previous ones is $\mathbf{r}_n=\boldsymbol{0}$, so $\mathbf{x}_n$ must be the exact solution.
 
-In practice, conjugate gradients is not competitive as a direct method. It is computationally intensive, and rounding errors can destroy the orthogonality, meaning that more than $n$ iterations may be required. Instead, its main use is for large sparse systems. For suitable matrices (perhaps after **preconditioning**), it can converge very rapidly.
+In practice, conjugate gradients is not competitive as a direct method for small dense systems, and rounding errors can destroy the orthogonality, meaning that more than $n$ iterations may be required. Instead, its main use is for large sparse systems, where we stop long before $n$ iterations. With some algebraic rearrangement, each iteration requires only *one* matrix-vector product, and the error decreases by a factor of about
+$$
+\frac{\sqrt{\kappa}-1}{\sqrt{\kappa}+1}
+$$
+per iteration, which is much faster than steepest descent when $\kappa$ is large. This is another reason why conditioning matters: **preconditioning** replaces $A\mathbf{x}=\mathbf{b}$ by an equivalent system with a smaller condition number, so that conjugate gradients converges in fewer iterations.
 
-We can save computation by using the alternative formulae
-$$
-\mathbf{r}_{k+1} = \mathbf{r}_k + \alpha_k A\mathbf{d}_k, \quad
-\alpha_k = \frac{\mathbf{r}_k^\top \mathbf{r}_k}{\mathbf{d}_k^\top A \mathbf{d}_k}, \quad
-\beta_k = \frac{\mathbf{r}_{k+1}^\top\mathbf{r}_{k+1}}{\mathbf{r}_k^\top\mathbf{r}_k}.
-$$
-With these formulae, each iteration requires only one matrix-vector product, two vector-vector products, and three vector additions. Compare this to the basic algorithm above which requires two matrix-vector products, four vector-vector products and three vector additions.
+::: {.eg title="MATLAB demonstration: steepest descent vs conjugate gradients"}
+```matlab
+A = [3 2; 2 6];  b = [2; -8];
+[X, Y] = meshgrid(linspace(-4, 6, 200), linspace(-6, 4, 200));
+F = 0.5*(A(1,1)*X.^2 + 2*A(1,2)*X.*Y + A(2,2)*Y.^2) - b(1)*X - b(2)*Y;
+
+xs = zeros(2, 11);  xs(:,1) = [-2; -2];        % steepest descent
+for k = 1:10
+    d = b - A*xs(:,k);                         % d = -r
+    xs(:,k+1) = xs(:,k) + (d'*d)/(d'*A*d)*d;
+end
+
+xc = zeros(2, 3);  xc(:,1) = [-2; -2];         % conjugate gradients
+r = A*xc(:,1) - b;  d = -r;
+for k = 1:2
+    alpha = -(d'*r)/(d'*A*d);
+    xc(:,k+1) = xc(:,k) + alpha*d;
+    rnew = A*xc(:,k+1) - b;
+    beta = (rnew'*A*d)/(d'*A*d);
+    d = -rnew + beta*d;  r = rnew;
+end
+
+figure
+contour(X, Y, F, 30), hold on
+plot(xs(1,:), xs(2,:), 'o-', 'LineWidth', 2.5, 'MarkerSize', 8)
+plot(xc(1,:), xc(2,:), 's-', 'LineWidth', 2.5, 'MarkerSize', 8), hold off
+legend('contours of f', 'steepest descent', 'conjugate gradients', 'Location', 'northwest')
+xlabel('x_1'), ylabel('x_2'), axis equal, set(gca, 'FontSize', 18)
+```
+:::
+
+::: {.eg title="MATLAB demonstration: conjugate gradients for a large sparse system"}
+```matlab
+A = gallery('poisson', 100);       % sparse SPD matrix, 10^4-by-10^4, at most 5 non-zeros per row
+figure
+spy(A(1:500, 1:500))
+title('Sparsity pattern (first 500 rows and columns)'), set(gca, 'FontSize', 18)
+
+b = ones(size(A, 1), 1);
+[x, flag, relres, iter, resvec] = pcg(A, b, 1e-8, 1000);
+figure
+semilogy(0:length(resvec)-1, resvec/norm(b), 'LineWidth', 2.5)
+legend('conjugate gradients', 'Location', 'northeast')
+xlabel('iteration k'), ylabel('relative residual'), set(gca, 'FontSize', 18), grid on
+fprintf('CG converged in %d iterations for n = %d unknowns\n', iter, size(A, 1));
+```
+This matrix comes from the two-dimensional heat (or Poisson) equation, and conjugate gradients converges in far fewer than $n = 10^4$ iterations.
+:::
 
 ## Knowledge checklist {.unnumbered}
 
 **Key topics:**
 
-1. Direct and iterative methods for solving linear systems: triangular systems, Gaussian elimination, LU decomposition, and iterative algorithms.
+1. Direct methods for linear systems: triangular systems, Gaussian elimination, LU decomposition and partial pivoting, and their computational cost.
 
-2. Vector and matrix norms, including induced matrix norms and their role in error analysis.
+2. Vector norms and induced matrix norms.
 
-3. Conditioning and the condition number: sensitivity of solutions to input errors and implications for numeric stability.
+3. Conditioning: the condition number and its effect on the accuracy of computed solutions.
+
+4. Iterative methods for sparse symmetric positive definite systems: steepest descent and the conjugate gradient method.
 
 **Key skills:**
 
-- Formulate and solve linear systems using direct and iterative methods (e.g., Gaussian elimination, LU decomposition).
+- Solving linear systems by forward and backward substitution, Gaussian elimination and LU decomposition (with partial pivoting), and counting the operations required.
 
-- Apply norms to measure errors and conditioning, and calculate condition numbers.
+- Computing vector and matrix norms and condition numbers, and using them to estimate the accuracy of a computed solution.
 
- - Analyze computational complexity and efficiency of matrix algorithms.
-
+- Applying steepest descent and conjugate gradients to SPD systems, and explaining how their convergence depends on the condition number.
