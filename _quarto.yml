@@ -32,6 +32,7 @@ format:
     self-contained: true
     title-block-banner: "#68246D"
     title-block-banner-color: white
+    include-after-body: pdf-download.html
     include-before:
       <p hidden>
       $$

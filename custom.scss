@@ -6,3 +6,19 @@
   background-position: right 2rem center !important;
   background-size: auto 55% !important;
 }
+
+.pdf-download-btn {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid #fff;
+  border-radius: 0.375rem;
+  color: #fff !important;
+  font-size: 0.9rem;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #fff;
+    color: #68246D !important;
+  }
+}

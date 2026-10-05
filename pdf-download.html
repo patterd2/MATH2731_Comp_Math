@@ -1,0 +1,13 @@
+<script>
+  // Add a "Download PDF" button to the title banner of each page
+  (function () {
+    var title = document.querySelector("#title-block-header .quarto-title");
+    if (!title) return;
+    var link = document.createElement("a");
+    link.href = "Computational-Mathematics-II--MATH2731-.pdf";
+    link.className = "pdf-download-btn";
+    link.setAttribute("download", "");
+    link.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Download PDF';
+    title.appendChild(link);
+  })();
+</script>
