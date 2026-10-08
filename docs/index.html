@@ -3891,7 +3891,11 @@ background: #68246D;
 }
 </style>
 <style>
-.proof {
+.definition {
+--color1: #fcebee;
+--color2: #ea3342;
+}
+.theorem {
 --color1: #fcebee;
 --color2: #ea3342;
 }
@@ -3899,21 +3903,17 @@ background: #68246D;
 --color1: #E7D6EA;
 --color2: #68246D;
 }
-.definition {
+.doit {
+--color1: #e7efea;
+--color2: #53b57b;
+}
+.proof {
 --color1: #fcebee;
 --color2: #ea3342;
 }
 .algorithm {
 --color1: #e7efea;
 --color2: #53b57b;
-}
-.doit {
---color1: #e7efea;
---color2: #53b57b;
-}
-.theorem {
---color1: #fcebee;
---color2: #ea3342;
 }
 </style>
 
@@ -4272,7 +4272,8 @@ Code for all of the examples and exercises will be available on the course Githu
     title.appendChild(link);
 
     // Add a "Slides" button if this chapter has a deck in slides/
-    var page = location.pathname.split("/").pop() || "index.html";
+    var page = location.pathname.split("/").pop();
+    if (!/^chap-/.test(page)) return;
     var slides = "slides/" + page;
     fetch(slides, { method: "HEAD" }).then(function (r) {
       if (!r.ok) return;

@@ -4,6 +4,7 @@
 #   quarto preview chap-two.qmd
 # Output goes to docs/slides/ so it is deployed alongside the book.
 project:
+  type: website
   output-dir: ../docs/slides
 
 format:
@@ -14,7 +15,11 @@ format:
     center: false
     width: 1280
     height: 720
-    embed-resources: true
+    # C: draw on the slide, B: open a blackboard. The chalkboard cannot be
+    # used with embed-resources, so images load from ../im (docs/im once
+    # deployed, which the book render provides).
+    chalkboard:
+      theme: chalkboard
     code-line-numbers: false
     html-math-method: mathjax
     include-before: |

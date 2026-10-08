@@ -1,0 +1,1094 @@
+[
+  {
+    "objectID": "chap-five.html#how-can-computers-solve-differential-equations",
+    "href": "chap-five.html#how-can-computers-solve-differential-equations",
+    "title": "Chapter 5: Differential Equations",
+    "section": "How can computers solve differential equations?",
+    "text": "How can computers solve differential equations?\n\nAlmost all differential equations have no exact analytical solution\nGoal: understand the fundamentals of numerical timestepping, so we can choose a method for a given problem\nKey ideas: consistency, stability, convergence, order"
+  },
+  {
+    "objectID": "chap-five.html#first-order-systems",
+    "href": "chap-five.html#first-order-systems",
+    "title": "Chapter 5: Differential Equations",
+    "section": "First-order systems",
+    "text": "First-order systems\n\\[\n\\dot{\\mathbf{u}} = \\frac{\\mathrm{d}\\mathbf{u}}{\\mathrm{d}t} = \\mathbf{f}(t,\\mathbf{u}), \\quad \\mathbf{u}(t_0)=\\mathbf{u}_0 \\in \\mathbb{R}^n\n\\]\n\nAutonomous if \\(\\mathbf{f}(t,\\mathbf{u})=\\mathbf{f}(\\mathbf{u})\\)\nAny \\(n\\)th order ODE \\(u^{(n)} = f\\big(t, u, u',\\dotsc, u^{(n-1)}\\big)\\) becomes a first-order system: \\[\ny_0 = u, \\;\\; y_1 = u', \\;\\; \\ldots, \\;\\; y_{n-1} = u^{(n-1)}\n\\quad\\implies\\quad\n\\begin{aligned}\ny_0' &= y_1, \\;\\; \\ldots, \\;\\; y_{n-2}' = y_{n-1}, \\\\\ny_{n-1}' &= f\\big(t, y_0, y_1, \\dotsc, y_{n-1}\\big)\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "chap-five.html#example",
+    "href": "chap-five.html#example",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Example",
+    "text": "Example\n\n\\(u''' = t + 2u + 3u''\\), \\(\\; u(0) = 1\\), \\(u'(0) = 2\\), \\(u''(0) = 3\\) Let \\(y_0 = u\\), \\(y_1 = u'\\), \\(y_2 = u''\\): \\[\n\\begin{aligned}\ny_0' &= y_1, & y_0(0) &= 1,\\\\\ny_1' &= y_2, & y_1(0) &= 2,\\\\\ny_2' &= t + 2y_0 + 3y_2, & y_2(0) &= 3.\n\\end{aligned}\n\\]\n\n\\[\n\\frac{d}{dt}\n\\begin{bmatrix}\ny_0 \\\\\ny_1 \\\\\ny_2\n\\end{bmatrix}\n=\n\\begin{bmatrix}\n0 & 1 & 0 \\\\\n0 & 0 & 1 \\\\\n2 & 0 & 3\n\\end{bmatrix}\n\\begin{bmatrix}\ny_0 \\\\\ny_1 \\\\\ny_2\n\\end{bmatrix}\n+\n\\begin{bmatrix}\n0 \\\\\n0 \\\\\nt\n\\end{bmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-five.html#existence-and-uniqueness",
+    "href": "chap-five.html#existence-and-uniqueness",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Existence and uniqueness",
+    "text": "Existence and uniqueness\n\nPicard–Lindelöf theorem Let \\(\\mathcal{D}\\subset\\mathbb{R}\\times\\mathbb{R}^n\\) be an open rectangle with interior point \\((t_0,\\mathbf{u}_0)\\). Suppose \\(\\mathbf{f}:\\mathcal{D}\\to\\mathbb{R}^n\\) is continuous in \\(t\\) and Lipschitz continuous in \\(\\mathbf{u}\\) on \\(\\mathcal{D}\\). Then there exists \\(\\varepsilon&gt;0\\) such that the initial-value problem has a unique solution \\(\\mathbf{u}(t)\\) for \\(t\\in[t_0-\\varepsilon,t_0+\\varepsilon]\\).\n\n\nFollows from the contraction mapping theorem\nGlobally Lipschitz and continuous for all \\(t\\) \\(\\implies\\) solution exists for all \\(t\\)\nAutonomous systems: solution curves cannot cross"
+  },
+  {
+    "objectID": "chap-five.html#non-uniqueness",
+    "href": "chap-five.html#non-uniqueness",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Non-uniqueness",
+    "text": "Non-uniqueness\n\nNorton’s Dome \\[\n\\frac{\\mathrm{d}u}{\\mathrm{d}t} = v, \\quad \\frac{\\mathrm{d}v}{\\mathrm{d}t} = \\sqrt{u}, \\quad u(0) = v(0) = 0\n\\]\nAs well as \\(u(t) = 0\\), for any \\(T &gt; 0\\): \\[\nu(t) = \\begin{cases}\n    0 & t &lt; T,\\\\\n    \\frac{1}{144}(t-T)^4 & t \\geq T.\n\\end{cases}\n\\]\n\\(\\sqrt{u}\\) is not Lipschitz at \\(u=0\\)."
+  },
+  {
+    "objectID": "chap-five.html#forward-euler",
+    "href": "chap-five.html#forward-euler",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Forward Euler",
+    "text": "Forward Euler\nForward difference for \\(\\dot{\\mathbf{u}}\\), with time step \\(\\Delta t\\): \\[\n\\mathbf{u}(t + \\Delta t) \\approx \\mathbf{u}(t) + \\Delta t\\, \\mathbf{f}(\\mathbf{u}(t))\n\\]\nWith \\(\\mathbf{u}_n \\approx \\mathbf{u}(n\\Delta t)\\): \\[\n\\mathbf{u}_{n+1} = \\mathbf{u}_n + \\Delta t\\, \\mathbf{f}(\\mathbf{u}_n)\n\\]\n\nHow accurate is it?\nIs it convergent: does \\(\\mathbf{u}_n \\to \\mathbf{u}(t)\\) as \\(\\Delta t \\to 0\\)?"
+  },
+  {
+    "objectID": "chap-five.html#the-van-der-pol-oscillator",
+    "href": "chap-five.html#the-van-der-pol-oscillator",
+    "title": "Chapter 5: Differential Equations",
+    "section": "The van der Pol oscillator",
+    "text": "The van der Pol oscillator\n\\[\n\\frac{\\mathrm{d}^2 u}{\\mathrm{d} t^2} - C\\left(1-u^2 \\right )\\frac{\\mathrm{d} u}{\\mathrm{d} t} + u = 0\n\\]\n\\[\n\\iff \\quad \\frac{\\mathrm{d} u}{\\mathrm{d} t} = v, \\quad \\frac{\\mathrm{d}v}{\\mathrm{d} t} = C\\left(1-u^2\\right)v - u\n\\]\n\n\\(C=0\\): simple harmonic oscillator\n\\(C&gt;0\\): damping for \\(|u|&gt;1\\), “negative damping” for \\(|u|&lt;1\\)"
+  },
+  {
+    "objectID": "chap-five.html#matlab-demo-forward-euler-vs-ode45",
+    "href": "chap-five.html#matlab-demo-forward-euler-vs-ode45",
+    "title": "Chapter 5: Differential Equations",
+    "section": "MATLAB demo: forward Euler vs ode45",
+    "text": "MATLAB demo: forward Euler vs ode45\nC = 0; % Parameter C in the model.\n% The ODE rhs function as an \"anonymous function\".\nf = @(t,u)  [u(2); -C*(u(1)^2 - 1).*u(2) - u(1)];\n\nU0 = [2; -0.65];  % Initial condition\ntspan = linspace(0,20,1e3); % Time span\n\n% Set low tolerances to ensure an accurate solution\noptions = odeset('RelTol',1e-11,'AbsTol',1e-11);\n[~,u_ode45] = ode45(f, tspan, U0);\n\n% Forward Euler setup (timestep, vector of solution points etc)\ndt = 0.15; n = round(tspan(end)/dt); u_Euler = NaN(2,n);\n\nu_Euler(:,1) = U0; % Initial condition for Euler method\nfor i = 1:n-1\n    t = (i-1) * dt; % Current time (NB: Unused currently!)\n    u_Euler(:,i+1) = u_Euler(:,i) + dt * f(t, u_Euler(:,i));\nend"
+  },
+  {
+    "objectID": "chap-five.html#forward-euler-c0",
+    "href": "chap-five.html#forward-euler-c0",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Forward Euler: \\(C=0\\)",
+    "text": "Forward Euler: \\(C=0\\)"
+  },
+  {
+    "objectID": "chap-five.html#forward-euler-c3",
+    "href": "chap-five.html#forward-euler-c3",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Forward Euler: \\(C=3\\)",
+    "text": "Forward Euler: \\(C=3\\)"
+  },
+  {
+    "objectID": "chap-five.html#local-truncation-error",
+    "href": "chap-five.html#local-truncation-error",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Local truncation error",
+    "text": "Local truncation error\nSubstitute the true solution and Taylor expand: \\[\n\\mathbf{u}(t+\\Delta t) = \\mathbf{u}(t) + \\Delta t\\, \\frac{\\mathrm{d}\\mathbf{u}}{\\mathrm{d}t} + {\\cal O}(\\Delta t^2) = \\mathbf{u}(t) + \\Delta t\\, \\mathbf{f}(\\mathbf{u}(t)) + {\\cal O}(\\Delta t^2)\n\\]\n\nForward Euler has LTE \\({\\cal O}(\\Delta t^2)\\) (the single-step error)\nAlternatively, from the difference quotient: \\[\n\\frac{\\mathbf{u}(t+\\Delta t) - \\mathbf{u}(t)}{\\Delta t} = \\mathbf{f}(\\mathbf{u}(t)) + {\\cal O}(\\Delta t)\n\\]\nConsistent: LTE \\({\\cal O}(\\Delta t)\\) or smaller\n\nConsistency is not enough for convergence!"
+  },
+  {
+    "objectID": "chap-five.html#forward-euler-c4",
+    "href": "chap-five.html#forward-euler-c4",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Forward Euler: \\(C=4\\)",
+    "text": "Forward Euler: \\(C=4\\)\n\n\n\n\n\n\\(\\Delta t = 0.1\\): \\(u_{70} \\approx 10^{172}\\)"
+  },
+  {
+    "objectID": "chap-five.html#the-dahlquist-problem",
+    "href": "chap-five.html#the-dahlquist-problem",
+    "title": "Chapter 5: Differential Equations",
+    "section": "The Dahlquist problem",
+    "text": "The Dahlquist problem\n\\[\n\\frac{\\mathrm{d}u}{\\mathrm{d}t} = \\lambda u, \\qquad \\lambda \\in \\mathbb{C}\n\\]\n\nModel for the linearised behaviour of a general system\nExact solutions decay when \\(\\Re(\\lambda)&lt;0\\)\nDoes the numerical method decay too?"
+  },
+  {
+    "objectID": "chap-five.html#stability-of-forward-euler",
+    "href": "chap-five.html#stability-of-forward-euler",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Stability of forward Euler",
+    "text": "Stability of forward Euler\n\nStability of forward Euler \\[\nu_{n+1} = u_n + \\Delta t \\lambda u_n = (1+\\Delta t \\lambda)u_n \\implies u_n = (1+\\Delta t \\lambda)^n u_0\n\\]\n\nGrows without bound if \\(|1 + \\Delta t \\lambda| &gt; 1\\). For real \\(\\lambda\\), stability requires \\[\n-2 &lt; \\Delta t \\lambda &lt; 0.\n\\]"
+  },
+  {
+    "objectID": "chap-five.html#a-consistent-but-unstable-method",
+    "href": "chap-five.html#a-consistent-but-unstable-method",
+    "title": "Chapter 5: Differential Equations",
+    "section": "A consistent but unstable method",
+    "text": "A consistent but unstable method\n\nA consistent but unstable method \\[\nu_{n+1} = -4u_n + 5u_{n-1} + \\Delta t(4\\lambda u_n + 2\\lambda u_{n-1})\n= 4(\\Delta t \\lambda - 1)u_n + (5 + 2\\Delta t \\lambda)u_{n-1}\n\\]\n\nTry \\(u_n = C\\mu^n\\): \\[\n\\mu^2 = 4(\\Delta t \\lambda - 1)\\mu + (5 + 2\\Delta t \\lambda)\n\\implies\n\\mu = 2(\\Delta t \\lambda - 1) \\pm \\sqrt{4(\\Delta t \\lambda)^2 - 6 \\Delta t \\lambda + 9}\n\\]\n\n\n\n\\(\\Delta t \\to 0\\): \\(\\mu \\to -5\\), so \\(u_n \\sim (-5)^n\\)\nIn fact, always some \\(|\\mu| \\geq \\sqrt{19} &gt; 1\\): always unstable"
+  },
+  {
+    "objectID": "chap-five.html#stability-regions",
+    "href": "chap-five.html#stability-regions",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Stability regions",
+    "text": "Stability regions\n\n\n\n\n\n\nA-stable: stable for all \\(\\Re(\\lambda)&lt;0\\)\nThen choose \\(\\Delta t\\) for accuracy alone"
+  },
+  {
+    "objectID": "chap-five.html#backward-euler",
+    "href": "chap-five.html#backward-euler",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Backward Euler",
+    "text": "Backward Euler\n\\[\n\\mathbf{u}_{n+1} = \\mathbf{u}_n + \\Delta t\\, \\mathbf{f}(\\mathbf{u}_{n+1})\n\\]\n\nImplicit: \\(\\mathbf{u}_{n+1}\\) appears on the right-hand side\nEach step is a rootfinding problem: \\[\n\\mathbf{G}(\\mathbf{u}_{n+1}) := \\mathbf{u}_{n+1} - \\Delta t\\, \\mathbf{f}(\\mathbf{u}_{n+1}) = \\mathbf{u}_n\n\\]\nDirect when \\(\\mathbf{f}\\) is linear (a linear system, Chapter 3)\nSame LTE as forward Euler"
+  },
+  {
+    "objectID": "chap-five.html#stability-of-backward-euler",
+    "href": "chap-five.html#stability-of-backward-euler",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Stability of backward Euler",
+    "text": "Stability of backward Euler\n\nStability of backward Euler \\[\nu_{n+1} - \\Delta t \\lambda u_{n+1} = u_n\n\\implies u_{n+1} = \\frac{1}{1-\\Delta t \\lambda}u_n\n\\implies u_n = \\left( \\frac{1}{1-\\Delta t \\lambda} \\right)^n u_0\n\\]\n\nIf \\(\\Re(\\lambda)&lt;0\\) and \\(\\Delta t &gt; 0\\), then \\(\\Re(1-\\Delta t\\lambda) &gt; 1\\), so \\[\n\\left|\\frac{1}{1-\\Delta t \\lambda}\\right| &lt; 1.\n\\] Backward Euler is A-stable."
+  },
+  {
+    "objectID": "chap-five.html#convergence",
+    "href": "chap-five.html#convergence",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Convergence",
+    "text": "Convergence\n\nLax Equivalence Theorem Assume the conditions of the Picard–Lindelöf theorem. A finite difference method converges (in a suitable sense) to the unique solution of \\[\n\\dot{\\mathbf{u}} = \\mathbf{f}(t, \\mathbf{u}), \\quad \\mathbf{u}(t_0) = \\mathbf{u}_0 \\in \\mathbb{R}^N,\n\\] as \\(\\Delta t \\to 0\\) if the method is both consistent and stable.\n\n\nHolds in exact arithmetic only: rounding error builds up over long times or tiny steps\nGlobal truncation error: accumulation of the LTE over many steps"
+  },
+  {
+    "objectID": "chap-five.html#runge-kutta-methods",
+    "href": "chap-five.html#runge-kutta-methods",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Runge-Kutta methods",
+    "text": "Runge-Kutta methods\nSeveral function evaluations within one step (\\(\\dot u = f(u)\\)): \\[\nu_{n+1} = u_n + \\Delta t \\sum_{i=1}^s a_i k_i, \\quad k_1 = f(u_n), \\quad\nk_i = f\\left(u_n + \\Delta t \\sum_{j=1}^{i-1} a_{ij} k_j\\right)\n\\]\n\nSingle-step: only \\(u_n\\) is needed\nExplicit: each \\(k_i\\) uses only earlier \\(k_j\\)"
+  },
+  {
+    "objectID": "chap-five.html#derivation-of-rk2",
+    "href": "chap-five.html#derivation-of-rk2",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Derivation of RK2",
+    "text": "Derivation of RK2\n\nDerivation of RK2 \\[\nu(t_n+\\Delta t) = u(t_n) + \\Delta t f(u(t_n)) + \\frac{\\Delta t^2}{2} f_u(u(t_n)) \\dot{u}(t_n) + {\\cal O}(\\Delta t^3)\n\\]\n\nEvaluate \\(f\\) at the midpoint: \\[\nf\\big(u(t_n) + \\tfrac{\\Delta t}{2} f(u(t_n))\\big) = f(u(t_n)) + \\frac{\\Delta t}{2} f_u(u(t_n)) \\dot{u}(t_n) + {\\cal O}(\\Delta t^2)\n\\]\n\n\nMultiply by \\(\\Delta t\\): matches up to \\({\\cal O}(\\Delta t^2)\\), so \\[\nu_{n+1} = u_n + \\Delta t\\, f\\big(u_n + \\tfrac{\\Delta t}{2} f(u_n)\\big)\n\\] is one order more accurate than forward Euler, for one extra function evaluation."
+  },
+  {
+    "objectID": "chap-five.html#linear-multistep-methods",
+    "href": "chap-five.html#linear-multistep-methods",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Linear multistep methods",
+    "text": "Linear multistep methods\nUse several previous steps instead of several evaluations per step.\n\nTwo-step Adams-Bashforth \\[\nu_{n+2} = u_{n+1} + \\frac{\\Delta t}{2} \\Big( 3 f(u_{n+1}) - f(u_n) \\Big)\n\\]\n\n\nSecond order, like RK2, but only one new function evaluation per step\nNeeds more starting values than \\(u_0\\): start with a Runge-Kutta method"
+  },
+  {
+    "objectID": "chap-five.html#beyond-the-basics",
+    "href": "chap-five.html#beyond-the-basics",
+    "title": "Chapter 5: Differential Equations",
+    "section": "Beyond the basics",
+    "text": "Beyond the basics\n\nStability matters, but is hard to guarantee\nNo explicit method of these forms is A-stable\nImplicit methods need (often difficult) rootfinding\nStiff equations: hard to integrate stably, often large \\(|\\lambda|\\) when linearised"
+  },
+  {
+    "objectID": "chap-two.html#how-do-we-represent-and-manipulate-continuous-functions-on-a-computer",
+    "href": "chap-two.html#how-do-we-represent-and-manipulate-continuous-functions-on-a-computer",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "How do we represent and manipulate continuous functions on a computer?",
+    "text": "How do we represent and manipulate continuous functions on a computer?\n\nInterpolation: approximate \\(f\\) by a polynomial that matches it at chosen nodes\nRootfinding: solve \\(f(x)=0\\) by iterative methods"
+  },
+  {
+    "objectID": "chap-two.html#why-polynomials",
+    "href": "chap-two.html#why-polynomials",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Why polynomials?",
+    "text": "Why polynomials?\n\nWeierstrass Approximation Theorem (1885) For any \\(f\\in C([0,1])\\) and any \\(\\epsilon &gt; 0\\), there exists a polynomial \\(p(x)\\) such that \\[\n\\max_{0\\leq x\\leq 1}\\big|f(x) - p(x)\\big| \\leq \\epsilon.\n\\]\n\n\n\\(p_n(x) = a_0 + a_1x + \\ldots + a_nx^n\\): store just \\(n+1\\) coefficients\nEasy to differentiate and integrate\nPoor near singularities, e.g. \\(1/x\\) near \\(x=0\\)"
+  },
+  {
+    "objectID": "chap-two.html#interpolation-1",
+    "href": "chap-two.html#interpolation-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Interpolation",
+    "text": "Interpolation\nFind \\(p_n\\) with \\[\np_n(x_i) = f(x_i) \\quad \\text{at the \\textbf{nodes} } x_0, x_1, \\ldots, x_n.\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#taylor-series-a-single-node",
+    "href": "chap-two.html#taylor-series-a-single-node",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Taylor series: a single node",
+    "text": "Taylor series: a single node\nCalculate \\(\\sin(0.1)\\) to 6 s.f.: \\[\n\\sin(x) = x - \\frac{x^3}{3!} + \\frac{x^5}{5!} - \\frac{x^7}{7!} + \\ldots\n\\]\n\n\\[\\begin{align*}\n\\textrm{1 term} \\;&\\implies\\; \\sin(0.1) \\approx 0.1\\\\\n\\textrm{2 terms} \\;&\\implies\\; \\sin(0.1) \\approx 0.1 - \\frac{0.1^3}{6} = 0.099833\\ldots\\\\\n\\textrm{3 terms} \\;&\\implies\\; \\sin(0.1) \\approx 0.1 - \\frac{0.1^3}{6} + \\frac{0.1^5}{120} = 0.09983341\\ldots\n\\end{align*}\\]\n\n\nNext term: \\(-0.1^7/7! \\approx -2\\times 10^{-11}\\). Exact: \\(\\sin(0.1)=0.09983341\\dots\\)"
+  },
+  {
+    "objectID": "chap-two.html#taylors-theorem",
+    "href": "chap-two.html#taylors-theorem",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Taylor’s theorem",
+    "text": "Taylor’s theorem\n\nTaylor’s Theorem Let \\(f\\) be \\(n+1\\) times differentiable on \\((a,b)\\), and let \\(f^{(n)}\\) be continuous on \\([a,b]\\). If \\(x,x_0\\in[a,b]\\) then there exists \\(\\xi\\) between \\(x_0\\) and \\(x\\) such that \\[\nf(x) = \\underbrace{\\sum_{k=0}^n\\frac{f^{(k)}(x_0)}{k!}(x-x_0)^k}_{\\text{Taylor polynomial}} \\; + \\; \\underbrace{\\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-x_0)^{n+1}}_{\\text{Lagrange remainder}}.\n\\]\n\n\n\\(\\xi\\) is unknown (and depends on \\(x\\)) \\(\\implies\\) take the worst case over the interval\nThis is truncation error"
+  },
+  {
+    "objectID": "chap-two.html#bounding-the-error",
+    "href": "chap-two.html#bounding-the-error",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Bounding the error",
+    "text": "Bounding the error\n\nError in \\(\\sin(0.1) \\approx p_6(0.1)\\) \\(x - x^3/3! + x^5/5!\\) is also \\(p_6\\), so use \\(n=6\\) with \\(f^{(7)}(x) = -\\cos(x)\\): \\[\n\\big|f(0.1) - p_6(0.1)\\big| = \\frac{1}{5040}(0.1)^7\\big|\\cos(\\xi)\\big| \\quad \\textrm{for some $\\xi\\in[0,0.1]$}.\n\\]\n\nSince \\(|\\cos(\\xi)|\\leq 1\\), \\[\n\\big|f(0.1) - p_6(0.1)\\big| \\leq 1.984\\times 10^{-11}.\n\\]\n\n\nActual error: \\(1.984\\times 10^{-11}\\)"
+  },
+  {
+    "objectID": "chap-two.html#polynomial-interpolation",
+    "href": "chap-two.html#polynomial-interpolation",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Polynomial interpolation",
+    "text": "Polynomial interpolation\nFind \\[\np_n(x) = a_0 + a_1x + \\ldots + a_n x^n\n\\] with \\(p_n(x_i) = f(x_i)\\) at \\(n+1\\) distinct nodes: \\(n+1\\) unknowns, \\(n+1\\) conditions.\n\nLinear interpolation (\\(n=1\\)) \\[\n\\begin{cases}\na_0 + a_1x_0 = f(x_0)\\\\\na_0 + a_1x_1 = f(x_1)\n\\end{cases}\n\\implies\\quad\np_1(x) = \\frac{x_1f(x_0) - x_0f(x_1)}{x_1 - x_0} + \\frac{f(x_1) - f(x_0)}{x_1 - x_0}x.\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#the-vandermonde-system",
+    "href": "chap-two.html#the-vandermonde-system",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "The Vandermonde system",
+    "text": "The Vandermonde system\n\\[\n\\underbrace{\\begin{pmatrix}\n1 & x_0 & x_0^2 & \\cdots & x_0^n\\\\\n1 & x_1 & x_1^2 & \\cdots & x_1^n\\\\\n\\vdots & \\vdots &\\vdots& & \\vdots\\\\\n1 & x_n & x_n^2 & \\cdots & x_n^n\\\\\n\\end{pmatrix}}_{V}\n\\begin{pmatrix}\na_0\\\\ a_1\\\\ \\vdots\\\\ a_n\n\\end{pmatrix}\n=\n\\begin{pmatrix}\nf(x_0)\\\\ f(x_1)\\\\ \\vdots\\\\ f(x_n)\n\\end{pmatrix},\n\\qquad\n\\det(V) = \\prod_{0\\leq i &lt; j\\leq n} (x_j - x_i)\n\\]\n\nExistence/uniqueness Given \\(n+1\\) distinct nodes \\(x_0, x_1, \\ldots, x_n\\), there is a unique polynomial \\(p_n\\in\\mathcal{P}_n\\) that interpolates \\(f(x)\\) at these nodes."
+  },
+  {
+    "objectID": "chap-two.html#uniqueness-a-direct-proof",
+    "href": "chap-two.html#uniqueness-a-direct-proof",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Uniqueness: a direct proof",
+    "text": "Uniqueness: a direct proof\nSuppose \\(q_n\\in\\mathcal{P}_n\\) also interpolates \\(f\\). Let \\(r_n := p_n - q_n \\in \\mathcal{P}_n\\).\n\n\\[\nr_n(x_i) = p_n(x_i) - q_n(x_i) = f(x_i)-f(x_i)=0 \\quad \\textrm{for $i=0,\\ldots,n$}\n\\]\n\n\n\n\\(r_n\\) has \\(n+1\\) roots, but degree \\(\\leq n\\)\nSo \\(r_n\\equiv 0\\), i.e. \\(q_n=p_n\\) \\(\\quad\\blacksquare\\)"
+  },
+  {
+    "objectID": "chap-two.html#example",
+    "href": "chap-two.html#example",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Example",
+    "text": "Example\n\nInterpolate \\(f(x)=\\cos(x)\\) with \\(p_2\\in\\mathcal{P}_2\\) at \\(\\{0, \\tfrac{\\pi}{2}, \\pi\\}\\) \\(f(x_0)=1\\), \\(f(x_1)=0\\), \\(f(x_2)=-1 \\implies p_2(x) = 1 - \\tfrac2\\pi x\\)\nNodes \\(\\{0,2\\pi,4\\pi\\} \\implies p_2(x)=1\\)"
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-the-vandermonde-approach",
+    "href": "chap-two.html#matlab-demo-the-vandermonde-approach",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: the Vandermonde approach",
+    "text": "MATLAB demo: the Vandermonde approach\n% Quadratic interpolant of cos(x) at three nodes\nx = linspace(-pi/4, pi/4, 3)';\na = vander(x) \\ cos(x);           % coefficients, highest power first\nxx = linspace(-1, 1, 200);\nfigure\nplot(xx, cos(xx), 'LineWidth', 3), hold on\nplot(xx, polyval(a, xx), '--', 'LineWidth', 3)\nplot(x, cos(x), 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k'), hold off\nlegend('f(x) = cos(x)', 'interpolant p_2(x)', 'nodes', 'Location', 'south')\nxlabel('x'), ylabel('y'), set(gca, 'FontSize', 18), grid on\n\n% The condition number grows rapidly with n\nfor n = [5 10 20 30]\n    x = linspace(-1, 1, n+1)';\n    fprintf('n = %2d, cond(V) = %.2e\\n', n, cond(vander(x)));\nend"
+  },
+  {
+    "objectID": "chap-two.html#lagrange-polynomials",
+    "href": "chap-two.html#lagrange-polynomials",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Lagrange polynomials",
+    "text": "Lagrange polynomials\nChoose a basis \\(\\{\\ell_k\\}\\) so that the coefficients are just the function values: \\[\np_n(x) = \\sum_{k=0}^n f(x_k)\\ell_k(x).\n\\]\n\nLinear interpolation again \\[\np_1(x) = \\underbrace{\\frac{x - x_1}{x_0 - x_1}}_{\\ell_0(x)}f(x_0) + \\underbrace{\\frac{x-x_0}{x_1-x_0}}_{\\ell_1(x)}f(x_1)\n\\] \\(\\ell_0(x_0) = 1\\), \\(\\ell_0(x_1)=0\\), \\(\\quad \\ell_1(x_0) = 0\\), \\(\\ell_1(x_1)=1\\)"
+  },
+  {
+    "objectID": "chap-two.html#lagrange-polynomials-1",
+    "href": "chap-two.html#lagrange-polynomials-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Lagrange polynomials",
+    "text": "Lagrange polynomials\n\nLagrange polynomials \\[\n\\ell_k(x) = \\prod_{\\substack{j=0\\\\j\\neq k}}^n\\frac{x - x_j}{x_k - x_j},\n\\qquad\n\\ell_k(x_i) = \\begin{cases}\n1 & \\textrm{if $i=k$},\\\\\n0 & \\textrm{otherwise}.\n\\end{cases}\n\\]\n\n\nThen \\(p_n(x) = \\sum_{k} f(x_k)\\ell_k(x)\\) satisfies \\(p_n(x_i) = f(x_i)\\)\nBy uniqueness, the \\(\\ell_k\\) are the only polynomials in \\(\\mathcal{P}_n\\) with this property"
+  },
+  {
+    "objectID": "chap-two.html#example-1",
+    "href": "chap-two.html#example-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Example",
+    "text": "Example\n\n\\(f(x)=\\cos(x)\\) with nodes \\(\\{-\\tfrac\\pi4, 0, \\tfrac\\pi4\\}\\) \\[\n\\ell_0(x) = \\frac{x(x-\\tfrac\\pi4)}{\\tfrac\\pi4\\cdot\\tfrac\\pi2},\n\\qquad\n\\ell_1(x) = \\frac{(x+\\tfrac\\pi4)(x-\\tfrac\\pi4)}{-\\tfrac\\pi4\\cdot\\tfrac\\pi4},\n\\qquad\n\\ell_2(x) = \\frac{x(x+\\tfrac\\pi4)}{\\tfrac\\pi2\\cdot\\tfrac\\pi4}\n\\]\n\n\\[\n\\begin{aligned}\np_2(x) &= \\tfrac{1}{\\sqrt{2}}\\ell_0(x) + \\ell_1(x) + \\tfrac{1}{\\sqrt{2}}\\ell_2(x)\n= \\tfrac{16}{\\pi^2}\\big(\\tfrac{1}{\\sqrt{2}} - 1\\big)x^2 + 1\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#example-2",
+    "href": "chap-two.html#example-2",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Example",
+    "text": "Example\n\\[\np_2(x) = \\tfrac{16}{\\pi^2}\\big(\\tfrac{1}{\\sqrt{2}} - 1\\big)x^2 + 1\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-plotting-the-lagrange-basis",
+    "href": "chap-two.html#matlab-demo-plotting-the-lagrange-basis",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: plotting the Lagrange basis",
+    "text": "MATLAB demo: plotting the Lagrange basis\nx = [-pi/4, 0, pi/4];             % nodes\nxx = linspace(-1, 1, 200);\nfigure, hold on\nfor k = 1:length(x)\n    others = x([1:k-1, k+1:end]);\n    ell_k = prod((xx' - others) ./ (x(k) - others), 2);   % l_k evaluated on the grid\n    plot(xx, ell_k, 'LineWidth', 3, 'DisplayName', sprintf('$\\\\ell_%d(x)$', k-1))\nend\nplot(x, zeros(size(x)), 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k', 'DisplayName', 'nodes')\nhold off\nlegend('Interpreter', 'latex', 'Location', 'southoutside', 'Orientation', 'horizontal')\nxlabel('x'), set(gca, 'FontSize', 18), grid on"
+  },
+  {
+    "objectID": "chap-two.html#interpolation-error",
+    "href": "chap-two.html#interpolation-error",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Interpolation error",
+    "text": "Interpolation error\n\n\\(f(x)=\\cos(x)\\) with \\(\\{-\\tfrac\\pi4,0,\\tfrac\\pi4\\}\\) \\[\n|f(x) - p_2(x)| = \\left|\\cos(x) -  \\tfrac{16}{\\pi^2}\\left(\\tfrac{1}{\\sqrt{2}}-1\\right)x^2 - 1\\right|\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#interpolation-error-1",
+    "href": "chap-two.html#interpolation-error-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Interpolation error",
+    "text": "Interpolation error\n\nCauchy’s Interpolation Error Theorem Let \\(p_n\\in{\\cal P}_n\\) interpolate \\(f(x)\\) at the \\(n+1\\) distinct nodes \\(x_0, \\ldots, x_n \\in [a,b]\\), and let \\(f\\) be continuous on \\([a,b]\\) with \\(n+1\\) continuous derivatives on \\((a,b)\\). Then for each \\(x\\in[a,b]\\) there exists \\(\\xi\\in(a,b)\\) such that \\[\nf(x) - p_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-x_0)(x-x_1)\\cdots(x-x_n).\n\\]\n\n\nCompare with the Taylor remainder: now zero at every node\nLarger error for “wiggly” \\(f\\) (large \\(f^{(n+1)}\\))\nDoes the error go down as \\(n\\) increases?"
+  },
+  {
+    "objectID": "chap-two.html#bounding-the-error-1",
+    "href": "chap-two.html#bounding-the-error-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Bounding the error",
+    "text": "Bounding the error\n\n\\(f(x)=\\cos(x)\\) with \\(\\{-\\tfrac\\pi4,0,\\tfrac\\pi4\\}\\), \\(x\\in[-1,1]\\) \\[\nf(x) - p_2(x) = \\tfrac16\\sin(\\xi)\\,\\underbrace{x(x+\\tfrac\\pi4)(x-\\tfrac\\pi4)}_{w(x)}, \\qquad \\xi\\in[-1,1]\n\\]\n\n\\(w'(x) = 3x^2 - \\tfrac{\\pi^2}{16} = 0 \\implies x=\\pm\\tfrac\\pi{4\\sqrt{3}}\\) \\[\nw(\\mp\\tfrac\\pi{4\\sqrt{3}}) = \\pm 0.186\\ldots, \\qquad\nw(\\pm 1) = \\pm 0.383\\ldots\n\\]\n\n\n\\[\n|f(x) - p_2(x)| \\leq \\tfrac16(0.383) = 0.0638\\ldots\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#the-runge-phenomenon",
+    "href": "chap-two.html#the-runge-phenomenon",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "The Runge phenomenon",
+    "text": "The Runge phenomenon\n\\(f(x) = 1/(1 + 25x^2)\\) on \\([-1,1]\\) with equally spaced nodes:"
+  },
+  {
+    "objectID": "chap-two.html#chebyshev-nodes",
+    "href": "chap-two.html#chebyshev-nodes",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Chebyshev nodes",
+    "text": "Chebyshev nodes\nThe node polynomial in the error formula, \\[\nw(x) = \\prod_{i=0}^n(x-x_i),\n\\] is large near the ends for equally spaced nodes \\(\\implies\\) put more nodes there.\n\n\n\n\n\\[\n\\begin{aligned}\n\\phi_j &= \\frac{(2j+1)\\pi}{2(n+1)},\\\\[0.5em]\nx_j &= \\cos\\left[\\frac{(2j + 1)\\pi}{2(n+1)}\\right],\n\\end{aligned}\n\\qquad j=0,\\ldots,n\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#chebyshev-nodes-1",
+    "href": "chap-two.html#chebyshev-nodes-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Chebyshev nodes",
+    "text": "Chebyshev nodes\n\n\n\n\n\nRunge function, \\(n=15\\), Chebyshev nodes\n\n\n\n\nZeros of \\(T_{n+1}(x) = \\cos\\big((n+1)\\arccos(x)\\big)\\)\nMinimise \\(\\max_{[-1,1]}|w(x)| = 2^{-n}\\)\n\n\\[\n\\max_{[-1,1]}|f - p_n| \\leq \\frac{\\max_{[-1,1]}\\big|f^{(n+1)}\\big|}{2^n(n+1)!}\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-equally-spaced-vs-chebyshev",
+    "href": "chap-two.html#matlab-demo-equally-spaced-vs-chebyshev",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: equally spaced vs Chebyshev",
+    "text": "MATLAB demo: equally spaced vs Chebyshev\nf = @(x) 1 ./ (1 + 25*x.^2);      % Runge function\nxx = linspace(-1, 1, 1000);\nfor n = [5 10 15 20]\n    xe = linspace(-1, 1, n+1);                 % equally spaced nodes\n    xc = cos((2*(0:n) + 1)*pi / (2*(n+1)));    % Chebyshev nodes\n    pe = polyval(polyfit(xe, f(xe), n), xx);\n    pc = polyval(polyfit(xc, f(xc), n), xx);\n    fprintf('n = %2d: max error equispaced %.2e, Chebyshev %.2e\\n', ...\n        n, max(abs(f(xx) - pe)), max(abs(f(xx) - pc)));\nend"
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-equally-spaced-vs-chebyshev-1",
+    "href": "chap-two.html#matlab-demo-equally-spaced-vs-chebyshev-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: equally spaced vs Chebyshev",
+    "text": "MATLAB demo: equally spaced vs Chebyshev\n% Side-by-side plots for n = 15\nn = 15;\nxe = linspace(-1, 1, n+1);\nxc = cos((2*(0:n) + 1)*pi / (2*(n+1)));\nnodes = {xe, xc};\ntitles = {'Equally spaced nodes', 'Chebyshev nodes'};\nfigure\nfor j = 1:2\n    subplot(1, 2, j)\n    xn = nodes{j};\n    plot(xx, f(xx), 'LineWidth', 3), hold on\n    plot(xx, polyval(polyfit(xn, f(xn), n), xx), '--', 'LineWidth', 3)\n    plot(xn, f(xn), 'ko', 'MarkerSize', 8, 'MarkerFaceColor', 'k'), hold off\n    ylim([-0.5 2.5]), grid on\n    title(sprintf('%s, n = %d', titles{j}, n))\n    legend('Runge function f(x)', 'interpolant p_n(x)', 'nodes', 'Location', 'north')\n    xlabel('x'), set(gca, 'FontSize', 18)\nend"
+  },
+  {
+    "objectID": "chap-two.html#how-do-we-find-roots-of-nonlinear-equations",
+    "href": "chap-two.html#how-do-we-find-roots-of-nonlinear-equations",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "How do we find roots of nonlinear equations?",
+    "text": "How do we find roots of nonlinear equations?\n\\[\nf(x) = 0\n\\]\n\nUsually no explicit formula for the root \\(x_*\\) \\(\\implies\\) iterative methods\nAlways plot \\(f\\) first!\n\n\n\\(f(x) = \\frac{1}{x} - a\\), for \\(a &gt; 0\\)"
+  },
+  {
+    "objectID": "chap-two.html#interval-bisection",
+    "href": "chap-two.html#interval-bisection",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Interval bisection",
+    "text": "Interval bisection\n\nIntermediate Value Theorem If \\(f\\) is continuous on \\([a,b]\\) and \\(c\\) lies between \\(f(a)\\) and \\(f(b)\\), then there is at least one \\(x\\in[a,b]\\) with \\(f(x)=c\\).\n\n\nInterval bisection Let \\(f\\) be continuous on \\([a_0,b_0]\\), with \\(f(a_0)f(b_0)&lt;0\\).\n\nSet \\(m_k = (a_k + b_k)/2\\).\nIf \\(f(a_k)f(m_k)\\geq 0\\) set \\(a_{k+1}=m_k\\), \\(b_{k+1}=b_k\\); otherwise \\(a_{k+1}=a_k\\), \\(b_{k+1}=m_k\\).\nStop when \\(f(m_k)=0\\) or \\((b_k-a_k)/2 &lt;\\) tolerance; return \\(m_k\\)."
+  },
+  {
+    "objectID": "chap-two.html#bisection-example",
+    "href": "chap-two.html#bisection-example",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Bisection: example",
+    "text": "Bisection: example\n\n\\(f(x)=\\tfrac1x - 0.5\\) \\([a_0,b_0]=[1,3]\\): \\(\\;m_0 = 2\\), \\(f(m_0)=0\\). Lucky!\n\n\\([a_0,b_0]=[1.5,3]\\): \\(\\;f(a_0)=0.1666\\), \\(f(b_0)=-0.1666\\)\n\n\n\n\\(k\\)\n\\(a_k\\)\n\\(b_k\\)\n\\(m_k\\)\n\\(f(m_k)\\)\n\n\n\n\n0\n1.5\n3\n2.25\n\\(-0.0555\\)\n\n\n1\n1.5\n2.25\n1.875\n\\(0.0333\\)\n\n\n2\n1.875\n2.25\n…\n…"
+  },
+  {
+    "objectID": "chap-two.html#bisection-a-warning",
+    "href": "chap-two.html#bisection-a-warning",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Bisection: a warning",
+    "text": "Bisection: a warning\n\nSame \\(f\\), initial interval \\([-0.5,0.5]\\) \n\\(f(a_0)f(b_0)&lt;0\\) but no root: \\(f\\) is not continuous on \\([-0.5,0.5]\\)."
+  },
+  {
+    "objectID": "chap-two.html#bisection-convergence",
+    "href": "chap-two.html#bisection-convergence",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Bisection: convergence",
+    "text": "Bisection: convergence\n\\[\n|b_k - a_k| = \\frac{|b_0 - a_0|}{2^k}\n\\quad\\implies\\quad\n|m_k - x_*| \\leq \\frac{|b_0 - a_0|}{2^{k+1}}\n\\]\n\nFor \\(|m_k - x_*| \\leq \\delta\\) it is enough that \\[\nk \\geq \\frac{\\log|b_0-a_0| - \\log(\\delta)}{\\log(2)} - 1.\n\\]\n\n\n\n\\(a_0=1.5\\), \\(b_0=3\\), \\(\\delta = \\epsilon_{\\rm M}=1.1\\times 10^{-16}\\) \\[\nk \\geq \\frac{\\log(1.5) - \\log(1.1\\times 10^{-16})}{\\log(2)}-1 \\quad \\implies k \\geq 53 \\textrm{ iterations}.\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#fixed-point-iteration",
+    "href": "chap-two.html#fixed-point-iteration",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Fixed point iteration",
+    "text": "Fixed point iteration\nRewrite \\(f(x)=0\\) as \\(x = g(x)\\), then iterate \\[\nx_{k+1} = g(x_k).\n\\]\n\n\\(f(x)=x^2-2x-3\\), roots \\(-1\\) and \\(3\\), \\(x_0=0\\)\n\n\n\n\n\\(g(x)\\)\n\\(x_0 = 0\\)\n\\(x_0 = 42\\)\n\n\n\n\n(a)\n\\(\\sqrt{2x+3}\\)\n\\(\\to 3\\) (33 its)\n\\(\\to 3\\)\n\n\n(b)\n\\(3/(x-2)\\)\n\\(\\to -1\\) (33 its)\n\\(\\to -1\\)\n\n\n(c)\n\\((x^2 - 3)/2\\)\n\\(\\to -1\\) (slowly!)\ndiverges\n\n\n(d)\n\\(x^2 - x - 3\\)\ndiverges\ndiverges\n\n\n(e)\n\\((x^2+3)/(2x-2)\\)\n\\(\\to -1\\) (5 its)\n\\(\\to 3\\)"
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-comparing-the-rearrangements",
+    "href": "chap-two.html#matlab-demo-comparing-the-rearrangements",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: comparing the rearrangements",
+    "text": "MATLAB demo: comparing the rearrangements\ng = {@(x) sqrt(2*x + 3), @(x) 3./(x - 2), @(x) (x.^2 - 3)/2, ...\n     @(x) x.^2 - x - 3,  @(x) (x.^2 + 3)./(2*x - 2)};\nlabels = 'abcde';\nfor j = 1:5\n    x = 0;                                     % initial guess\n    for k = 1:50\n        x = g{j}(x);\n    end\n    fprintf('(%c): x_50 = %g\\n', labels(j), x);\nend"
+  },
+  {
+    "objectID": "chap-two.html#contraction-mappings",
+    "href": "chap-two.html#contraction-mappings",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Contraction mappings",
+    "text": "Contraction mappings\n\nContraction mapping A map \\(g: L\\to L\\) on a closed interval \\(L\\) such that, for some \\(\\lambda &lt; 1\\), \\[\n|g(x)-g(y)| \\leq \\lambda|x-y| \\quad \\text{for all } x, y \\in L.\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#contraction-mapping-theorem",
+    "href": "chap-two.html#contraction-mapping-theorem",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Contraction Mapping Theorem",
+    "text": "Contraction Mapping Theorem\n\nContraction Mapping Theorem If \\(g\\) is a contraction mapping on \\(L=[a,b]\\), then\n\nThere exists a unique fixed point \\(x_*\\in L\\) with \\(g(x_*)=x_*\\).\nFor any \\(x_0\\in L\\), the iteration \\(x_{k+1}=g(x_k)\\) converges to \\(x_*\\) as \\(k\\to\\infty\\).\n\n\n\nChecking the contraction property: by the mean value theorem, \\[\n|g(x)-g(y)| \\leq \\Big(\\max_{\\xi\\in L}|g'(\\xi)|\\Big)\\,|x-y|.\n\\]\nSo it suffices that (a) \\(g:L\\to L\\) and (b) \\(|g'(x)|\\leq M &lt; 1\\) on \\(L\\)."
+  },
+  {
+    "objectID": "chap-two.html#example-3",
+    "href": "chap-two.html#example-3",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Example",
+    "text": "Example\n\nIteration (a), \\(g(x) = \\sqrt{2x + 3}\\) \\[\ng'(x)=(2x + 3)^{-1/2} \\implies |g'(x)|&lt;1 \\text{ for all } x&gt;-1\n\\]\n\n\\(g\\) is increasing, \\(g(-\\tfrac12)=\\sqrt{2}\\), \\(g(4)=\\sqrt{11}\\), so \\(g\\) maps \\(L=[-\\tfrac12,4]\\) into itself.\n\n\n\\(\\implies\\) unique fixed point \\(x_*\\in[-\\tfrac12,4]\\) (namely \\(x_*=3\\)), and convergence from any \\(x_0 \\in L\\)."
+  },
+  {
+    "objectID": "chap-two.html#local-convergence",
+    "href": "chap-two.html#local-convergence",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Local convergence",
+    "text": "Local convergence\n\nLocal Convergence Theorem Let \\(g\\) and \\(g'\\) be continuous in the neighbourhood of an isolated fixed point \\(x_*=g(x_*)\\). If \\(|g'(x_*)|&lt;1\\) then there is an interval \\(L=[x_*-\\delta,x_*+\\delta]\\) such that \\(x_{k+1}=g(x_k)\\) converges to \\(x_*\\) whenever \\(x_0\\in L\\).\n\n\n\n(a) \\(g(x) = \\sqrt{2x + 3}\\): \\(\\quad |g'(3)|=\\tfrac13 &lt; 1\\)\n(e) \\(g(x) = \\dfrac{x^2+3}{2x-2}\\): \\(\\quad g'(x) = \\dfrac{x^2-2x-3}{2(x-1)^2}\\), so \\(g'(-1)=g'(3)=0\\)"
+  },
+  {
+    "objectID": "chap-two.html#orders-of-convergence",
+    "href": "chap-two.html#orders-of-convergence",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Orders of convergence",
+    "text": "Orders of convergence\n\n\n(a) \\(g(x)=\\sqrt{2x+3}\\)\n\n\n\n\\(x_k\\)\n\\(|3-x_k|\\)\nratio\n\n\n\n\n0.0000000000\n3.0000000000\n-\n\n\n1.7320508076\n1.2679491924\n0.4226\n\n\n2.5424597568\n0.4575402432\n0.3609\n\n\n2.8433992885\n0.1566007115\n0.3423\n\n\n2.9473375404\n0.0526624596\n0.3363\n\n\n2.9823941860\n0.0176058140\n0.3343\n\n\n2.9941256440\n0.0058743560\n0.3337\n\n\n\n\n(e) \\(g(x) = (x^2+3)/(2x-2)\\)\n\n\n\n\\(x_k\\)\n\\(|(-1)-x_k|\\)\nratio\n\n\n\n\n0.0000000000\n1.0000000000\n-\n\n\n-1.5000000000\n0.5000000000\n0.5000\n\n\n-1.0500000000\n0.0500000000\n0.1000\n\n\n-1.0006097561\n0.0006097561\n0.0122\n\n\n-1.0000000929\n0.0000000929\n0.0002\n\n\n\n\nratio \\(= |x_*-x_k|/|x_*-x_{k-1}|\\)"
+  },
+  {
+    "objectID": "chap-two.html#orders-of-convergence-1",
+    "href": "chap-two.html#orders-of-convergence-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Orders of convergence",
+    "text": "Orders of convergence\n\nLinear and superlinear convergence Suppose \\(x_k\\to x_*\\). Then \\(\\{x_k\\}\\) converges linearly with rate \\(\\lambda\\) if \\[\n\\lim_{k\\to\\infty}\\frac{|x_*-x_{k+1}|}{|x_*-x_k|} = \\lambda \\quad \\textrm{with} \\quad 0&lt;\\lambda &lt;1.\n\\] If \\(\\lambda=0\\), the convergence is superlinear.\n\n\nTheorem Let \\(g'\\) be continuous near a fixed point \\(x_*=g(x_*)\\), and suppose \\(x_{k+1}=g(x_k)\\) converges to \\(x_*\\).\n\nIf \\(|g'(x_*)|\\neq 0\\), the convergence is linear with rate \\(\\lambda=|g'(x_*)|\\).\nIf \\(|g'(x_*)|=0\\), the convergence is superlinear."
+  },
+  {
+    "objectID": "chap-two.html#proof",
+    "href": "chap-two.html#proof",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Proof",
+    "text": "Proof\nBy the mean value theorem, for some \\(\\xi_k\\) between \\(x_*\\) and \\(x_k\\), \\[\nx_* - x_{k+1} = g(x_*) - g(x_k) = g'(\\xi_k)(x_* - x_k).\n\\]\n\nSince \\(x_k\\to x_*\\), we have \\(\\xi_k\\to x_*\\), so \\[\n\\lim_{k\\to\\infty}\\frac{|x_*-x_{k+1}|}{|x_*-x_k|} = \\lim_{k\\to\\infty}|g'(\\xi_k)| = |g'(x_*)|. \\quad\\blacksquare\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#orders-of-convergence-2",
+    "href": "chap-two.html#orders-of-convergence-2",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Orders of convergence",
+    "text": "Orders of convergence\n\nOrder of convergence \\(\\{x_k\\}\\) converges with order \\(\\alpha\\) if \\[\n\\lim_{k\\to\\infty}\\frac{|x_*-x_{k+1}|}{|x_*-x_k|^\\alpha} = C \\quad \\textrm{for some} \\quad 0 &lt; C &lt; \\infty.\n\\] \\(\\alpha=1\\): linear, \\(\\alpha=2\\): quadratic, \\(\\alpha=3\\): cubic.\n\n\n\nis linear with \\(\\lambda = |g'(3)| = \\tfrac13\\)\n\n\nis superlinear since \\(g'(-1) = 0\\)"
+  },
+  {
+    "objectID": "chap-two.html#newtons-method",
+    "href": "chap-two.html#newtons-method",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method",
+    "text": "Newton’s method\n\n\n\n\nTangent line at \\(x_k\\): \\[\n\\frac{0 - f(x_k)}{x_{k+1} - x_k} = f'(x_k)\n\\]\n\\[\n\\implies x_{k+1} = x_k - \\frac{f(x_k)}{f'(x_k)}\n\\]\nEquivalently, from Taylor: \\[\n0 \\approx f(x_k) + f'(x_k)(x_{k+1} - x_{k})\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-convergence",
+    "href": "chap-two.html#newtons-method-convergence",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method: convergence",
+    "text": "Newton’s method: convergence\n\\[\ng(x) = x - \\frac{f(x)}{f'(x)}\n\\quad\\implies\\quad\ng'(x) = \\frac{f(x)f''(x)}{[f'(x)]^2}\n\\quad\\implies\\quad\ng'(x_*)=0 \\;\\; \\textrm{if $f'(x_*)\\neq 0$}\n\\]\n\n\nLocal convergence for \\(x_0\\) close enough to \\(x_*\\)\nSuperlinear, since \\(g'(x_*) = 0\\)\n\n\n\nIn fact, \\[\nx_*-x_{k+1} = -\\frac{f''(x_*)}{2f'(x_*)}(x_*-x_k)^2 + {\\cal O}\\big((x_*-x_k)^3\\big)\n\\] so the convergence is quadratic if \\(f''(x_*)\\neq 0\\)."
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-example",
+    "href": "chap-two.html#newtons-method-example",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method: example",
+    "text": "Newton’s method: example\n\nCalculate \\(a^{-1}\\) using \\(f(x)=\\frac1x - a\\) \\[\nx_{k+1} = x_k - \\frac{\\frac{1}{x_k}-a}{-\\frac{1}{x_k^2}} = 2x_k - a x_k^2,\n\\qquad\n\\tfrac1a - x_{k+1} = a\\big(\\tfrac1a - x_k\\big)^2\n\\]\nWith \\(a=0.5\\), \\(x_0=1\\):\n\n\n\n\n\n\n\n\n\n\\(x_k\\)\n\\(|2 - x_k|\\)\n\\(|2-x_k|/|2-x_{k-1}|\\)\n\\(|2-x_k|/|2-x_{k-1}|^2\\)\n\n\n\n\n1.0\n1.0\n-\n-\n\n\n1.5\n0.5\n0.5\n0.5\n\n\n1.875\n0.125\n0.25\n0.5\n\n\n1.9921875\n0.0078125\n0.0625\n0.5\n\n\n1.999969482\n\\(3.05\\times 10^{-5}\\)\n0.00390625\n0.5\n\n\n2.0\n\\(4.65\\times 10^{-10}\\)\n\\(1.53\\times 10^{-5}\\)\n0.5\n\n\n2.0\n\\(1.08\\times 10^{-19}\\)\n\\(2.33\\times 10^{-10}\\)\n0.5"
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-choice-of-x_0",
+    "href": "chap-two.html#newtons-method-choice-of-x_0",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method: choice of \\(x_0\\)",
+    "text": "Newton’s method: choice of \\(x_0\\)\n\n\\(f(x) = x^3-2x+2\\) Turning points at \\(x=\\pm\\sqrt{\\tfrac23}\\); single real root \\(x_*\\approx -1.769\\).\n\\(x_0=0 \\implies x_1 = 1 \\implies x_2 = 0 \\implies \\ldots\\)"
+  },
+  {
+    "objectID": "chap-two.html#basins-of-attraction",
+    "href": "chap-two.html#basins-of-attraction",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Basins of attraction",
+    "text": "Basins of attraction\n\\(f(z) = z^3 - 1\\): colour each \\(z_0\\in\\mathbb{C}\\) by the root Newton’s method converges to."
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-comparing-convergence-rates",
+    "href": "chap-two.html#matlab-demo-comparing-convergence-rates",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: comparing convergence rates",
+    "text": "MATLAB demo: comparing convergence rates\n% Bisection, fixed-point iteration (a) and Newton's method for x^2 - 2x - 3 = 0\nf  = @(x) x.^2 - 2*x - 3;\ndf = @(x) 2*x - 2;\nxs = 3;                                % the root we are aiming for\nN = 40;  eb = zeros(N,1);  ef = eb;  en = eb;\na = 2;  b = 5;  xf = 0;  xn = 5;       % starting values\nfor k = 1:N\n    m = (a + b)/2;  eb(k) = abs(m - xs);\n    if f(a)*f(m) &gt;= 0, a = m; else, b = m; end\n    xf = sqrt(2*xf + 3);      ef(k) = abs(xf - xs);\n    xn = xn - f(xn)/df(xn);   en(k) = abs(xn - xs);\nend\nfigure\nsemilogy(1:N, eb, 'o-', 1:N, ef, 's-', 1:N, en, '^-', 'LineWidth', 2.5, 'MarkerSize', 8)\nlegend('bisection', 'fixed point (a)', 'Newton', 'Location', 'southwest')\nxlabel('iteration k'), ylabel('error |x_k - x_*|'), set(gca, 'FontSize', 18), grid on"
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-for-systems",
+    "href": "chap-two.html#newtons-method-for-systems",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method for systems",
+    "text": "Newton’s method for systems\nSolve \\(\\mathbf{f}(\\mathbf{x})=\\mathbf{0}\\) for \\(\\mathbf{x}\\in\\mathbb{R}^m\\). Linearise about \\(\\mathbf{x}_k\\): \\[\n\\begin{pmatrix} 0\\\\ 0 \\end{pmatrix}\n=\n\\begin{pmatrix} f_1(\\mathbf{x}_k)\\\\ f_2(\\mathbf{x}_k) \\end{pmatrix}\n+\n\\underbrace{\\begin{pmatrix}\n\\frac{\\partial f_1}{\\partial x_1}(\\mathbf{x}_k) & \\frac{\\partial f_1}{\\partial x_2}(\\mathbf{x}_k)\\\\\n\\frac{\\partial f_2}{\\partial x_1}(\\mathbf{x}_k) & \\frac{\\partial f_2}{\\partial x_2}(\\mathbf{x}_k)\n\\end{pmatrix}}_{J(\\mathbf{x}_k)}\n\\begin{pmatrix}\nx_{1,k+1} - x_{1,k}\\\\\nx_{2,k+1} - x_{2,k}\n\\end{pmatrix}\n\\]\n\nAt each step:\n\nSolve \\(J(\\mathbf{x}_k)\\boldsymbol{\\delta}_k = -\\mathbf{f}(\\mathbf{x}_k)\\)\nSet \\(\\mathbf{x}_{k+1} = \\mathbf{x}_k + \\boldsymbol{\\delta}_k\\)\n\nNever compute \\(J^{-1}\\) explicitly."
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-for-systems-example",
+    "href": "chap-two.html#newtons-method-for-systems-example",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method for systems: example",
+    "text": "Newton’s method for systems: example\n\n\\(xy - y^3 - 1 = 0\\), \\(\\; x^2y + y -5=0\\), \\(\\; (x_0, y_0) = (2, 3)\\) \\[\nJ(x,y) = \\begin{pmatrix}\ny & x-3y^2\\\\\n2xy & x^2 + 1\n\\end{pmatrix},\n\\qquad\nJ(2,3) = \\begin{pmatrix}\n3 & -25\\\\\n12 & 5\n\\end{pmatrix}, \\qquad\n\\mathbf{f}(2,3) = \\begin{pmatrix}\n-22\\\\\n10\n\\end{pmatrix}\n\\]\n\n\\[\n\\boldsymbol{\\delta}_0 = \\begin{pmatrix} -\\tfrac49 \\\\ -\\tfrac{14}{15} \\end{pmatrix}\n\\implies\n\\begin{pmatrix}\nx_1\\\\\ny_1\n\\end{pmatrix}\n= \\begin{pmatrix}\n2\\\\\n3\n\\end{pmatrix}\n+ \\begin{pmatrix}\n-0.44444444\\\\\n-0.93333333\n\\end{pmatrix}\n= \\begin{pmatrix}\n1.55555556\\\\\n2.06666667\n\\end{pmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#newtons-method-for-systems-example-1",
+    "href": "chap-two.html#newtons-method-for-systems-example-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Newton’s method for systems: example",
+    "text": "Newton’s method for systems: example\n\n\n\n\n\n\\(k\\)\n\\(x_k\\)\n\\(y_k\\)\n\n\n\n\n2\n1.54720541\n1.47779333\n\n\n3\n1.78053503\n1.15886481\n\n\n4\n1.95284300\n1.02844269\n\n\n5\n1.99776297\n1.00124041\n\n\n6\n1.99999524\n1.00000260\n\n\n\nQuadratic convergence if \\(J(\\mathbf{x}_*)\\) is non-singular."
+  },
+  {
+    "objectID": "chap-two.html#matlab-demo-newtons-method-for-systems",
+    "href": "chap-two.html#matlab-demo-newtons-method-for-systems",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "MATLAB demo: Newton’s method for systems",
+    "text": "MATLAB demo: Newton’s method for systems\nF = @(v) [v(1)*v(2) - v(2)^3 - 1;  v(1)^2*v(2) + v(2) - 5];\nJ = @(v) [v(2), v(1) - 3*v(2)^2;  2*v(1)*v(2), v(1)^2 + 1];\nv = [2; 3];                            % starting values (x_0, y_0)\nfor k = 1:8\n    v = v - J(v) \\ F(v);               % solve J*delta = -F, no inverse needed\n    fprintf('k = %d: x = %.10f, y = %.10f\\n', k, v(1), v(2));\nend"
+  },
+  {
+    "objectID": "chap-two.html#the-secant-method",
+    "href": "chap-two.html#the-secant-method",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "The secant method",
+    "text": "The secant method\n\n\n\n\nQuasi-Newton: \\[\nx_{k+1} = x_k - \\frac{f(x_k)}{g_k}, \\quad g_k \\approx f'(x_k)\n\\]\nBackward difference: \\[\ng_k = \\frac{f(x_k) - f(x_{k-1})}{x_k - x_{k-1}}\n\\]\n\\[\n\\implies x_{k+1} = x_k - \\frac{f(x_k)(x_k - x_{k-1})}{f(x_k) - f(x_{k-1})}\n\\]"
+  },
+  {
+    "objectID": "chap-two.html#the-secant-method-1",
+    "href": "chap-two.html#the-secant-method-1",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "The secant method",
+    "text": "The secant method\n\n\n\\(f(x)=\\tfrac1x - 0.5\\), \\(\\; x_0=0.25\\), \\(x_1=0.5\\)\n\n\n\n\\(k\\)\n\\(x_k\\)\nratio\n\n\n\n\n2\n0.6875\n0.875\n\n\n3\n1.01562\n0.75\n\n\n4\n1.354\n0.656\n\n\n5\n1.68205\n0.492\n\n\n6\n1.8973\n0.323\n\n\n7\n1.98367\n0.159\n\n\n8\n1.99916\n0.051\n\n\n\n\n\nTheorem If \\(f'(x_*)\\neq 0\\), the secant method converges for \\(x_0\\), \\(x_1\\) sufficiently close to \\(x_*\\), with \\[\nx_*-x_{k+1} \\approx -\\frac{f''(x_*)}{2f'(x_*)}(x_*-x_k)(x_*-x_{k-1}),\n\\] and order of convergence \\(\\frac{1+\\sqrt{5}}{2} = 1.618\\ldots\\)"
+  },
+  {
+    "objectID": "chap-two.html#knowledge-checklist",
+    "href": "chap-two.html#knowledge-checklist",
+    "title": "Chapter 2: Continuous Functions",
+    "section": "Knowledge checklist",
+    "text": "Knowledge checklist\n\nTaylor’s theorem and the Lagrange form of the remainder\nPolynomial interpolation: existence/uniqueness, Lagrange form, error theorem, Runge phenomenon, Chebyshev nodes\nRootfinding: bisection, fixed-point iteration, Newton’s method (incl. systems), secant method\nConvergence: contraction mappings, local convergence, orders of convergence"
+  },
+  {
+    "objectID": "chap-four.html#calculus-on-a-computer",
+    "href": "chap-four.html#calculus-on-a-computer",
+    "title": "Chapter 4: Calculus",
+    "section": "Calculus on a computer",
+    "text": "Calculus on a computer\n\nDifferentiation: finite differences, rounding error, Richardson extrapolation\nIntegration: Newton-Cotes formulae, composite rules, Gaussian quadrature"
+  },
+  {
+    "objectID": "chap-four.html#finite-differences",
+    "href": "chap-four.html#finite-differences",
+    "title": "Chapter 4: Calculus",
+    "section": "Finite differences",
+    "text": "Finite differences\n\n\n\\[\nf'(x_0) = \\lim_{h\\to 0}\\frac{f(x_0+h) - f(x_0)}{h}\n\\]\nForward difference (\\(h&gt;0\\)): \\[\nf'(x_0) \\approx \\frac{f(x_0 + h) - f(x_0)}{h}\n\\]\n(\\(h&lt;0\\): backward difference)"
+  },
+  {
+    "objectID": "chap-four.html#truncation-error",
+    "href": "chap-four.html#truncation-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Truncation error",
+    "text": "Truncation error\nTaylor’s theorem: for some \\(\\xi\\) between \\(x_0\\) and \\(x_0+h\\), \\[\nf(x_0+h) = f(x_0) + h f'(x_0) + \\frac{h^2}{2}f''(\\xi)\n\\]\n\\[\n\\implies \\quad f'(x_0) = \\frac{f(x_0+h)-f(x_0)}{h} - \\frac{h}{2}f''(\\xi)\n\\]\n\nTruncation error \\(-f''(\\xi)h/2 = {\\cal O}(h)\\): first order\nOrder \\(p\\): error \\({\\cal O}(h^p)\\), i.e. \\(|g(h)|\\leq M|h|^p\\) for small \\(h\\)"
+  },
+  {
+    "objectID": "chap-four.html#example",
+    "href": "chap-four.html#example",
+    "title": "Chapter 4: Calculus",
+    "section": "Example",
+    "text": "Example\n\nDerivative of \\(f(x)=\\log(x)\\) at \\(x_0=2\\)\n\n\n\n\\(h\\)\nForward difference\nError \\(\\vert f'(2) - D\\vert\\)\n\n\n\n\n1\n0.405465\n0.0945349\n\n\n0.1\n0.487902\n0.0120984\n\n\n0.01\n0.498754\n0.00124585\n\n\n0.001\n0.499875\n0.000124958\n\n\n\nError \\(\\approx 0.125 h\\): agrees with \\(|f''(\\xi)|/2 \\approx \\tfrac18\\) since \\(f''(x) = -x^{-2}\\)."
+  },
+  {
+    "objectID": "chap-four.html#central-difference",
+    "href": "chap-four.html#central-difference",
+    "title": "Chapter 4: Calculus",
+    "section": "Central difference",
+    "text": "Central difference\n\\[\nf(x \\pm h) = f(x) \\pm hf'(x) + \\frac{h^2}{2}f''(x) \\pm \\frac{h^3}{6}f'''(\\xi_\\pm)\n\\]\n\nSubtract: \\[\nf'(x) = \\frac{f(x+h) - f(x-h)}{2h} - \\frac{h^2}{6}f'''(\\xi), \\qquad \\xi\\in(x-h,x+h)\n\\]\nSlope of the quadratic interpolating \\(f\\) at \\(x-h\\), \\(x\\), \\(x+h\\): second order."
+  },
+  {
+    "objectID": "chap-four.html#central-difference-example",
+    "href": "chap-four.html#central-difference-example",
+    "title": "Chapter 4: Calculus",
+    "section": "Central difference: example",
+    "text": "Central difference: example\n\nDerivative of \\(f(x)=\\log(x)\\) at \\(x=2\\)\n\n\n\n\\(h\\)\nForward\nError\nCentral\nError\n\n\n\n\n1\n0.405465\n0.0945349\n0.549306\n0.0493061\n\n\n0.1\n0.487902\n0.0120984\n0.500417\n0.000417293\n\n\n0.01\n0.498754\n0.00124585\n0.500004\n4.16673e-06\n\n\n0.001\n0.499875\n0.000124958\n0.500000\n4.16666e-08"
+  },
+  {
+    "objectID": "chap-four.html#second-derivative",
+    "href": "chap-four.html#second-derivative",
+    "title": "Chapter 4: Calculus",
+    "section": "Second derivative",
+    "text": "Second derivative\nAdd the expansions of \\(f(x\\pm h)\\) (to one more term): \\[\nf''(x) = \\frac{f(x-h) - 2f(x) + f(x+h)}{h^2} - \\frac{h^2}{12}f^{(4)}(\\xi)\n\\]\n\nSecond derivative of \\(f(x)=\\log(x)\\) at \\(x=2\\) \\(f''(2) = -\\tfrac14\\), \\(f^{(4)}(2) = -\\tfrac38\\), so expect error \\(\\approx 0.03125h^2\\):\n\n\n\n\\(h\\)\nCentral difference for \\(f''(2)\\)\nError\n\n\n\n\n1\n-0.2876820725\n0.0376821\n\n\n0.1\n-0.2503130218\n0.000313022\n\n\n0.01\n-0.2500031251\n3.12505e-06\n\n\n0.001\n-0.2500000311\n3.11212e-08"
+  },
+  {
+    "objectID": "chap-four.html#rounding-error",
+    "href": "chap-four.html#rounding-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Rounding error",
+    "text": "Rounding error\n\\(\\text{fl}[f(x\\pm h)] = (1+\\delta_{1,2})f(x\\pm h)\\), \\(\\;|\\delta_1|,|\\delta_2|\\leq \\epsilon_{\\rm M}\\): \\[\n\\begin{aligned}\n\\left| f'(x) - \\frac{\\text{fl}[f(x+h)] - \\text{fl}[f(x-h)]}{2h}\\right|\n&= \\left| - \\frac{f'''(\\xi)}{6}h^2 - \\frac{\\delta_1f(x+h) - \\delta_2f(x-h)}{2h}\\right|\\\\\n&\\leq \\underbrace{\\frac{h^2}{6}M_3}_{\\text{truncation}} + \\underbrace{\\frac{\\epsilon_{\\rm M}}{h}M_0}_{\\text{rounding}}\n\\end{aligned}\n\\]\n\\(M_0\\), \\(M_3\\): maxima of \\(|f|\\), \\(|f'''|\\) on \\([x-h,x+h]\\)"
+  },
+  {
+    "objectID": "chap-four.html#rounding-error-1",
+    "href": "chap-four.html#rounding-error-1",
+    "title": "Chapter 4: Calculus",
+    "section": "Rounding error",
+    "text": "Rounding error\n\nDerivative of \\(f(x)=\\log(x)\\) at \\(x=2\\) again"
+  },
+  {
+    "objectID": "chap-four.html#optimal-step-size",
+    "href": "chap-four.html#optimal-step-size",
+    "title": "Chapter 4: Calculus",
+    "section": "Optimal step size",
+    "text": "Optimal step size\n\\[\nE(h) = \\tfrac16 h^2M_3 + \\frac{\\epsilon_{\\rm M}M_0}{h},\n\\qquad\nE'(h) = \\tfrac13 hM_3 - \\frac{\\epsilon_{\\rm M}M_0}{h^2} = 0\n\\]\n\\[\n\\implies \\quad h_* = \\left(\\frac{3\\epsilon_{\\rm M}M_0}{M_3}\\right)^{1/3} \\sim \\epsilon_{\\rm M}^{1/3}, \\qquad E(h_*) \\sim \\epsilon_{\\rm M}^{2/3}\n\\]\n\nExample: \\(h_*\\approx 10^{-5}\\), error \\(\\approx 10^{-11}\\), never the full 16 digits\nForward difference: \\(h_*\\sim\\epsilon_{\\rm M}^{1/2}\\approx 10^{-8}\\), error \\(\\approx 10^{-8}\\)"
+  },
+  {
+    "objectID": "chap-four.html#differentiating-noisy-data",
+    "href": "chap-four.html#differentiating-noisy-data",
+    "title": "Chapter 4: Calculus",
+    "section": "Differentiating noisy data",
+    "text": "Differentiating noisy data\nMeasurement errors of size \\(\\delta\\) (usually \\(\\gg \\epsilon_{\\rm M}\\)): \\[\n\\text{error} \\lesssim \\frac{h^2}{6}M_3 + \\frac{\\delta}{h}\n\\]\n\nFirst derivative: data error amplified by \\(1/h\\)\nSecond derivative: amplified by about \\(4/h^2\\)\nBetter: fit a smooth model (e.g. least squares), then differentiate the model"
+  },
+  {
+    "objectID": "chap-four.html#matlab-demo-differentiating-noisy-measurements",
+    "href": "chap-four.html#matlab-demo-differentiating-noisy-measurements",
+    "title": "Chapter 4: Calculus",
+    "section": "MATLAB demo: differentiating noisy measurements",
+    "text": "MATLAB demo: differentiating noisy measurements\nBall rolling down a ramp: \\(x(t) = t^2\\), \\(a = 2\\,\\)m/s\\(^2\\), positions every \\(0.02\\,\\)s with \\(\\approx 2\\,\\)mm errors.\nrng(1)                                       % reproducible \"measurements\"\ndt = 0.02;  t = (0:dt:2)';\nx = t.^2 + 0.002*randn(size(t));             % noisy positions [m]\n\n% Central differences for velocity and acceleration at interior points\nv = (x(3:end) - x(1:end-2)) / (2*dt);\na = (x(3:end) - 2*x(2:end-1) + x(1:end-2)) / dt^2;\n\n% Least-squares quadratic fit, then differentiate the fitted model\np = polyfit(t, x, 2);\naFit = 2*p(1);"
+  },
+  {
+    "objectID": "chap-four.html#matlab-demo-differentiating-noisy-measurements-1",
+    "href": "chap-four.html#matlab-demo-differentiating-noisy-measurements-1",
+    "title": "Chapter 4: Calculus",
+    "section": "MATLAB demo: differentiating noisy measurements",
+    "text": "MATLAB demo: differentiating noisy measurements\nfigure\nsubplot(1, 2, 1)\nplot(t(2:end-1), v, 'o', t, 2*t, 'LineWidth', 2.5, 'MarkerSize', 5)\nlegend('finite differences', 'exact v = 2t', 'Location', 'northwest')\nxlabel('t [s]'), ylabel('velocity [m/s]'), grid on, set(gca, 'FontSize', 16)\nsubplot(1, 2, 2)\nplot(t(2:end-1), a, 'o', t, 2*ones(size(t)), t, aFit*ones(size(t)), '--', ...\n    'LineWidth', 2.5, 'MarkerSize', 5)\nlegend('finite differences', 'exact a = 2', 'from least-squares fit', 'Location', 'southwest')\nxlabel('t [s]'), ylabel('acceleration [m/s^2]'), grid on, set(gca, 'FontSize', 16)"
+  },
+  {
+    "objectID": "chap-four.html#richardson-extrapolation",
+    "href": "chap-four.html#richardson-extrapolation",
+    "title": "Chapter 4: Calculus",
+    "section": "Richardson extrapolation",
+    "text": "Richardson extrapolation\n\\[\nD_h := \\frac{f(x+h) - f(x-h)}{2h}\n\\]\nExpand the truncation error further: \\[\nD_h = f'(x) + f'''(x)\\frac{h^2}{6} + f^{(5)}(x)\\frac{h^4}{120} + {\\cal O}(h^6)\n\\]\n\n\\[\nD_{h/2} = f'(x) + f'''(x)\\frac{h^2}{2^2(6)} + f^{(5)}(x)\\frac{h^4}{2^4(120)} + {\\cal O}(h^6)\n\\]\n\n\nEliminate the \\(h^2\\) term: \\[\nD_h^{(1)} := \\frac{2^2D_{h/2} - D_h}{3} = f'(x) - f^{(5)}(x)\\frac{h^4}{480} + {\\cal O}(h^6) \\quad \\text{: 4th order}\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#richardson-extrapolation-example",
+    "href": "chap-four.html#richardson-extrapolation-example",
+    "title": "Chapter 4: Calculus",
+    "section": "Richardson extrapolation: example",
+    "text": "Richardson extrapolation: example\n\nDerivative of \\(f(x)=\\log(x)\\) at \\(x=2\\) (central difference)\n\n\n\n\n\n\n\n\n\n\n\\(h\\)\n\\(D_h\\)\n\\(\\vert\\)Error\\(\\vert\\)\n\\(D_h^{(1)}\\)\n\\(\\vert\\)Error\\(\\vert\\)\n\n\n\n\n1.0\n0.5493061443\n0.04930614433\n0.4979987836\n0.00200121642\n\n\n0.1\n0.5004172928\n0.00041729278\n0.4999998434\n1.56599487e-07\n\n\n0.01\n0.5000041667\n4.16672916e-06\n0.5000000000\n1.56388791e-11\n\n\n0.001\n0.5000000417\n4.16666151e-08\n0.5000000000\n9.29256672e-14\n\n\n\nError falls by \\(\\approx 10^4\\) per row until rounding error (\\(\\approx\\epsilon_{\\rm M}/h\\)) takes over."
+  },
+  {
+    "objectID": "chap-four.html#richardson-extrapolation-in-general",
+    "href": "chap-four.html#richardson-extrapolation-in-general",
+    "title": "Chapter 4: Calculus",
+    "section": "Richardson extrapolation: in general",
+    "text": "Richardson extrapolation: in general\nFor any order-\\(n\\) approximation \\[\nD_h = f'(x) + Ch^n + {\\cal O}(h^{n+1}),\n\\qquad\nD_{h/2} = f'(x) + C\\frac{h^n}{2^n} + {\\cal O}(h^{n+1})\n\\]\n\\[\n\\implies \\quad D_h^{(1)} := \\frac{2^nD_{h/2} - D_h}{2^n - 1} = f'(x) + {\\cal O}(h^{n+1})\n\\]\n\nNo need to know \\(C\\)\nCan be applied iteratively: \\(D_h^{(2)} := \\big(2^4D_{h/2}^{(1)} - D_h^{(1)}\\big)/(2^4 - 1)\\) is 6th order"
+  },
+  {
+    "objectID": "chap-four.html#quadrature",
+    "href": "chap-four.html#quadrature",
+    "title": "Chapter 4: Calculus",
+    "section": "Quadrature",
+    "text": "Quadrature\n\\[\nI(f) := \\int_a^b f(x)\\,\\mathrm{d}x \\;\\approx\\; I_n(f) := \\sum_{k=0}^n \\sigma_k f(x_k)\n\\]\nNodes \\(x_0,\\ldots,x_n\\), weights \\(\\sigma_0,\\ldots,\\sigma_n\\)"
+  },
+  {
+    "objectID": "chap-four.html#the-trapezium-rule",
+    "href": "chap-four.html#the-trapezium-rule",
+    "title": "Chapter 4: Calculus",
+    "section": "The trapezium rule",
+    "text": "The trapezium rule\n\nThe trapezium rule\n\n\n\\[\nI_1(f) = \\frac{b-a}{2}\\Big( f(a) + f(b) \\Big)\n\\]\n\\(\\int_0^2\\mathrm{e}^x\\,\\mathrm{d}x\\): \\[\nI_1(f) = \\mathrm{e}^0 + \\mathrm{e}^{2} = 8.389\n\\] \\[\nI(f) = \\mathrm{e}^{2} - \\mathrm{e}^0 = 6.389\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#newton-cotes-formulae",
+    "href": "chap-four.html#newton-cotes-formulae",
+    "title": "Chapter 4: Calculus",
+    "section": "Newton-Cotes formulae",
+    "text": "Newton-Cotes formulae\nIntegrate the interpolating polynomial \\(p_n(x) = \\sum_{k=0}^n f(x_k)\\ell_k(x)\\): \\[\nI_n(f) := \\int_a^b p_n(x)\\,\\mathrm{d}x = \\sum_{k=0}^n\\sigma_k f(x_k), \\qquad \\sigma_k = \\int_a^b\\ell_k(x)\\,\\mathrm{d}x\n\\]\n\nNewton-Cotes: equidistant nodes\nClosed: \\(x_0=a\\) and \\(x_n=b\\)\n\n\nTrapezium rule: closed Newton-Cotes with \\(n=1\\) \\[\n\\sigma_0 = \\int_a^b\\frac{x-b}{a-b}\\,\\mathrm{d}x = \\frac{b-a}{2},\n\\qquad\n\\sigma_1 = \\int_a^b\\frac{x-a}{b-a}\\,\\mathrm{d}x = \\frac{b-a}{2}\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#newton-cotes-error",
+    "href": "chap-four.html#newton-cotes-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Newton-Cotes error",
+    "text": "Newton-Cotes error\n\nTheorem Let \\(f\\) be continuous on \\([a,b]\\) with \\(n+1\\) continuous derivatives on \\((a,b)\\). Then \\[\n\\big|I(f) - I_n(f)\\big| \\leq \\frac{\\max_{\\xi\\in[a,b]}|f^{(n+1)}(\\xi)|}{(n+1)!}\\int_a^b\\big|(x-x_0)(x-x_1)\\cdots(x-x_{n}) \\big|\\,\\mathrm{d}x.\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#newton-cotes-error-proof",
+    "href": "chap-four.html#newton-cotes-error-proof",
+    "title": "Chapter 4: Calculus",
+    "section": "Newton-Cotes error: proof",
+    "text": "Newton-Cotes error: proof\n\\[\n\\big|I(f) - I_n(f)\\big| = \\left| \\int_a^b\\big[f(x) - p_n(x)\\big]\\,\\mathrm{d}x\\right| \\leq \\int_a^b\\big|f(x) - p_n(x)\\big|\\,\\mathrm{d}x,\n\\] then insert the interpolation error formula \\[\nf(x) - p_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!}(x-x_0)\\cdots(x-x_{n}). \\quad\\blacksquare\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#trapezium-rule-error",
+    "href": "chap-four.html#trapezium-rule-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Trapezium rule error",
+    "text": "Trapezium rule error\n\nTrapezium rule error With \\(M_2 = \\max_{\\xi\\in[a,b]}|f''(\\xi)|\\): \\[\n\\big|I(f) - I_1(f)\\big| \\leq \\frac{M_2}{2!}\\int_a^b(x-a)(b-x)\\,\\mathrm{d}x = \\frac{(b-a)^3}{12}M_2\n\\]\n\nFor \\(\\int_0^2\\mathrm{e}^x\\,\\mathrm{d}x\\): \\[\n\\big|I(f) - I_1(f)\\big| \\leq \\tfrac1{12}(2^3)\\mathrm{e}^{2} \\approx 4.926 \\qquad (\\text{actual error} \\approx 2.000)\n\\]\n\n\n\nAccuracy limited by smoothness of \\(f\\) and by the node locations\nLarge \\(n\\) is a bad idea: \\(\\sum_{k=0}^n|\\sigma_k| \\to \\infty\\) as \\(n\\to\\infty\\)"
+  },
+  {
+    "objectID": "chap-four.html#composite-trapezium-rule",
+    "href": "chap-four.html#composite-trapezium-rule",
+    "title": "Chapter 4: Calculus",
+    "section": "Composite trapezium rule",
+    "text": "Composite trapezium rule\n\\(m\\) subintervals of width \\(h = (b-a)/m\\), trapezium rule on each: \\[\nC_{1,m}(f) = h\\left[\\tfrac12 f(x_0) + f(x_1) + f(x_2) + \\ldots + f(x_{m-1}) + \\tfrac12 f(x_m) \\right]\n\\]\n\n\n\n\\(f(x)=\\mathrm{e}^x\\) on \\([0,2]\\), \\(m=3\\)"
+  },
+  {
+    "objectID": "chap-four.html#composite-trapezium-rule-error",
+    "href": "chap-four.html#composite-trapezium-rule-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Composite trapezium rule: error",
+    "text": "Composite trapezium rule: error\nOn each subinterval: \\[\n\\int_{x_{i-1}}^{x_i}(x-x_{i-1})(x_i-x)\\,\\mathrm{d}x = \\tfrac16 h^3\n\\]\n\nAdd up the \\(m\\) subintervals: \\[\n\\big| I(f) - C_{1,m}(f) \\big| \\leq \\tfrac12 \\max_{\\xi\\in[a,b]}|f''(\\xi)|\\, m\\frac{h^3}{6}\n= \\frac{b-a}{12}h^2\\max_{\\xi\\in[a,b]}|f''(\\xi)|\n\\]\n\n\nConverges as \\(m\\to\\infty\\), with order \\({\\cal O}(h^2)\\)."
+  },
+  {
+    "objectID": "chap-four.html#degree-of-exactness",
+    "href": "chap-four.html#degree-of-exactness",
+    "title": "Chapter 4: Calculus",
+    "section": "Degree of exactness",
+    "text": "Degree of exactness\n\nNewton-Cotes \\(I_n(f)\\) is exact if \\(f^{(n+1)}=0\\), i.e. \\(f \\in{\\cal P}_n\\)\nDegree of exactness: largest \\(n\\) such that the formula is exact for all of \\({\\cal P}_n\\)\nSuffices to check \\(1, x, x^2, \\ldots, x^n\\)\n\n\nSimpson’s rule (\\(n=2\\)) \\[\nI_2(f) = \\frac{b-a}{6}\\left[f(a) + 4f\\left(\\frac{a+b}{2}\\right) + f(b)\\right]\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#simpsons-rule-degree-of-exactness",
+    "href": "chap-four.html#simpsons-rule-degree-of-exactness",
+    "title": "Chapter 4: Calculus",
+    "section": "Simpson’s rule: degree of exactness",
+    "text": "Simpson’s rule: degree of exactness\n\nSimpson’s rule (\\(n=2\\)) \\[\n\\begin{aligned}\nI_2(1) &= \\frac{b-a}{6}[1 + 4 + 1] = b-a = I(1)\\\\\nI_2(x) &= \\frac{b-a}{6}\\left[a + 2(a+b) + b\\right] = \\frac{b^2-a^2}{2} = I(x)\\\\\nI_2(x^2) &= \\frac{b-a}{6}\\left[a^2 + (a+b)^2 + b^2\\right] = \\frac{b^3 - a^3}{3} = I(x^2)\\\\\nI_2(x^3) &= \\frac{b-a}{6}\\left[a^3 + \\tfrac12(a+b)^3 + b^3 \\right] = \\frac{b^4-a^4}{4} = I(x^3)\n\\end{aligned}\n\\]\n\n\\(I_2(x^4)\\neq I(x^4)\\), so degree of exactness is 3, not 2."
+  },
+  {
+    "objectID": "chap-four.html#simpsons-rule-error",
+    "href": "chap-four.html#simpsons-rule-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Simpson’s rule: error",
+    "text": "Simpson’s rule: error\n\\[\n\\big|I(f) - I_2(f)\\big| \\leq \\frac{(b-a)^5}{2880}\\max_{\\xi\\in[a,b]}\\big|f^{(4)}(\\xi)\\big|\n\\]\n\nNewton-Cotes with even \\(n\\): degree of exactness \\(n+1\\)\n\nComposite Simpson’s rule (\\(m\\) even): \\[\nC_{2,m}(f) = \\frac{h}{3}\\Big[f(x_0) + 4f(x_1) + 2f(x_2) + 4f(x_3) + \\ldots + 2f(x_{m-2}) + 4f(x_{m-1}) + f(x_m)\\Big]\n\\] \\[\n\\big|I(f) - C_{2,m}(f)\\big| \\leq \\frac{b-a}{180}h^4\\max_{\\xi\\in[a,b]}\\big|f^{(4)}(\\xi)\\big|\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#the-midpoint-rule",
+    "href": "chap-four.html#the-midpoint-rule",
+    "title": "Chapter 4: Calculus",
+    "section": "The midpoint rule",
+    "text": "The midpoint rule\n\\[\nM(f) = (b-a)\\,f\\Big(\\frac{a+b}{2}\\Big)\n\\]\n\nOne node, but exact for all linear polynomials\n\\(|I(f) - M(f)| \\leq \\frac{(b-a)^3}{24}\\max_{\\xi\\in[a,b]}|f''(\\xi)|\\)\nComposite midpoint rule \\(h\\sum_{i=1}^m f\\big(\\tfrac{x_{i-1}+x_i}{2}\\big)\\): \\({\\cal O}(h^2)\\), half the error constant of the trapezium rule"
+  },
+  {
+    "objectID": "chap-four.html#composite-rules-comparison",
+    "href": "chap-four.html#composite-rules-comparison",
+    "title": "Chapter 4: Calculus",
+    "section": "Composite rules: comparison",
+    "text": "Composite rules: comparison\n\n\\(\\int_0^2\\mathrm{e}^x\\,\\mathrm{d}x = 6.389056\\ldots\\)\n\n\n\n\n\n\n\n\n\n\n\n\\(m\\)\n\\(h\\)\n\\(C_{1,m}(f)\\)\n\\(\\vert I(f) - C_{1,m}(f)\\vert\\)\n\\(C_{2,m}(f)\\)\n\\(\\vert I(f) - C_{2,m}(f)\\vert\\)\n\n\n\n\n1\n2\n8.389056\n2.000\n–\n–\n\n\n2\n1\n6.912810\n0.524\n6.420728\n3.17e-02\n\n\n4\n0.5\n6.521610\n0.133\n6.391210\n2.15e-03\n\n\n8\n0.25\n6.422298\n0.033\n6.389194\n1.38e-04\n\n\n16\n0.125\n6.397373\n0.008\n6.389065\n8.65e-06\n\n\n32\n0.0625\n6.391136\n0.002\n6.389057\n5.41e-07\n\n\n\nHalving \\(h\\): error \\(\\div 4\\) (trapezium), \\(\\div 16\\) (Simpson)."
+  },
+  {
+    "objectID": "chap-four.html#matlab-demo-integrating-sampled-data",
+    "href": "chap-four.html#matlab-demo-integrating-sampled-data",
+    "title": "Chapter 4: Calculus",
+    "section": "MATLAB demo: integrating sampled data",
+    "text": "MATLAB demo: integrating sampled data\nCar speed \\(v(t) = 20(1 - \\mathrm{e}^{-t/20})\\,\\)m/s, speedometer readings every \\(5\\,\\)s for one minute.\nt = 0:5:60;                                   % times of the readings [s]\nv = 20*(1 - exp(-t/20));                      % speedometer readings [m/s]\ndTrap = trapz(t, v);                          % composite trapezium rule\nh = t(2) - t(1);                              % composite Simpson (12 subintervals)\ndSimp = h/3*(v(1) + 4*sum(v(2:2:end-1)) + 2*sum(v(3:2:end-2)) + v(end));\ndExact = 20*(60 + 20*exp(-3) - 20);\nfprintf('Trapezium: %.3f m,  Simpson: %.3f m,  exact: %.3f m\\n', dTrap, dSimp, dExact);\n\nfigure\narea(t, v, 'FaceColor', [0.85 0.9 1]), hold on\nplot(t, v, 'o-', 'LineWidth', 2.5, 'MarkerSize', 8), hold off\nlegend('distance = area under the curve', 'speedometer readings', 'Location', 'southeast')\nxlabel('time [s]'), ylabel('speed [m/s]'), grid on, set(gca, 'FontSize', 18)"
+  },
+  {
+    "objectID": "chap-four.html#gaussian-quadrature",
+    "href": "chap-four.html#gaussian-quadrature",
+    "title": "Chapter 4: Calculus",
+    "section": "Gaussian quadrature",
+    "text": "Gaussian quadrature\nChoose the nodes \\(x_k\\) as well as the weights \\(\\sigma_k\\) for the highest degree of exactness.\n\n\\(G_1(f)=\\sigma_0f(x_0) + \\sigma_1f(x_1)\\) on \\([-1,1]\\) \\[\n\\begin{aligned}\n\\sigma_0 + \\sigma_1 &= \\textstyle\\int_{-1}^1\\,\\mathrm{d}x = 2, &\n\\sigma_0x_0 + \\sigma_1x_1 &= \\textstyle\\int_{-1}^1x\\,\\mathrm{d}x = 0,\\\\\n\\sigma_0x_0^2 + \\sigma_1x_1^2 &= \\textstyle\\int_{-1}^1x^2\\,\\mathrm{d}x = \\tfrac23, &\n\\sigma_0x_0^3 + \\sigma_1x_1^3 &= \\textstyle\\int_{-1}^1x^3\\,\\mathrm{d}x = 0\n\\end{aligned}\n\\]\n\nSymmetry: \\(x_1=-x_0\\), \\(\\sigma_0=\\sigma_1\\) \\(\\implies\\) \\(2\\sigma_0 = 2\\), \\(\\;2\\sigma_0x_0^2 = \\tfrac23\\) \\[\nG_1(f) = f\\left(-\\frac{1}{\\sqrt{3}}\\right) + f\\left(\\frac{1}{\\sqrt{3}}\\right) \\quad \\text{: degree of exactness 3}\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#orthogonal-polynomials",
+    "href": "chap-four.html#orthogonal-polynomials",
+    "title": "Chapter 4: Calculus",
+    "section": "Orthogonal polynomials",
+    "text": "Orthogonal polynomials\nWeight function \\(w(x)\\geq 0\\) on \\([a,b]\\), inner product \\[\n(f,g) := \\int_a^b f(x)g(x)w(x)\\,\\mathrm{d}x\n\\]\n\n\\(\\phi_0,\\phi_1,\\ldots\\) (degree \\(k\\)) are orthogonal if \\((\\phi_j,\\phi_k)=0\\) for \\(j\\neq k\\)\nGram-Schmidt on \\(1, x, x^2,\\ldots\\): \\[\n\\phi_0 = 1, \\quad \\phi_1 = x - \\frac{(x,\\phi_0)}{(\\phi_0,\\phi_0)}\\phi_0, \\quad \\phi_2 = x^2 - \\frac{(x^2,\\phi_0)}{(\\phi_0,\\phi_0)}\\phi_0 - \\frac{(x^2,\\phi_1)}{(\\phi_1,\\phi_1)}\\phi_1\n\\]\n\\(w(x)=1\\) on \\([-1,1]\\): Legendre polynomials \\(1\\), \\(x\\), \\(x^2-\\tfrac13\\), \\(\\ldots\\)\n\\(\\phi_{n+1}\\) is orthogonal to every polynomial of degree \\(\\leq n\\)"
+  },
+  {
+    "objectID": "chap-four.html#gaussian-quadrature-1",
+    "href": "chap-four.html#gaussian-quadrature-1",
+    "title": "Chapter 4: Calculus",
+    "section": "Gaussian quadrature",
+    "text": "Gaussian quadrature\n\nTheorem If \\(\\phi_0,\\ldots,\\phi_n\\) are orthogonal polynomials on \\([a,b]\\) with \\(\\phi_k\\) of degree \\(k\\), then \\(\\phi_k\\) has \\(k\\) distinct real roots, all in \\((a,b)\\).\n\n\nGaussian quadrature Let \\(\\phi_{n+1}\\in{\\cal P}_{n+1}\\) be orthogonal on \\([a,b]\\) to all of \\({\\cal P}_{n}\\) with respect to \\(w(x)\\). If \\(x_0,\\ldots,x_n\\) are the roots of \\(\\phi_{n+1}\\), then \\[\nG_{n,w}(f) := \\sum_{k=0}^n\\sigma_kf(x_k), \\qquad \\sigma_k = \\int_a^b\\ell_k(x)w(x)\\,\\mathrm{d}x\n\\] approximates \\(I_w(f) = \\int_a^b f(x)w(x)\\,\\mathrm{d}x\\) with degree of exactness \\(2n+1\\) (the largest possible)."
+  },
+  {
+    "objectID": "chap-four.html#proof",
+    "href": "chap-four.html#proof",
+    "title": "Chapter 4: Calculus",
+    "section": "Proof",
+    "text": "Proof\n\\(G_{n,w}\\) is interpolatory with \\(n+1\\) nodes, so it is exact on \\({\\cal P}_n\\).\n\nFor \\(p_{2n+1}\\in{\\cal P}_{2n+1}\\), divide by \\(\\phi_{n+1}\\): \\[\np_{2n+1}(x) = \\phi_{n+1}(x)q_n(x) + r_n(x), \\qquad q_n,r_n \\in{\\cal P}_n\n\\]\n\n\n\\[\nG_{n,w}(p_{2n+1}) = \\sum_{k=0}^n\\sigma_k\\Big[\\underbrace{\\phi_{n+1}(x_k)}_{=0}q_n(x_k) + r_n(x_k) \\Big] = I_w(r_n)\n\\]\n\n\n\\(q_n\\) is orthogonal to \\(\\phi_{n+1}\\), so \\(I_w(\\phi_{n+1}q_n) = 0\\): \\[\nG_{n,w}(p_{2n+1}) = I_w(r_n) + I_w(\\phi_{n+1}q_n) = I_w(p_{2n+1}). \\quad\\blacksquare\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#example-1",
+    "href": "chap-four.html#example-1",
+    "title": "Chapter 4: Calculus",
+    "section": "Example",
+    "text": "Example\n\n\\(n=1\\) on \\([-1,1]\\), \\(w(x)=1\\) (again) \\(\\phi_2(x) = x^2 - \\tfrac13 \\implies x_0= -1/\\sqrt{3}, \\; x_1=1/\\sqrt{3}\\) \\[\n\\begin{aligned}\n\\sigma_0 &= \\int_{-1}^1\\frac{x-\\tfrac1{\\sqrt{3}}}{-\\tfrac2{\\sqrt{3}}}\\,\\mathrm{d}x = 1,\n\\qquad\n\\sigma_1 = \\int_{-1}^1\\frac{x+\\tfrac1{\\sqrt{3}}}{\\tfrac2{\\sqrt{3}}}\\,\\mathrm{d}x = 1\n\\end{aligned}\n\\]\n\nGeneral interval: \\(x = \\tfrac{a+b}{2} + \\tfrac{b-a}{2}t\\), \\[\n\\int_a^b f(x)\\,\\mathrm{d}x \\approx \\frac{b-a}{2}\\sum_{k=0}^n\\sigma_kf\\Big(\\tfrac{a+b}{2} + \\tfrac{b-a}{2}t_k\\Big)\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#example-2",
+    "href": "chap-four.html#example-2",
+    "title": "Chapter 4: Calculus",
+    "section": "Example",
+    "text": "Example\n\nTwo-point Gaussian quadrature for \\(\\int_0^2\\mathrm{e}^x\\,\\mathrm{d}x\\) Nodes \\(x = 1\\pm 1/\\sqrt{3}\\), weights \\(\\tfrac{b-a}{2}\\sigma_k = 1\\): \\[\nG_1(\\mathrm{e}^x) = \\mathrm{e}^{1-1/\\sqrt{3}} + \\mathrm{e}^{1+1/\\sqrt{3}} = 6.368108\\ldots\n\\]\n\n\n\nRule\nFunction evaluations\nError\n\n\n\n\nTrapezium\n2\n2.000\n\n\nSimpson\n3\n0.032\n\n\nGauss\n2\n0.021"
+  },
+  {
+    "objectID": "chap-four.html#weighted-quadrature",
+    "href": "chap-four.html#weighted-quadrature",
+    "title": "Chapter 4: Calculus",
+    "section": "Weighted quadrature",
+    "text": "Weighted quadrature\n\n\\(\\int_0^1 \\cos(x)x^{-1/2}\\,\\mathrm{d}x = 1.80905\\ldots\\), with \\(n=0\\)\nUnweighted (\\(w\\equiv 1\\)): \\[\n\\phi_1(x) = x - \\frac{\\int_0^1x\\,\\mathrm{d}x}{\\int_0^1\\,\\mathrm{d}x} = x-\\tfrac12, \\quad \\sigma_0 = 1\n\\implies G_0 = \\frac{\\cos\\left(\\tfrac12\\right)}{\\sqrt{\\tfrac12}} = 1.2411\\ldots\n\\]\n\nWeighted (\\(w(x) = x^{-1/2}\\)): \\[\n\\phi_1(x) = x - \\frac{\\int_0^1x^{1/2}\\,\\mathrm{d}x}{\\int_0^1x^{-1/2}\\,\\mathrm{d}x} = x-\\tfrac13, \\quad \\sigma_0 = 2\n\\implies G_{0,w} = 2\\cos\\left(\\tfrac13\\right) = 1.8899\\ldots\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#gaussian-quadrature-convergence-and-error",
+    "href": "chap-four.html#gaussian-quadrature-convergence-and-error",
+    "title": "Chapter 4: Calculus",
+    "section": "Gaussian quadrature: convergence and error",
+    "text": "Gaussian quadrature: convergence and error\n\n\\(G_{n,w}(f)\\to I_w(f)\\) as \\(n\\to\\infty\\) for any continuous \\(f\\): all weights \\(\\sigma_k &gt; 0\\)\nNewton-Cotes: \\(\\sum_{k}|\\sigma_k|\\to\\infty\\), which destroys convergence\n\n\nError estimate for Gaussian quadrature Let \\(\\phi_{n+1}\\) be monic, with roots \\(x_0,\\ldots,x_n\\). If \\(f\\) has \\(2n+2\\) continuous derivatives on \\((a,b)\\), then there exists \\(\\xi\\in(a,b)\\) such that \\[\nI_w(f) - G_{n,w}(f) = \\frac{f^{(2n+2)}(\\xi)}{(2n+2)!}\\int_a^b\\phi_{n+1}^2(x)w(x)\\,\\mathrm{d}x.\n\\]"
+  },
+  {
+    "objectID": "chap-four.html#knowledge-checklist",
+    "href": "chap-four.html#knowledge-checklist",
+    "title": "Chapter 4: Calculus",
+    "section": "Knowledge checklist",
+    "text": "Knowledge checklist\n\nFinite differences for first and second derivatives, and their truncation errors\nTruncation vs rounding (or measurement) error, and the optimal step size\nRichardson extrapolation\nNewton-Cotes formulae (trapezium, Simpson), composite rules, error bounds, degree of exactness\nGaussian quadrature: orthogonal polynomials, optimal nodes, weighted integrals"
+  },
+  {
+    "objectID": "chap-three.html#how-do-we-solve-a-linear-system-numerically",
+    "href": "chap-three.html#how-do-we-solve-a-linear-system-numerically",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "How do we solve a linear system numerically?",
+    "text": "How do we solve a linear system numerically?\n\\[\nA\\mathbf{x} = \\mathbf{b}, \\qquad A\\in\\mathbb{R}^{n\\times n}, \\quad \\mathbf{x}, \\mathbf{b}\\in\\mathbb{R}^n\n\\]\n\nUnique solution \\(\\mathbf{x} = A^{-1}\\mathbf{b}\\) iff \\(A\\) is non-singular (\\(\\det(A)\\neq 0\\))\nGoal: solve efficiently and accurately\n\\(n = 10^6\\) is routine, e.g. backward Euler for the heat equation (Chapter 6): \\[\n(I - \\Delta t\\,\\alpha A)\\mathbf{u}_{n+1} = \\mathbf{u}_n \\quad \\text{at every time step}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#triangular-systems",
+    "href": "chap-three.html#triangular-systems",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Triangular systems",
+    "text": "Triangular systems\n\\[\nL = \\begin{pmatrix}\nl_{11} & 0 & \\cdots & 0\\\\\nl_{21} & l_{22} & \\ddots & \\vdots\\\\\n\\vdots & &\\ddots & 0\\\\\nl_{n1} & \\cdots & \\cdots & l_{nn}\n\\end{pmatrix},\n\\qquad\n\\det(L) = l_{11}l_{22}\\cdots l_{nn}\n\\]\n\nSolve \\(L\\mathbf{x} = \\mathbf{b}\\) for \\(n=4\\) \\[\n\\begin{aligned}\nl_{11}x_1 &= b_1,\\\\\nl_{21}x_1 + l_{22}x_2 &= b_2,\\\\\nl_{31}x_1 + l_{32}x_2 + l_{33}x_3 &= b_3,\\\\\nl_{41}x_1 + l_{42}x_2 + l_{43}x_3 + l_{44}x_4 &= b_4.\n\\end{aligned}\n\\qquad\\implies\\qquad\nx_1 = \\frac{b_1}{l_{11}}, \\;\\; x_2 = \\frac{b_2 - l_{21}x_1}{l_{22}}, \\;\\; \\ldots\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#forward-and-backward-substitution",
+    "href": "chap-three.html#forward-and-backward-substitution",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Forward and backward substitution",
+    "text": "Forward and backward substitution\nForward substitution for lower triangular \\(L\\mathbf{x}=\\mathbf{b}\\): \\[\nx_j = \\frac{b_j - \\sum_{k=1}^{j-1}l_{jk}x_k}{l_{jj}}, \\quad j=1,\\ldots,n.\n\\]\nBackward substitution for upper triangular \\(U\\mathbf{x}=\\mathbf{b}\\): \\[\nx_j = \\frac{b_j - \\sum_{k=j+1}^{n}u_{jk}x_k}{u_{jj}}, \\quad j=n,\\ldots,1.\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#cost-of-forward-substitution",
+    "href": "chap-three.html#cost-of-forward-substitution",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Cost of forward substitution",
+    "text": "Cost of forward substitution\n\nCount the floating-point operations (\\(+\\), \\(-\\), \\(\\times\\), \\(\\div\\))\n\n\\(j=1\\): 1 division\n\\(j=2\\): 1 division + [1 subtraction + 1 multiplication]\n\\(\\vdots\\)\n\\(j=n\\): 1 division + \\((n-1)\\,\\times\\)[1 subtraction + 1 multiplication]\n\n\n\\[\n\\sum_{j=1}^n\\Big(1 + 2(j-1)\\Big) = 2\\sum_{j=1}^nj - \\sum_{j=1}^n1 = n(n+1) - n = n^2.\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#gaussian-elimination",
+    "href": "chap-three.html#gaussian-elimination",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Gaussian elimination",
+    "text": "Gaussian elimination\n\nTransform to upper triangular form \\[\nA=\\begin{pmatrix}\n1 & 2 & 1\\\\\n1 & -2 & 2\\\\\n2 & 12 & -2\n\\end{pmatrix},\n\\quad\n\\mathbf{b}=\\begin{pmatrix}\n0\\\\ 4\\\\ 4\n\\end{pmatrix}\n\\]\n\nStage 1: \\(m_{21}=1\\), \\(m_{31}=2\\) \\[\nA^{(2)}=\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 8 & -4\n\\end{pmatrix},\n\\quad\n\\mathbf{b}^{(2)}=\\begin{pmatrix}\n0\\\\ 4\\\\ 4\n\\end{pmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#gaussian-elimination-1",
+    "href": "chap-three.html#gaussian-elimination-1",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Gaussian elimination",
+    "text": "Gaussian elimination\n\nTransform to upper triangular form (continued) Stage 2: \\(m_{32}=-2\\) \\[\nA^{(3)}=\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 0 & -2\n\\end{pmatrix},\n\\quad\n\\mathbf{b}^{(3)}=\\begin{pmatrix}\n0\\\\ 4\\\\ 12\n\\end{pmatrix}\n\\]\n\nBack substitution: \\(x_3=-6\\), \\(\\; x_2=-\\tfrac{5}{2}\\), \\(\\; x_1=11\\)."
+  },
+  {
+    "objectID": "chap-three.html#gaussian-elimination-2",
+    "href": "chap-three.html#gaussian-elimination-2",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Gaussian elimination",
+    "text": "Gaussian elimination\n\nGaussian elimination Let \\(A^{(1)}=A\\), \\(\\mathbf{b}^{(1)}=\\mathbf{b}\\). For \\(k = 1, \\ldots, n-1\\):\n\nRow multipliers \\[\nm_{ik} = \\frac{a_{ik}^{(k)}}{a_{kk}^{(k)}}, \\quad i=k+1,\\ldots,n.\n\\]\nEliminate \\(x_k\\) from equations \\(k+1\\) to \\(n\\): \\[\na_{ij}^{(k+1)} = a_{ij}^{(k)} - m_{ik}a_{kj}^{(k)}, \\quad b_i^{(k+1)} = b_i^{(k)} - m_{ik}b_k^{(k)}, \\quad i,j=k+1,\\ldots,n.\n\\]\n\n\\(A^{(n)}=U\\) is upper triangular, provided the pivots \\(a_{kk}^{(k)}\\) are non-zero."
+  },
+  {
+    "objectID": "chap-three.html#cost-of-gaussian-elimination",
+    "href": "chap-three.html#cost-of-gaussian-elimination",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Cost of Gaussian elimination",
+    "text": "Cost of Gaussian elimination\nStage \\(k\\): \\(n-k\\) multipliers, then update an \\((n-k)\\times(n-k)\\) block \\[\nN \\approx \\sum_{k=1}^{n-1}2(n-k)^2 = 2\\sum_{j=1}^{n-1}j^2 \\approx \\tfrac23n^3\n\\]\n\nExactly: \\(N = \\tfrac23n^3 - \\tfrac12n^2 - \\tfrac16n\\)\n\\({\\cal O}(n^3)\\): doubling \\(n\\) multiplies the cost by about \\(8\\)\nCompare \\({\\cal O}(n^2)\\) for the substitution step"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-cubic-cost",
+    "href": "chap-three.html#matlab-demo-cubic-cost",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: cubic cost",
+    "text": "MATLAB demo: cubic cost\nfor n = [1000 2000 4000 8000]\n    A = rand(n);  b = rand(n, 1);\n    tic;  x = A \\ b;  t = toc;\n    fprintf('n = %4d: time = %.3f s\\n', n, t);\nend"
+  },
+  {
+    "objectID": "chap-three.html#lu-decomposition",
+    "href": "chap-three.html#lu-decomposition",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "LU decomposition",
+    "text": "LU decomposition\nEach stage of elimination is left-multiplication by a lower triangular \\(F^{(k)}\\): \\[\nF^{(1)}A=\\begin{pmatrix}\n1 & 0 & 0\\\\\n-1 & 1 & 0\\\\\n-2 & 0 & 1\n\\end{pmatrix}\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n1 & -2 & 2\\\\\n2 & 12 & -2\n\\end{pmatrix}\n=\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 8 & -4\n\\end{pmatrix} = A^{(2)}\n\\] \\[\nF^{(2)}A^{(2)}=\n\\begin{pmatrix}\n1 & 0 & 0\\\\\n0 & 1 & 0\\\\\n0 & 2 & 1\n\\end{pmatrix}\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 8 & -4\n\\end{pmatrix}\n=\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 0 & -2\n\\end{pmatrix} = U\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#lu-decomposition-1",
+    "href": "chap-three.html#lu-decomposition-1",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "LU decomposition",
+    "text": "LU decomposition\n\\[\nU = F^{(n-1)}\\cdots F^{(1)}A \\quad \\implies \\quad A = (F^{(1)})^{-1}\\cdots (F^{(n-1)})^{-1}U\n\\]\n\\[\n(F^{(1)})^{-1}\\cdots (F^{(n-1)})^{-1} =  \\begin{pmatrix}\n1 & 0& \\cdots&0\\\\\nm_{2,1} & 1 &\\ddots&\\vdots\\\\\n\\vdots & \\vdots&\\ddots&0\\\\\nm_{n,1} & m_{n,2} &\\cdots &1\n\\end{pmatrix} := L\n\\]\n\nLU decomposition Let \\(U\\) be the upper triangular matrix from Gaussian elimination of \\(A\\) (without pivoting), and \\(L\\) the unit lower triangular matrix of multipliers. Then \\(A = LU\\)."
+  },
+  {
+    "objectID": "chap-three.html#solving-with-lu",
+    "href": "chap-three.html#solving-with-lu",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Solving with LU",
+    "text": "Solving with LU\n\\[\nA\\mathbf{x}=\\mathbf{b} \\iff LU\\mathbf{x}=\\mathbf{b}\n\\]\n\nSolve \\(L\\mathbf{y}=\\mathbf{b}\\) (forward substitution)\nSolve \\(U\\mathbf{x}=\\mathbf{y}\\) (backward substitution)\n\n\n\nFactorise once: \\({\\cal O}(n^3)\\)\nEach new right-hand side \\(\\mathbf{b}\\): \\({\\cal O}(n^2)\\)\nNever compute \\(A^{-1}\\): costs \\(\\approx 2n^3\\) and less accurate. In MATLAB use A\\b, not inv(A)*b"
+  },
+  {
+    "objectID": "chap-three.html#example",
+    "href": "chap-three.html#example",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Example",
+    "text": "Example\n\nSolve the earlier example by LU decomposition \\[\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n1 & -2 & 2\\\\\n2 & 12 & -2\n\\end{pmatrix} =\n\\begin{pmatrix}\n1 & 0 & 0\\\\\n1 & 1 & 0\\\\\n2 & -2 & 1\n\\end{pmatrix}\n\\begin{pmatrix}\n1 & 2 & 1\\\\\n0 & -4 & 1\\\\\n0 & 0 & -2\n\\end{pmatrix}\n\\]\n\n\\(L\\mathbf{y}=\\mathbf{b}\\): \\(\\quad y_1 = 0, \\;\\; y_2 = 4-y_1 =4, \\;\\; y_3=4-2y_1+2y_2 = 12\\)\n\n\n\\(U\\mathbf{x} = \\mathbf{y}\\): \\(\\quad x_3 = -6, \\;\\; x_2=-\\tfrac14(4-x_3)=-\\tfrac52, \\;\\; x_1 = -2x_2 - x_3 = 11\\)"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-reusing-the-factorisation",
+    "href": "chap-three.html#matlab-demo-reusing-the-factorisation",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: reusing the factorisation",
+    "text": "MATLAB demo: reusing the factorisation\nA = [1 2 1; 1 -2 2; 2 12 -2];\n[L, U, P] = lu(A)       % MATLAB pivots (see below), so P is a permutation matrix\n\n% Reusing the factorisation for many right-hand sides\nn = 2000;  A = rand(n);  B = rand(n, 100);     % 100 right-hand sides\ntic\nfor j = 1:100\n    x = A \\ B(:, j);                           % factorises A every time\nend\nt1 = toc;\ntic\n[L, U, P] = lu(A);                             % factorise once...\nfor j = 1:100\n    x = U \\ (L \\ (P*B(:, j)));                 % ...then two triangular solves each time\nend\nt2 = toc;\nfprintf('Backslash each time: %.2f s,  LU once then reuse: %.2f s\\n', t1, t2);"
+  },
+  {
+    "objectID": "chap-three.html#pivoting",
+    "href": "chap-three.html#pivoting",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Pivoting",
+    "text": "Pivoting\nZero pivot, even though \\(A\\) is non-singular: \\[\nA = \\begin{pmatrix}\n0 & 1\\\\\n1 & 1\n\\end{pmatrix}\n\\]\n\nA small pivot \\[\n\\begin{aligned}\n\\epsilon x_1 + x_2 &= 1,\\\\\nx_1 + x_2 &= 2,\n\\end{aligned}\n\\qquad x_1 = \\tfrac{1}{1-\\epsilon} \\approx 1, \\quad x_2 = \\tfrac{1-2\\epsilon}{1-\\epsilon} \\approx 1\n\\]\n\nNo pivoting: \\(m_{21} = 1/\\epsilon\\), so \\(\\big(1 - \\tfrac1\\epsilon\\big)x_2 = 2 - \\tfrac1\\epsilon\\). With \\(\\epsilon = 10^{-20}\\): \\(x_2 = 1\\), but \\(x_1 = (1 - x_2)/\\epsilon = 0\\) ✗\n\n\nRows swapped: \\(m_{21} = \\epsilon\\), so \\((1-\\epsilon)x_2 = 1 - 2\\epsilon\\): \\(x_2 = 1\\), \\(x_1 = 2 - x_2 = 1\\) ✓"
+  },
+  {
+    "objectID": "chap-three.html#partial-pivoting",
+    "href": "chap-three.html#partial-pivoting",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Partial pivoting",
+    "text": "Partial pivoting\n\nPartial pivoting At each stage \\(k\\), find the row \\(p\\geq k\\) for which \\(|a_{pk}^{(k)}|\\) is largest, and swap rows \\(k\\) and \\(p\\) (in both \\(A^{(k)}\\) and \\(\\mathbf{b}^{(k)}\\)). Then \\(|m_{ik}|\\leq 1\\).\n\n\nRecord row swaps in a permutation matrix \\(P\\): \\[\nPA = LU\n\\]\nSolve \\(L\\mathbf{y} = P\\mathbf{b}\\), then \\(U\\mathbf{x} = \\mathbf{y}\\)\nMATLAB’s lu and \\ pivot automatically"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-the-danger-of-small-pivots",
+    "href": "chap-three.html#matlab-demo-the-danger-of-small-pivots",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: the danger of small pivots",
+    "text": "MATLAB demo: the danger of small pivots\nep = 1e-20;\nA = [ep 1; 1 1];  b = [1; 2];\n\n% Gaussian elimination WITHOUT pivoting\nm   = A(2,1)/A(1,1);\nu22 = A(2,2) - m*A(1,2);\ny2  = b(2) - m*b(1);\nx2  = y2/u22;\nx1  = (b(1) - A(1,2)*x2)/A(1,1);\ndisp([x1; x2])          % gives [0; 1]: x1 is completely wrong\n\n% Backslash uses partial pivoting\ndisp(A \\ b)             % gives [1; 1]"
+  },
+  {
+    "objectID": "chap-three.html#vector-norms",
+    "href": "chap-three.html#vector-norms",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Vector norms",
+    "text": "Vector norms\n\nVector norm A real-valued function on \\(\\mathbb{R}^n\\) such that, for all \\(\\mathbf{x},\\mathbf{y}\\in \\mathbb{R}^n\\), \\(\\alpha\\in\\mathbb{R}\\):\n\n\\(\\|\\mathbf{x} + \\mathbf{y}\\| \\leq \\|\\mathbf{x}\\| + \\|\\mathbf{y}\\|\\) (triangle inequality)\n\\(\\|\\alpha \\mathbf{x}\\| = |\\alpha|\\,\\|\\mathbf{x}\\|\\)\n\\(\\|\\mathbf{x}\\| \\geq 0\\), and \\(\\|\\mathbf{x}\\|=0\\) implies \\(\\mathbf{x}=0\\)\n\n\n\\[\n\\|\\mathbf{x}\\|_2 := \\sqrt{\\sum_{k=1}^n x_k^2},\n\\qquad\n\\|\\mathbf{x}\\|_1 := \\sum_{k=1}^n |x_k|,\n\\qquad\n\\|\\mathbf{x}\\|_\\infty := \\max_{k} |x_k|\n\\]\n\\[\n\\|\\mathbf{x}\\|_p = \\left(\\sum_{k=1}^n |x_k|^p\\right)^{1/p}, \\quad p\\geq 1\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#vector-norms-examples",
+    "href": "chap-three.html#vector-norms-examples",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Vector norms: examples",
+    "text": "Vector norms: examples\n\n\\(\\mathbf{a}=(1,-2,3)^\\top\\), \\(\\mathbf{b}=(2,0,-1)^\\top\\), \\(\\mathbf{c}=(0,1,4)^\\top\\)\n\n\n\n\n\\(\\ell_1\\)\n\\(\\ell_2\\)\n\\(\\ell_\\infty\\)\n\n\n\n\n\\(\\mathbf{a}\\)\n6\n\\(\\sqrt{14} \\approx 3.74\\)\n3\n\n\n\\(\\mathbf{b}\\)\n3\n\\(\\sqrt{5} \\approx 2.24\\)\n2\n\n\n\\(\\mathbf{c}\\)\n5\n\\(\\sqrt{17} \\approx 4.12\\)\n4\n\n\n\n\\(\\|\\mathbf{x}\\|_1 \\geq \\|\\mathbf{x}\\|_2 \\geq \\|\\mathbf{x}\\|_\\infty\\), but different norms can order vectors differently."
+  },
+  {
+    "objectID": "chap-three.html#unit-circles",
+    "href": "chap-three.html#unit-circles",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Unit circles",
+    "text": "Unit circles\n\\[\n\\{\\mathbf{x}\\in\\mathbb{R}^2 : \\|\\mathbf{x}\\|_p=1\\}, \\quad p=1,2,\\infty\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#matrix-norms",
+    "href": "chap-three.html#matrix-norms",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Matrix norms",
+    "text": "Matrix norms\n\nMatrix norm A real-valued function on \\(\\mathbb{R}^{n\\times n}\\) such that, for all \\(A,B\\in\\mathbb{R}^{n\\times n}\\), \\(\\alpha\\in\\mathbb{R}\\):\n\n\\(\\|A + B\\| \\leq \\|A\\| + \\|B\\|\\)\n\\(\\|\\alpha A\\| = |\\alpha|\\,\\|A\\|\\)\n\\(\\|A\\| \\geq 0\\), and \\(\\|A\\|=0\\) implies \\(A=0\\)\n\\(\\|AB\\| \\leq \\|A\\|\\|B\\|\\) (consistency)"
+  },
+  {
+    "objectID": "chap-three.html#induced-norms",
+    "href": "chap-three.html#induced-norms",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Induced norms",
+    "text": "Induced norms\n\nInduced (operator) norm \\[\n\\|A\\|_p := \\sup_{\\mathbf{x}\\neq \\boldsymbol{0}}\\frac{\\|A\\mathbf{x}\\|_p}{\\|\\mathbf{x}\\|_p} = \\max_{\\|\\mathbf{x}\\|_p=1}\\|A\\mathbf{x}\\|_p\n\\]\n\n\nInduced norms are matrix norms The induced norm of any vector norm is a matrix norm, and \\(\\|A\\mathbf{x}\\| \\leq \\|A\\|\\|\\mathbf{x}\\|\\)."
+  },
+  {
+    "objectID": "chap-three.html#induced-norms-example",
+    "href": "chap-three.html#induced-norms-example",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Induced norms: example",
+    "text": "Induced norms: example\n\n\\(A = \\begin{pmatrix} 0 & 1\\\\ 3 & 0 \\end{pmatrix}\\) in the \\(\\ell_2\\)-norm\n\n\n\\[\n\\mathbf{x}=\\begin{pmatrix}\\cos\\theta\\\\ \\sin\\theta\\end{pmatrix}\n\\implies\nA\\mathbf{x} = \\begin{pmatrix}\n\\sin\\theta\\\\\n3\\cos\\theta\n\\end{pmatrix}\n\\]\n\\[\n\\begin{aligned}\n\\|A\\|_2 &= \\max_\\theta\\big(\\sin^2\\theta + 9\\cos^2\\theta \\big)^{1/2}\\\\\n&= \\max_\\theta\\big(1 + 8\\cos^2\\theta\\big)^{1/2} = 3\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#computing-induced-norms",
+    "href": "chap-three.html#computing-induced-norms",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Computing induced norms",
+    "text": "Computing induced norms\n\nMatrix norms induced by \\(\\ell_1\\) and \\(\\ell_\\infty\\) \\[\n\\|A\\|_1 = \\max_{j}\\sum_{i=1}^n|a_{ij}| \\;\\; \\text{(max column sum)},\n\\qquad\n\\|A\\|_\\infty = \\max_{i}\\sum_{j=1}^n|a_{ij}| \\;\\; \\text{(max row sum)}\n\\]\n\n\nExample \\[\nA = \\begin{pmatrix}\n-7 & 3 & -1\\\\\n2 & 4 & 5\\\\\n-4 & 6 & 0\n\\end{pmatrix}\n\\implies\n\\|A\\|_1 = \\max\\{13, 13, 6\\} = 13, \\quad \\|A\\|_\\infty = \\max\\{11,11,10\\} = 11\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#spectral-norm",
+    "href": "chap-three.html#spectral-norm",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Spectral norm",
+    "text": "Spectral norm\nSpectral radius: \\(\\rho(A) = \\max\\{|\\lambda| : \\lambda \\text{ an eigenvalue of } A\\}\\)\n\nSpectral norm \\[\n\\|A\\|_2 = \\sqrt{\\rho(A^\\top A)}\n\\]\n\n\n\\(A = \\begin{pmatrix} 0 & 1\\\\ 3 & 0 \\end{pmatrix}\\) \\[\nA^\\top A = \\begin{pmatrix}\n0 & 3\\\\\n1 & 0\n\\end{pmatrix}\n\\begin{pmatrix}\n0 & 1\\\\\n3 & 0\n\\end{pmatrix}\n=\\begin{pmatrix}\n9 & 0\\\\\n0 & 1\n\\end{pmatrix}\n\\implies \\|A\\|_2=\\sqrt{9}=3\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#conditioning",
+    "href": "chap-three.html#conditioning",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Conditioning",
+    "text": "Conditioning\n\nWell conditioned vs ill-conditioned \\[\n\\begin{pmatrix}\n1 & 1\\\\\n0 & 1\n\\end{pmatrix}\n\\mathbf{x}\n= \\begin{pmatrix}\n1 + \\delta\\\\ 1\n\\end{pmatrix}\n\\implies\n\\mathbf{x}=\n\\begin{pmatrix}\n\\delta\\\\ 1\n\\end{pmatrix},\n\\qquad\n\\begin{pmatrix}\n\\epsilon & 1\\\\\n0 & 1\n\\end{pmatrix}\n\\mathbf{x}\n= \\begin{pmatrix}\n1 + \\delta\\\\ 1\n\\end{pmatrix}\n\\implies\n\\mathbf{x}=\n\\begin{pmatrix}\n\\delta/\\epsilon\\\\ 1\n\\end{pmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#condition-number",
+    "href": "chap-three.html#condition-number",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Condition number",
+    "text": "Condition number\nError \\(\\delta\\mathbf{b}\\) in the data gives error \\(\\delta\\mathbf{x} = A^{-1}\\delta\\mathbf{b}\\): \\[\n\\frac{\\|\\delta\\mathbf{x}\\|/\\|\\mathbf{x}\\|}{\\|\\delta\\mathbf{b}\\|/\\|\\mathbf{b}\\|}\n= \\frac{\\|A^{-1}\\delta\\mathbf{b}\\|}{\\|\\delta\\mathbf{b}\\|}\\,\\frac{\\|A\\mathbf{x}\\|}{\\|\\mathbf{x}\\|}\n\\leq \\|A^{-1}\\|\\|A\\|\n\\]\n\nCondition number \\[\n\\kappa_*(A) = \\|A^{-1}\\|_*\\|A\\|_*\n\\]\n\n\nLarge \\(\\kappa\\): close to singular, solution sensitive to errors in \\(\\mathbf{b}\\)\n\\(\\det(A)\\) does not measure conditioning: \\(\\begin{pmatrix} 10^{-50} & 0\\\\ 0 & 10^{-50}\\end{pmatrix}\\) is well conditioned"
+  },
+  {
+    "objectID": "chap-three.html#condition-number-examples",
+    "href": "chap-three.html#condition-number-examples",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Condition number: examples",
+    "text": "Condition number: examples\n\nCondition numbers in the 1-norm, \\(0 &lt; \\epsilon \\ll 1\\) \\[\nA = \\begin{pmatrix}\n1 & 1\\\\\n0 & 1\n\\end{pmatrix}, \\quad\nA^{-1} = \\begin{pmatrix}\n1 & -1\\\\\n0 & 1\n\\end{pmatrix}\n\\implies \\kappa_1(A) = 2\\cdot 2 = 4\n\\]\n\n\\[\nB = \\begin{pmatrix}\n\\epsilon & 1\\\\\n0 & 1\n\\end{pmatrix}, \\quad\nB^{-1} = \\frac{1}{\\epsilon}\\begin{pmatrix}\n1 & -1\\\\\n0 & \\epsilon\n\\end{pmatrix}\n\\implies \\kappa_1(B) = 2\\cdot\\frac{1 + \\epsilon}{\\epsilon} \\to \\infty \\text{ as } \\epsilon \\to 0\n\\]\n\n\n\nHilbert matrix \\((h_n)_{ij} = \\frac{1}{i+j-1}\\) \\(\\kappa_2(H_5) \\approx 4.8\\times 10^5\\), \\(\\quad\\kappa_2(H_{20})\\approx 2.5\\times 10^{28}\\)"
+  },
+  {
+    "objectID": "chap-three.html#what-this-means-in-practice",
+    "href": "chap-three.html#what-this-means-in-practice",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "What this means in practice",
+    "text": "What this means in practice\nRounding errors of relative size \\(\\epsilon_{\\rm M}\\) in the data give \\[\n\\frac{\\|\\hat{\\mathbf{x}} - \\mathbf{x}\\|}{\\|\\mathbf{x}\\|} \\lesssim \\kappa(A)\\,\\epsilon_{\\rm M}\n\\]\n\nExpect to lose about \\(\\log_{10}\\kappa(A)\\) significant digits\n\\(H_{20}\\): \\(\\kappa_2 \\approx 10^{28} \\gg 1/\\epsilon_{\\rm M}\\approx 10^{16}\\), so no digits can be trusted\nCheap lower bound from one solve: \\(\\|A^{-1}\\| \\geq \\|\\mathbf{x}\\|/\\|\\mathbf{b}\\|\\)\nMATLAB: condest (estimate) vs cond (exact \\(\\kappa_2\\))"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-conditioning-and-accuracy",
+    "href": "chap-three.html#matlab-demo-conditioning-and-accuracy",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: conditioning and accuracy",
+    "text": "MATLAB demo: conditioning and accuracy\nns = 2:13;  kappa = zeros(size(ns));  err = kappa;\nfor j = 1:length(ns)\n    n = ns(j);  H = hilb(n);\n    x = ones(n, 1);  b = H*x;                  % so the exact solution is all ones\n    kappa(j) = cond(H);\n    err(j) = norm(H\\b - x)/norm(x);\nend\nfigure\nsemilogy(ns, kappa, 'o-', ns, err, 's-', ns, kappa*eps/2, '--', ...\n    'LineWidth', 2.5, 'MarkerSize', 8)\nlegend('condition number \\kappa_2(H_n)', 'relative error in x', ...\n    '\\kappa_2(H_n) \\epsilon_M', 'Location', 'northwest')\nxlabel('n'), set(gca, 'FontSize', 18), grid on"
+  },
+  {
+    "objectID": "chap-three.html#sparse-systems",
+    "href": "chap-three.html#sparse-systems",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Sparse systems",
+    "text": "Sparse systems\n\n\\({\\cal O}(n^3)\\) is prohibitive for large \\(n\\)\nMany large systems are sparse: e.g. backward Euler for the heat equation is tridiagonal\n\\(n = 10^6\\): full storage \\(10^{12}\\) numbers (8 TB) vs \\(\\approx 3\\times 10^6\\) non-zeros\nIterative methods: main cost is matrix-vector products \\(A\\mathbf{d}\\)\n\n\nSymmetric positive definite (SPD) \\(A\\) is SPD if \\(A = A^\\top\\) and \\(\\mathbf{x}^\\top A\\mathbf{x}&gt;0\\) for every \\(\\mathbf{x}\\neq 0\\) \\(\\;\\iff\\;\\) all eigenvalues positive."
+  },
+  {
+    "objectID": "chap-three.html#example-1",
+    "href": "chap-three.html#example-1",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Example",
+    "text": "Example\n\nShow that \\(A\\) is SPD \\[\nA = \\begin{pmatrix}\n3 & 1 & -1\\\\\n1 & 4 & 2\\\\\n-1 & 2 & 5\n\\end{pmatrix}\n\\]\nEigenvalues \\(\\approx 1.29\\), \\(4.14\\), \\(6.57\\) (eig(A)), all positive.\n\nOr complete the square: \\[\n\\begin{aligned}\n\\mathbf{x}^\\top A\\mathbf{x} &= 3x_1^2 + 4x_2^2 + 5x_3^2 + 2x_1x_2 + 4x_2x_3 - 2x_1x_3\\\\\n&= x_1^2 + x_2^2 + 2x_3^2 + (x_1+x_2)^2 + (x_1-x_3)^2 + 2(x_2+x_3)^2\n\\end{aligned}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#linear-systems-as-minimisation",
+    "href": "chap-three.html#linear-systems-as-minimisation",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Linear systems as minimisation",
+    "text": "Linear systems as minimisation\nFor \\(A\\) SPD, minimise \\[\nf(\\mathbf{x}) = \\tfrac12\\mathbf{x}^\\top A\\mathbf{x} -\\mathbf{b}^\\top\\mathbf{x}\n\\]\n\nUnique global minimiser \\(\\mathbf{x}_*\\)\n\\(\\nabla f = A\\mathbf{x} - \\mathbf{b} = \\boldsymbol{0} \\iff A\\mathbf{x}=\\mathbf{b}\\)\n\n\nLine search: \\(\\mathbf{x}_{k+1} = \\mathbf{x}_k + \\alpha_k\\mathbf{d}_k\\), choosing \\(\\alpha_k\\) to minimise \\(f\\) along the line: \\[\nf(\\mathbf{x}_{k} + \\alpha\\mathbf{d}_{k}) = \\big(\\tfrac12\\mathbf{d}_{k}^\\top A\\mathbf{d}_{k}\\big)\\alpha^2 + \\mathbf{d}_{k}^\\top\\big(  A\\mathbf{x}_k - \\mathbf{b} \\big)\\alpha + \\text{const.}\n\\]\n\n\n\\[\n\\mathbf{r}_k := A\\mathbf{x}_k - \\mathbf{b} \\quad \\implies \\quad \\alpha_k = - \\frac{\\mathbf{d}_k^\\top\\mathbf{r}_k}{\\mathbf{d}_k^\\top A\\mathbf{d}_k}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#steepest-descent",
+    "href": "chap-three.html#steepest-descent",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Steepest descent",
+    "text": "Steepest descent\n\\[\n\\mathbf{d}_k = - \\nabla f (\\mathbf{x}_k) = -\\mathbf{r}_k\n\\]\n\n\\(\\begin{pmatrix} 3 & 2\\\\ 2 & 6 \\end{pmatrix}\\mathbf{x}=\\begin{pmatrix} 2\\\\ -8 \\end{pmatrix}\\), \\(\\;\\mathbf{x}_0=(-2,-2)^\\top\\)\n\n\n\\[\n\\mathbf{d}_0 = \\begin{pmatrix}\n12\\\\ 8\n\\end{pmatrix}, \\quad \\alpha_0 = \\frac{\\mathbf{d}_0^\\top\\mathbf{d}_0}{\\mathbf{d}_0^\\top A\\mathbf{d}_0} = \\frac{208}{1200}\n\\] \\[\n\\mathbf{x}_1 = \\mathbf{x}_0 + \\alpha_0\\mathbf{d}_0 \\approx \\begin{pmatrix}\n0.08\\\\ -0.613\n\\end{pmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#conjugate-gradients",
+    "href": "chap-three.html#conjugate-gradients",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Conjugate gradients",
+    "text": "Conjugate gradients\nSteepest descent zig-zags: error decreases by a factor of about \\[\n\\frac{\\kappa-1}{\\kappa+1} \\text{ per step}, \\qquad \\kappa = \\kappa_2(A) = \\frac{\\lambda_{\\max}}{\\lambda_{\\min}}.\n\\]\nInstead, choose search directions that are \\(A\\)-conjugate: \\[\n\\mathbf{d}_{k+1}^\\top A \\mathbf{d}_k = 0\n\\]\n\n\\[\n\\mathbf{d}_{k+1} = -\\mathbf{r}_{k+1} + \\beta_k\\mathbf{d}_k\n\\quad\\implies\\quad\n0 = -\\mathbf{r}_{k+1}^\\top A \\mathbf{d}_k + \\beta_k\\mathbf{d}_k^\\top A \\mathbf{d}_k\n\\]\n\\[\n\\implies \\quad \\beta_k = \\frac{\\mathbf{r}_{k+1}^\\top A\\mathbf{d}_k}{\\mathbf{d}_k^\\top A \\mathbf{d}_k}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#conjugate-gradient-method",
+    "href": "chap-three.html#conjugate-gradient-method",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Conjugate gradient method",
+    "text": "Conjugate gradient method\n\nConjugate gradient method Start with \\(\\mathbf{x}_0\\) and \\(\\mathbf{d}_0 = -\\mathbf{r}_0 = \\mathbf{b} - A\\mathbf{x}_0\\). For \\(k=0,1,\\ldots\\):\n\n\\(\\alpha_k = -\\dfrac{\\mathbf{d}_k^\\top\\mathbf{r}_k}{\\mathbf{d}_k^\\top A \\mathbf{d}_k}\\)\n\\(\\mathbf{x}_{k+1} = \\mathbf{x}_k + \\alpha_k\\mathbf{d}_k\\)\n\\(\\mathbf{r}_{k+1} = A\\mathbf{x}_{k+1} - \\mathbf{b}\\)\nIf \\(\\|\\mathbf{r}_{k+1}\\| &lt;\\) tolerance, stop\n\\(\\mathbf{d}_{k+1} = -\\mathbf{r}_{k+1} + \\beta_k\\mathbf{d}_k\\), \\(\\quad\\beta_k = \\dfrac{\\mathbf{r}_{k+1}^\\top A \\mathbf{d}_k}{\\mathbf{d}_k^\\top A \\mathbf{d}_k}\\)"
+  },
+  {
+    "objectID": "chap-three.html#conjugate-gradients-example",
+    "href": "chap-three.html#conjugate-gradients-example",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Conjugate gradients: example",
+    "text": "Conjugate gradients: example\n\nSame system, \\(\\mathbf{x}_0=(-2,-2)^\\top\\)\n\n\nFirst step as before: \\(\\mathbf{x}_1 = (0.08, -0.613)^\\top\\)\n\\[\n\\mathbf{r}_1 = \\begin{pmatrix}\n-2.99\\\\ 4.48\n\\end{pmatrix}, \\quad \\beta_0 = 0.139\n\\] \\[\n\\mathbf{d}_1 = -\\mathbf{r}_1 + \\beta_0\\mathbf{d}_0 = \\begin{pmatrix}\n4.66\\\\-3.36\n\\end{pmatrix}\n\\] \\[\n\\alpha_1 = 0.412 \\implies \\mathbf{x}_2 = \\begin{pmatrix}\n2\\\\-2\n\\end{pmatrix}\n\\]"
+  },
+  {
+    "objectID": "chap-three.html#conjugate-gradients-convergence",
+    "href": "chap-three.html#conjugate-gradients-convergence",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Conjugate gradients: convergence",
+    "text": "Conjugate gradients: convergence\n\nTheorem The residuals of the conjugate gradient method are mutually orthogonal: \\(\\mathbf{r}_j^\\top \\mathbf{r}_k = 0\\) for \\(j=0,\\ldots,k-1\\).\n\n\nSo \\(\\mathbf{r}_n=\\boldsymbol{0}\\): exact solution in \\(n\\) iterations (in exact arithmetic)\nIn practice: for large sparse systems, stop long before \\(n\\)\nOne matrix-vector product per iteration\nError decreases by about \\(\\dfrac{\\sqrt{\\kappa}-1}{\\sqrt{\\kappa}+1}\\) per iteration (vs \\(\\dfrac{\\kappa-1}{\\kappa+1}\\) for steepest descent)\nPreconditioning: reduce \\(\\kappa\\) to speed up convergence"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-steepest-descent-vs-cg",
+    "href": "chap-three.html#matlab-demo-steepest-descent-vs-cg",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: steepest descent vs CG",
+    "text": "MATLAB demo: steepest descent vs CG\nA = [3 2; 2 6];  b = [2; -8];\n[X, Y] = meshgrid(linspace(-4, 6, 200), linspace(-6, 4, 200));\nF = 0.5*(A(1,1)*X.^2 + 2*A(1,2)*X.*Y + A(2,2)*Y.^2) - b(1)*X - b(2)*Y;\n\nxs = zeros(2, 11);  xs(:,1) = [-2; -2];        % steepest descent\nfor k = 1:10\n    d = b - A*xs(:,k);                         % d = -r\n    xs(:,k+1) = xs(:,k) + (d'*d)/(d'*A*d)*d;\nend\n\nxc = zeros(2, 3);  xc(:,1) = [-2; -2];         % conjugate gradients\nr = A*xc(:,1) - b;  d = -r;\nfor k = 1:2\n    alpha = -(d'*r)/(d'*A*d);\n    xc(:,k+1) = xc(:,k) + alpha*d;\n    rnew = A*xc(:,k+1) - b;\n    beta = (rnew'*A*d)/(d'*A*d);\n    d = -rnew + beta*d;  r = rnew;\nend"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-steepest-descent-vs-cg-1",
+    "href": "chap-three.html#matlab-demo-steepest-descent-vs-cg-1",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: steepest descent vs CG",
+    "text": "MATLAB demo: steepest descent vs CG\nfigure\ncontour(X, Y, F, 30), hold on\nplot(xs(1,:), xs(2,:), 'o-', 'LineWidth', 2.5, 'MarkerSize', 8)\nplot(xc(1,:), xc(2,:), 's-', 'LineWidth', 2.5, 'MarkerSize', 8), hold off\nlegend('contours of f', 'steepest descent', 'conjugate gradients', 'Location', 'northwest')\nxlabel('x_1'), ylabel('x_2'), axis equal, set(gca, 'FontSize', 18)"
+  },
+  {
+    "objectID": "chap-three.html#matlab-demo-cg-for-a-large-sparse-system",
+    "href": "chap-three.html#matlab-demo-cg-for-a-large-sparse-system",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "MATLAB demo: CG for a large sparse system",
+    "text": "MATLAB demo: CG for a large sparse system\nA = gallery('poisson', 100);       % sparse SPD matrix, 10^4-by-10^4, at most 5 non-zeros per row\nfigure\nspy(A(1:500, 1:500))\ntitle('Sparsity pattern (first 500 rows and columns)'), set(gca, 'FontSize', 18)\n\nb = ones(size(A, 1), 1);\n[x, flag, relres, iter, resvec] = pcg(A, b, 1e-8, 1000);\nfigure\nsemilogy(0:length(resvec)-1, resvec/norm(b), 'LineWidth', 2.5)\nlegend('conjugate gradients', 'Location', 'northeast')\nxlabel('iteration k'), ylabel('relative residual'), set(gca, 'FontSize', 18), grid on\nfprintf('CG converged in %d iterations for n = %d unknowns\\n', iter, size(A, 1));"
+  },
+  {
+    "objectID": "chap-three.html#knowledge-checklist",
+    "href": "chap-three.html#knowledge-checklist",
+    "title": "Chapter 3: Linear Algebra",
+    "section": "Knowledge checklist",
+    "text": "Knowledge checklist\n\nDirect methods: triangular systems, Gaussian elimination, LU decomposition and partial pivoting, and their cost\nVector norms and induced matrix norms\nConditioning: the condition number and its effect on accuracy\nIterative methods for sparse SPD systems: steepest descent and conjugate gradients"
+  }
+]

@@ -11,7 +11,8 @@
     title.appendChild(link);
 
     // Add a "Slides" button if this chapter has a deck in slides/
-    var page = location.pathname.split("/").pop() || "index.html";
+    var page = location.pathname.split("/").pop();
+    if (!/^chap-/.test(page)) return;
     var slides = "slides/" + page;
     fetch(slides, { method: "HEAD" }).then(function (r) {
       if (!r.ok) return;
