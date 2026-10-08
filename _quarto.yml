@@ -2,6 +2,7 @@ project:
   # type: website
   type: book
   output-dir: docs
+  post-render: slides/render.py
 
 
 book:

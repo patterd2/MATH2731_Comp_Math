@@ -1,0 +1,32 @@
+# Lecture slides are a separate Quarto project from the book, so rendering
+# the book does not pick these up. Render from this folder with
+#   quarto render            (all decks)
+#   quarto preview chap-two.qmd
+# Output goes to docs/slides/ so it is deployed alongside the book.
+project:
+  output-dir: ../docs/slides
+
+format:
+  revealjs:
+    theme: [default, slides.scss]
+    slide-number: c/t
+    hash: true
+    center: false
+    width: 1280
+    height: 720
+    embed-resources: true
+    code-line-numbers: false
+    html-math-method: mathjax
+    include-before: |
+      <div hidden>
+      $$
+       \def\eb{\boldsymbol{e}}
+       \def\fb{\boldsymbol{f}}
+       \def\hb{\boldsymbol{h}}
+       \def\xb{\boldsymbol{x}}
+       \def\Rb{\boldsymbol{R}}
+       \def\Real{\mathbb{R}}
+       \def\bfzero{\boldsymbol{0}}
+       \newcommand{\ddy}[2]{\frac{\partial{#1}}{\partial{#2}}}
+      $$
+      </div>

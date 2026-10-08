@@ -17,6 +17,8 @@
   font-size: 0.9rem;
   text-decoration: none;
 
+  & + & { margin-left: 0.5rem; }
+
   &:hover {
     background-color: #fff;
     color: #68246D !important;

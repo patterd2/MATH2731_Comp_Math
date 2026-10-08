@@ -9,5 +9,18 @@
     link.setAttribute("download", "");
     link.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Download PDF';
     title.appendChild(link);
+
+    // Add a "Slides" button if this chapter has a deck in slides/
+    var page = location.pathname.split("/").pop() || "index.html";
+    var slides = "slides/" + page;
+    fetch(slides, { method: "HEAD" }).then(function (r) {
+      if (!r.ok) return;
+      var btn = document.createElement("a");
+      btn.href = slides;
+      btn.className = "pdf-download-btn";
+      btn.target = "_blank";
+      btn.innerHTML = '<i class="bi bi-file-earmark-slides"></i> Slides';
+      title.appendChild(btn);
+    }).catch(function () {});
   })();
 </script>

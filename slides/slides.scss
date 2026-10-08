@@ -1,0 +1,46 @@
+/*-- scss:defaults --*/
+
+$du-purple: #68246D;
+
+$presentation-heading-color: $du-purple;
+$link-color: $du-purple;
+$presentation-font-size-root: 32px;
+$presentation-h2-font-size: 1.4em;
+
+/*-- scss:rules --*/
+
+// Coloured boxes matching the custom-numbered-blocks in the book
+.thm, .defn, .alg, .eg {
+  border-left: 6px solid;
+  border-radius: 4px;
+  padding: 0.4em 0.8em;
+  margin: 0.5em 0;
+
+  > p:first-child { margin-top: 0; }
+  > p:last-child { margin-bottom: 0; }
+
+  .box-title {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.2em;
+  }
+}
+
+.thm, .defn { background: #fcebee; border-color: #ea3342; }
+.alg        { background: #e7efea; border-color: #53b57b; }
+.eg         { background: #E7D6EA; border-color: $du-purple; }
+
+// Title and section-divider slides in Durham purple
+.reveal .slides section#title-slide,
+.reveal .slides section.section-divider {
+  h1, h2, .subtitle, .author { color: $du-purple; }
+}
+
+.reveal .slide-number { color: $du-purple; }
+
+// MATLAB demos: as large as fits ~95-character lines across the slide
+.reveal div.sourceCode pre code {
+  font-size: 20px;
+  line-height: 1.35;
+  max-height: none;
+}
