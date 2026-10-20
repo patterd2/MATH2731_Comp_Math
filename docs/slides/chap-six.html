@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.31">
+
+  <title>Chapter 6: Further Topics</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-af6796f82be533b77039feb0be94d88f.css">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+<div hidden="">
+$$
+ \def\eb{\boldsymbol{e}}
+ \def\fb{\boldsymbol{f}}
+ \def\hb{\boldsymbol{h}}
+ \def\xb{\boldsymbol{x}}
+ \def\Rb{\boldsymbol{R}}
+ \def\Real{\mathbb{R}}
+ \def\bfzero{\boldsymbol{0}}
+ \newcommand{\ddy}[2]{\frac{\partial{#1}}{\partial{#2}}}
+$$
+</div>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Chapter 6: Further Topics</h1>
+  <p class="subtitle">MATH2731 Computational Mathematics II</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="two-further-topics" class="slide level2">
+<h2>Two further topics</h2>
+<ul>
+<li><strong>Partial differential equations:</strong> the method of lines turns a PDE into a large system of ODEs</li>
+<li><strong>Monte Carlo methods:</strong> random numbers, error bars, the curse of dimensionality, variance reduction</li>
+</ul>
+<p>The two meet at the end: random walkers solve the heat equation.</p>
+</section>
+<section>
+<section id="partial-differential-equations" class="title-slide slide level1 center">
+<h1>Partial Differential Equations</h1>
+
+</section>
+<section id="how-can-we-solve-pdes-numerically" class="slide level2">
+<h2>How can we solve PDEs numerically?</h2>
+<ul>
+<li>Many PDEs can be reduced to large systems of ODEs: the <strong>method of lines</strong></li>
+<li>Then use any timestepping method from Chapter 5</li>
+<li>We illustrate with the simplest example: the 1D heat equation</li>
+<li>A vast field: computational fluid dynamics, numerical relativity, finite elements, … (and <a href="https://VisualPDE.com">VisualPDE.com</a>)</li>
+</ul>
+</section>
+<section id="the-heat-equation" class="slide level2">
+<h2>The heat equation</h2>
+<p><span class="math display">\[
+\frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}, \quad x \in [0,L], \quad t &gt; 0, \qquad \alpha &gt; 0
+\]</span></p>
+<ul>
+<li><strong>Initial condition:</strong> <span class="math inline">\(u(x,0) = u_0(x)\)</span></li>
+<li>Homogeneous <strong>Neumann boundary conditions:</strong> <span class="math display">\[
+\frac{\partial u}{\partial x}(0,t) = \frac{\partial u}{\partial x}(L,t) = 0
+\]</span></li>
+<li>Physically: an insulated rod, with no heat flowing in or out</li>
+</ul>
+</section>
+<section id="spatial-discretisation" class="slide level2">
+<h2>Spatial discretisation</h2>
+<p>Uniform grid of <span class="math inline">\(N\)</span> nodes: <span class="math display">\[
+x_j = (j-1) \Delta x, \quad j = 1, \dots, N, \quad \Delta x = \frac{L}{N-1}, \qquad u_j(t) \approx u(x_j, t)
+\]</span></p>
+<p>so <span class="math inline">\(x_1 = 0\)</span> and <span class="math inline">\(x_N = L\)</span>. Centred difference (Chapter 4): <span class="math display">\[
+\frac{\partial^2 u}{\partial x^2}(x_j,t) \approx \frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}
+\]</span></p>
+</section>
+<section id="ghost-nodes" class="slide level2">
+<h2>Ghost nodes</h2>
+<ul>
+<li>At <span class="math inline">\(j = 1\)</span> and <span class="math inline">\(j = N\)</span> the stencil needs <span class="math inline">\(u_0\)</span> and <span class="math inline">\(u_{N+1}\)</span></li>
+<li>Introduce <strong>ghost nodes</strong> <span class="math inline">\(x_0 = -\Delta x\)</span> and <span class="math inline">\(x_{N+1} = L + \Delta x\)</span> outside the domain</li>
+<li>Fix their values with the boundary conditions: <span class="math display">\[
+\frac{u_1 - u_0}{\Delta x} = 0 \;\implies\; u_0 = u_1, \qquad
+\frac{u_{N+1} - u_{N}}{\Delta x} = 0 \;\implies\; u_{N+1} = u_{N}
+\]</span></li>
+</ul>
+</section>
+<section id="the-method-of-lines" class="slide level2">
+<h2>The method of lines</h2>
+<p><span class="math display">\[
+\frac{d u_j}{dt} = \alpha\frac{u_{j-1} - 2u_j + u_{j+1}}{(\Delta x)^2}, \quad j = 1,\dots, N, \qquad u_0=u_1, \;\; u_{N+1} = u_N
+\]</span></p>
+<div class="fragment">
+<p>For <span class="math inline">\(\mathbf{u}(t) = (u_1(t), \dots, u_N(t))^\top\)</span>: <span class="math inline">\(\;\dfrac{d\mathbf{u}}{dt} = \alpha \mathbf{A} \mathbf{u}\)</span>, with the <span class="math inline">\(N\times N\)</span> matrix <span class="math display">\[
+\mathbf{A} = \frac{1}{(\Delta x)^2}
+\begin{pmatrix}
+-1 &amp; 1 &amp; &amp; &amp; \\
+1 &amp; -2 &amp; 1 &amp; &amp; \\
+&amp; \ddots &amp; \ddots &amp; \ddots &amp; \\
+&amp; &amp; 1 &amp; -2 &amp; 1\\
+&amp; &amp; &amp; 1 &amp; -1
+\end{pmatrix}
+\]</span> the discrete Laplacian with Neumann boundary conditions.</p>
+</div>
+</section>
+<section id="forward-euler" class="slide level2">
+<h2>Forward Euler</h2>
+<p><span class="math display">\[
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_n
+\]</span></p>
+<ul>
+<li>Simple and explicit, but stability requires <span class="math display">\[
+\Delta t \leq \frac{(\Delta x)^2}{2\alpha}
+\]</span></li>
+<li>Violating this gives rapidly growing, unphysical oscillations</li>
+</ul>
+<div class="fragment">
+<p>Why? The eigenvalues of <span class="math inline">\(\alpha\mathbf{A}\)</span> lie in <span class="math inline">\(\big[-4\alpha/(\Delta x)^2,\, 0\big]\)</span>, and forward Euler applied to <span class="math inline">\(\dot u = \lambda u\)</span> needs <span class="math inline">\(-2 \le \Delta t\lambda \le 0\)</span> (Chapter 5).</p>
+<p>Halving <span class="math inline">\(\Delta x\)</span> forces <span class="math inline">\(\Delta t\)</span> to shrink by a factor of <span class="math inline">\(4\)</span>!</p>
+</div>
+</section>
+<section id="backward-euler" class="slide level2">
+<h2>Backward Euler</h2>
+<p><span class="math display">\[
+\mathbf{u}_{n+1} = \mathbf{u}_n + \Delta t \, \alpha \mathbf{A} \mathbf{u}_{n+1}
+\quad\iff\quad
+(\mathbf{I} - \Delta t \,\alpha \mathbf{A})\,\mathbf{u}_{n+1} = \mathbf{u}_n
+\]</span></p>
+<ul>
+<li>Implicit: a (tridiagonal) linear system at each step (Chapter 3)</li>
+<li>A-stable, so <strong>unconditionally stable</strong> for the heat equation</li>
+<li>Any <span class="math inline">\(\Delta t\)</span> is stable, but accuracy may still require small <span class="math inline">\(\Delta t\)</span></li>
+</ul>
+</section>
+<section id="summary-method-of-lines" class="slide level2">
+<h2>Summary: method of lines</h2>
+<ul>
+<li>Discretise in space only: PDE <span class="math inline">\(\to\)</span> large ODE system</li>
+<li>Integrate in time with any method from Chapter 5</li>
+<li>Stability and accuracy depend on <strong>both</strong> the spatial discretisation and the time integrator</li>
+<li>Code demos on Blackboard: the heat equation (matrix and for-loop versions) and the Schnakenberg reaction-diffusion system</li>
+</ul>
+</section></section>
+<section>
+<section id="monte-carlo-methods" class="title-slide slide level1 center">
+<h1>Monte Carlo Methods</h1>
+
+</section>
+<section id="how-can-random-numbers-compute-things-that-are-not-random" class="slide level2">
+<h2>How can random numbers compute things that are not random?</h2>
+<ul>
+<li>Many quantities are <strong>averages</strong>: expected payoffs, mean energies, failure probabilities</li>
+<li>Each is an integral, often in <strong>very high dimension</strong></li>
+<li><strong>Monte Carlo:</strong> average the integrand at random points</li>
+<li>Ulam, von Neumann and Metropolis, Los Alamos, 1940s</li>
+</ul>
+<div class="fragment">
+<p>Plan:</p>
+<ol type="1">
+<li>How do computers produce random numbers?</li>
+<li>How do we get an estimate with an error bar?</li>
+<li>Why is this crude method the method of choice in high dimensions?</li>
+</ol>
+</div>
+</section>
+<section id="pseudorandom-numbers" class="slide level2">
+<h2>Pseudorandom numbers</h2>
+<p>Computers are deterministic, so they produce <strong>pseudorandom</strong> numbers: <span class="math display">\[
+s_{i+1} = g(s_i), \qquad u_i = h(s_i) \in (0,1)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(s_i\)</span>: internal <strong>state</strong>; <span class="math inline">\(s_0\)</span>: the <strong>seed</strong></li>
+<li>Finitely many states <span class="math inline">\(\implies\)</span> the sequence eventually repeats: the <strong>period</strong></li>
+<li>Determinism is a feature: same seed <span class="math inline">\(\implies\)</span> same numbers (<code>rng(1)</code> in Chapter 4)</li>
+</ul>
+</section>
+<section id="what-should-we-ask-for" class="slide level2">
+<h2>What should we ask for?</h2>
+<ul>
+<li>Each <span class="math inline">\(u_i\)</span> uniformly distributed on <span class="math inline">\([0,1]\)</span>: the <em>easy</em> part
+<ul>
+<li><span class="math inline">\(0.01, 0.02, \ldots, 0.99\)</span> has a perfect histogram, but is not random at all!</li>
+</ul></li>
+<li><strong>Independence:</strong> <span class="math inline">\(u_1, \ldots, u_{i-1}\)</span> tell us nothing about <span class="math inline">\(u_i\)</span>
+<ul>
+<li>pairs <span class="math inline">\((u_i, u_{i+1})\)</span> fill the unit square uniformly</li>
+<li>triples <span class="math inline">\((u_i, u_{i+1}, u_{i+2})\)</span> fill the unit cube uniformly, …</li>
+</ul></li>
+</ul>
+</section>
+<section id="linear-congruential-generators" class="slide level2">
+<h2>Linear congruential generators</h2>
+<div class="defn">
+<p><span class="box-title">Linear congruential generator (LCG)</span> <span class="math display">\[
+x_{i+1} = (a x_i + c) \bmod m, \qquad u_{i+1} = \frac{x_{i+1}}{m},
+\]</span> with integers <span class="math inline">\(a\)</span> (multiplier), <span class="math inline">\(c\)</span> (increment) and <span class="math inline">\(m\)</span> (modulus).</p>
+</div>
+<div class="fragment">
+<div class="eg">
+<p><span class="box-title"><span class="math inline">\(a=6\)</span>, <span class="math inline">\(c=0\)</span>, <span class="math inline">\(m=11\)</span>, seed <span class="math inline">\(x_0 = 1\)</span></span> <span class="math display">\[
+1, 6, 3, 7, 9, 10, 5, 8, 4, 2, 1, 6, \ldots \qquad \text{(period 10)}
+\]</span> With <span class="math inline">\(a=3\)</span>: <span class="math inline">\(\; 1, 3, 9, 5, 4, 1, \ldots \;\)</span> (period only <span class="math inline">\(5\)</span>).</p>
+</div>
+</div>
+<ul>
+<li>Period at most <span class="math inline">\(m\)</span>; number theory says how to achieve it. But a long period is not enough…</li>
+</ul>
+</section>
+<section id="randu" class="slide level2">
+<h2>RANDU</h2>
+<p><span class="math inline">\(a = 65539 = 2^{16}+3\)</span>, <span class="math inline">\(\; c=0\)</span>, <span class="math inline">\(\; m=2^{31}\)</span>: supplied with IBM mainframes in the 1960s</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../im/randu.png" class="quarto-figure quarto-figure-center" height="400"></p>
+</figure>
+</div>
+<p>All triples <span class="math inline">\((u_i, u_{i+1}, u_{i+2})\)</span> lie on just <span class="math inline">\(15\)</span> planes!</p>
+</section>
+<section id="why-15-planes" class="slide level2">
+<h2>Why 15 planes?</h2>
+<p><span class="math display">\[
+a^2 = 2^{32} + 6\cdot 2^{16} + 9 = 2^{32} + 6a - 9
+\]</span></p>
+<div class="fragment">
+<p>Since <span class="math inline">\(2^{32}\)</span> is a multiple of <span class="math inline">\(2^{31}\)</span>: <span class="math display">\[
+x_{i+2} = a^2 x_i \bmod 2^{31} = (6 a x_i - 9 x_i) \bmod 2^{31} = (6x_{i+1} - 9x_i) \bmod 2^{31}
+\]</span></p>
+</div>
+<div class="fragment">
+<p>So <span class="math inline">\(9x_i - 6x_{i+1} + x_{i+2}\)</span> is a multiple of <span class="math inline">\(2^{31}\)</span>: <span class="math display">\[
+9u_i - 6u_{i+1} + u_{i+2} = k \in \mathbb{Z}
+\]</span></p>
+</div>
+<div class="fragment">
+<p>LHS <span class="math inline">\(\in(-6, 10)\)</span>, so <span class="math inline">\(k \in \{-5, \ldots, 9\}\)</span>: <strong>15 planes</strong>.</p>
+</div>
+</section>
+<section id="matlab-demo-randu" class="slide level2">
+<h2>MATLAB demo: RANDU</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode matlab code-with-copy"><code class="sourceCode matlab"><span id="cb1-1"><a aria-hidden="true" tabindex="-1"></a><span class="va">n</span> <span class="op">=</span> <span class="fl">3e4</span><span class="op">;</span></span>
+<span id="cb1-2"><a aria-hidden="true" tabindex="-1"></a><span class="va">x</span> <span class="op">=</span> <span class="va">zeros</span>(<span class="va">n</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span>  <span class="va">x</span>(<span class="fl">1</span>) <span class="op">=</span> <span class="fl">1</span><span class="op">;</span>              <span class="co">% seed</span></span>
+<span id="cb1-3"><a aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> <span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">-</span><span class="fl">1</span></span>
+<span id="cb1-4"><a aria-hidden="true" tabindex="-1"></a>    <span class="va">x</span>(<span class="va">i</span><span class="op">+</span><span class="fl">1</span>) <span class="op">=</span> <span class="va">mod</span>(<span class="fl">65539</span><span class="op">*</span><span class="va">x</span>(<span class="va">i</span>)<span class="op">,</span> <span class="fl">2</span><span class="op">^</span><span class="fl">31</span>)<span class="op">;</span>      <span class="co">% exact: 65539*x(i) &lt; 2^53 (Chapter 1)</span></span>
+<span id="cb1-5"><a aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb1-6"><a aria-hidden="true" tabindex="-1"></a><span class="va">u</span> <span class="op">=</span> <span class="va">x</span><span class="op">/</span><span class="fl">2</span><span class="op">^</span><span class="fl">31</span><span class="op">;</span></span>
+<span id="cb1-7"><a aria-hidden="true" tabindex="-1"></a><span class="va">plot3</span>(<span class="va">u</span>(<span class="fl">1</span><span class="op">:</span><span class="kw">end</span><span class="op">-</span><span class="fl">2</span>)<span class="op">,</span> <span class="va">u</span>(<span class="fl">2</span><span class="op">:</span><span class="kw">end</span><span class="op">-</span><span class="fl">1</span>)<span class="op">,</span> <span class="va">u</span>(<span class="fl">3</span><span class="op">:</span><span class="kw">end</span>)<span class="op">,</span> <span class="ss">'.'</span><span class="op">,</span> <span class="ss">'MarkerSize'</span><span class="op">,</span> <span class="fl">2</span>)</span>
+<span id="cb1-8"><a aria-hidden="true" tabindex="-1"></a><span class="va">view</span>([<span class="fl">2</span> <span class="fl">3</span> <span class="fl">0</span>])                            <span class="co">% look along the planes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Every LCG has this defect (Marsaglia, 1968): <span class="math inline">\(d\)</span>-tuples lie on at most <span class="math inline">\((d!\,m)^{1/d}\)</span> hyperplanes</li>
+</ul>
+</section>
+<section id="modern-generators" class="slide level2">
+<h2>Modern generators</h2>
+<ul>
+<li>MATLAB default: <strong>Mersenne Twister</strong>, period <span class="math inline">\(2^{19937}-1\)</span>, equidistributed in up to <span class="math inline">\(623\)</span> dimensions</li>
+<li>PCG (NumPy), xoshiro (Julia)</li>
+<li>GPUs: <strong>counter-based</strong> generators such as Philox, <span class="math inline">\(u_i = h(\text{key}, i)\)</span>, so each core jumps straight to its own part of the sequence</li>
+</ul>
+<div class="fragment">
+<p>Practical lessons:</p>
+<ul>
+<li>Never write your own generator</li>
+<li>Always record your seed</li>
+<li>Parallel computations need independent streams</li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="testing-generators" class="title-slide slide level1 center">
+<h1>Testing Generators</h1>
+
+</section>
+<section id="hypothesis-testing" class="slide level2">
+<h2>Hypothesis testing</h2>
+<blockquote>
+<p><span class="math inline">\(H_0\)</span>: <span class="math inline">\(u_1, \ldots, u_n\)</span> are independent samples from the uniform distribution on <span class="math inline">\([0,1]\)</span></p>
+</blockquote>
+<ul>
+<li>A test can never show that <span class="math inline">\(H_0\)</span> is true (the numbers are not random!)</li>
+<li>Failing a test reveals a detectable non-random pattern</li>
+</ul>
+<div class="defn">
+<p><span class="box-title">Chi-squared distribution</span> If <span class="math inline">\(Z_1, \ldots, Z_\nu\)</span> are independent standard normal random variables, then <span class="math inline">\(Z_1^2 + \cdots + Z_\nu^2\)</span> has the <strong>chi-squared distribution</strong> with <span class="math inline">\(\nu\)</span> degrees of freedom, <span class="math inline">\(\chi^2_\nu\)</span>.</p>
+</div>
+</section>
+<section id="the-chi-squared-test-statistic" class="slide level2">
+<h2>The chi-squared test statistic</h2>
+<ul>
+<li>Partition <span class="math inline">\([0,1]\)</span> into <span class="math inline">\(k\)</span> equal bins <span class="math inline">\([0,\tfrac1k), \ldots, [\tfrac{k-1}{k},1]\)</span></li>
+<li><span class="math inline">\(n_j\)</span> = number of samples in bin <span class="math inline">\(j\)</span>; expected count <span class="math inline">\(n/k\)</span> under <span class="math inline">\(H_0\)</span></li>
+</ul>
+<p><span class="math display">\[
+T = \sum_{j=1}^k \frac{(n_j - n/k)^2}{n/k} = \frac{k}{n}\sum_{j=1}^k \left(n_j - \frac{n}{k}\right)^2
+\]</span></p>
+<div class="thm">
+<p>Under <span class="math inline">\(H_0\)</span>, <span class="math inline">\(T\)</span> converges in distribution to <span class="math inline">\(\chi^2_{k-1}\)</span> as <span class="math inline">\(n\to\infty\)</span>.</p>
+</div>
+<div class="fragment">
+<p>Intuition: <span class="math inline">\(n_j \approx\)</span> normal with mean and variance <span class="math inline">\(\approx n/k\)</span>, so each term <span class="math inline">\(\approx Z^2\)</span>. The constraint <span class="math inline">\(n_1 + \cdots + n_k = n\)</span> removes one degree of freedom.</p>
+</div>
+</section>
+<section id="carrying-out-the-test" class="slide level2">
+<h2>Carrying out the test</h2>
+<ul>
+<li>Choose a <strong>significance level</strong> <span class="math inline">\(\alpha\)</span>, typically <span class="math inline">\(0.05\)</span></li>
+<li>Critical value <span class="math inline">\(c\)</span>: the <span class="math inline">\((1-\alpha)\)</span>-quantile of <span class="math inline">\(\chi^2_{k-1}\)</span>, <code>chi2inv(1 - alpha, k - 1)</code></li>
+<li><span class="math inline">\(T &gt; c\)</span>: reject <span class="math inline">\(H_0\)</span>, the sample <strong>fails</strong>; otherwise it <strong>passes</strong></li>
+<li>If <span class="math inline">\(H_0\)</span> is true, the sample wrongly fails with probability <span class="math inline">\(\approx \alpha\)</span></li>
+<li>Need expected counts <span class="math inline">\(n/k \gtrsim 5\)</span></li>
+</ul>
+</section>
+<section id="example-ten-bins" class="slide level2">
+<h2>Example: ten bins</h2>
+<div class="eg">
+<p><span class="box-title"><span class="math inline">\(n = 1000\)</span> numbers, <span class="math inline">\(k = 10\)</span> bins, expected count <span class="math inline">\(100\)</span></span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Bin <span class="math inline">\(j\)</span></th>
+<th style="text-align: left;">1</th>
+<th style="text-align: left;">2</th>
+<th style="text-align: left;">3</th>
+<th style="text-align: left;">4</th>
+<th style="text-align: left;">5</th>
+<th style="text-align: left;">6</th>
+<th style="text-align: left;">7</th>
+<th style="text-align: left;">8</th>
+<th style="text-align: left;">9</th>
+<th style="text-align: left;">10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(n_j\)</span></td>
+<td style="text-align: left;">98</td>
+<td style="text-align: left;">104</td>
+<td style="text-align: left;">112</td>
+<td style="text-align: left;">107</td>
+<td style="text-align: left;">94</td>
+<td style="text-align: left;">95</td>
+<td style="text-align: left;">108</td>
+<td style="text-align: left;">97</td>
+<td style="text-align: left;">96</td>
+<td style="text-align: left;">89</td>
+</tr>
+</tbody>
+</table>
+<div class="fragment">
+<p><span class="math display">\[
+T = \frac{10}{1000}\left[(-2)^2 + 4^2 + 12^2 + 7^2 + (-6)^2 + (-5)^2 + 8^2 + (-3)^2 + (-4)^2 + (-11)^2\right] = 4.84
+\]</span></p>
+</div>
+<div class="fragment">
+<p><code>chi2inv(0.95, 9)</code> <span class="math inline">\(\approx 16.92\)</span>, and <span class="math inline">\(4.84 &lt; 16.92\)</span>: the sample <strong>passes</strong>.</p>
+</div>
+</div>
+</section>
+<section id="catching-randu" class="slide level2">
+<h2>Catching RANDU</h2>
+<div class="eg">
+<p><span class="box-title"><span class="math inline">\(n = 3\times 10^5\)</span> numbers from RANDU, seed <span class="math inline">\(x_0 = 1\)</span></span> <strong>Single values</strong>, <span class="math inline">\(k = 10\)</span> bins: <span class="math inline">\(T \approx 4.3 &lt; 16.92\)</span>. RANDU <strong>passes</strong>.</p>
+<div class="fragment">
+<p><strong>Triples</strong> <span class="math inline">\((u_1,u_2,u_3), (u_4,u_5,u_6), \ldots\)</span> in <span class="math inline">\(k^3 = 1000\)</span> cubes of side <span class="math inline">\(0.1\)</span>:</p>
+<ul>
+<li>expected count <span class="math inline">\(100\)</span> per cube, <span class="math inline">\(T \approx \chi^2_{999}\)</span>, critical value <span class="math inline">\(\approx 1074\)</span></li>
+<li>RANDU: counts from <span class="math inline">\(68\)</span> to <span class="math inline">\(145\)</span>, <span class="math inline">\(T \approx 1593\)</span>. RANDU <strong>fails</strong> decisively</li>
+<li>Mersenne Twister: <span class="math inline">\(T \approx 1043\)</span>, <strong>passes</strong></li>
+</ul>
+</div>
+</div>
+<div class="fragment">
+<p>Tests must probe <strong>independence</strong>, not just the histogram. Test suites (e.g.&nbsp;TestU01) apply hundreds of tests.</p>
+</div>
+</section></section>
+<section>
+<section id="sampling-from-other-distributions" class="title-slide slide level1 center">
+<h1>Sampling from Other Distributions</h1>
+
+</section>
+<section id="the-inverse-transform-method" class="slide level2">
+<h2>The inverse transform method</h2>
+<p>CDF <span class="math inline">\(F(x) = \mathbb{P}[X\le x]\)</span>; PDF <span class="math inline">\(f = F'\)</span>.</p>
+<div class="thm">
+<p><span class="box-title">Inverse transform method</span> Let <span class="math inline">\(U\)</span> be uniform on <span class="math inline">\([0,1]\)</span> and <span class="math inline">\(F\)</span> a continuous, strictly increasing CDF. Then <span class="math inline">\(X = F^{-1}(U)\)</span> has CDF <span class="math inline">\(F\)</span>.</p>
+</div>
+<div class="fragment">
+<p><strong>Proof.</strong> <span class="math inline">\(F\)</span> is increasing, so <span class="math inline">\(F^{-1}(U)\le x \iff U \le F(x)\)</span>. Hence <span class="math display">\[
+\mathbb{P}[X \le x] = \mathbb{P}[U \le F(x)] = F(x). \quad\blacksquare
+\]</span></p>
+</div>
+</section>
+<section id="examples" class="slide level2">
+<h2>Examples</h2>
+<div class="eg">
+<p><span class="box-title">Exponential distribution</span> <span class="math inline">\(F(x) = 1 - e^{-\lambda x}\)</span> for <span class="math inline">\(x \ge 0\)</span>, so <span class="math inline">\(F^{-1}(u) = -\log(1-u)/\lambda\)</span>.</p>
+<p><span class="math inline">\(1-U\)</span> is also uniform, so: <code>X = -log(rand(n, 1))/lambda</code></p>
+</div>
+<ul>
+<li><strong>Exercise:</strong> Pareto distribution, <span class="math inline">\(f(x) = \alpha x_m^\alpha/x^{\alpha+1}\)</span> for <span class="math inline">\(x\ge x_m\)</span>: show <span class="math inline">\(x_m (1-U)^{-1/\alpha}\)</span> works</li>
+<li>No closed-form <span class="math inline">\(F^{-1}\)</span>? E.g. <strong>Box–Muller:</strong> <span class="math inline">\(\sqrt{-2\log U_1}\cos(2\pi U_2)\)</span> and <span class="math inline">\(\sqrt{-2\log U_1}\sin(2\pi U_2)\)</span> are independent <span class="math inline">\(\mathcal{N}(0,1)\)</span></li>
+<li>In practice: built-in functions such as <code>randn</code></li>
+</ul>
+</section></section>
+<section>
+<section id="the-monte-carlo-estimator" class="title-slide slide level1 center">
+<h1>The Monte Carlo Estimator</h1>
+
+</section>
+<section id="estimating-pi" class="slide level2">
+<h2>Estimating <span class="math inline">\(\pi\)</span></h2>
+<p>Points uniform on <span class="math inline">\([-1,1]^2\)</span> land in the unit disc with probability <span class="math inline">\(\pi/4\)</span>:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../im/MC_circle.png" class="quarto-figure quarto-figure-center" height="330"></p>
+</figure>
+</div>
+<p><span class="math display">\[
+\pi = \int_{-1}^1 \int_{-1}^1 \mathbb{1}\{x^2+y^2\le 1\}\,dy\,dx \approx 4\times(\text{fraction of points in the disc})
+\]</span></p>
+</section>
+<section id="integrals-as-expectations" class="slide level2">
+<h2>Integrals as expectations</h2>
+<p><span class="math display">\[
+\mu = \mathbb{E}[A(X)] = \int_{\mathbb{R}^d} A(x) f(x)\,dx, \qquad X \text{ with PDF } f
+\]</span></p>
+<ul>
+<li><span class="math inline">\(U\)</span> uniform on <span class="math inline">\([0,1]^d\)</span> (<span class="math inline">\(f\equiv 1\)</span>): <span class="math display">\[
+\int_{[0,1]^d} g(x)\,dx = \mathbb{E}[g(U)]
+\]</span></li>
+<li><span class="math inline">\(U\)</span> uniform on <span class="math inline">\([a,b]\)</span> (<span class="math inline">\(f \equiv 1/(b-a)\)</span>): <span class="math display">\[
+\frac{1}{b-a}\int_a^b g(x)\,dx = \mathbb{E}[g(U)], \qquad U = a + (b-a)\,\texttt{rand}
+\]</span></li>
+</ul>
+</section>
+<section id="the-monte-carlo-estimator-1" class="slide level2">
+<h2>The Monte Carlo estimator</h2>
+<div class="defn">
+<p>For independent <span class="math inline">\(X_1, \ldots, X_n\)</span> distributed like <span class="math inline">\(X\)</span>, the <strong>Monte Carlo estimator</strong> of <span class="math inline">\(\mu = \mathbb{E}[A(X)]\)</span> is <span class="math display">\[
+\hat{\mu}_n = \frac{1}{n}\sum_{i=1}^n A(X_i).
+\]</span></p>
+</div>
+</section>
+<section id="properties-of-the-monte-carlo-estimator" class="slide level2">
+<h2>Properties of the Monte Carlo estimator</h2>
+<div class="thm">
+<p><span class="box-title">Properties of the Monte Carlo estimator</span> Suppose <span class="math inline">\(\mathbb{E}|A(X)| &lt; \infty\)</span>. Then:</p>
+<ol type="1">
+<li><strong>Unbiased:</strong> <span class="math inline">\(\mathbb{E}[\hat{\mu}_n] = \mu\)</span></li>
+<li><strong>Consistent:</strong> <span class="math inline">\(\hat{\mu}_n \to \mu\)</span> almost surely (strong law of large numbers)</li>
+<li>If <span class="math inline">\(\sigma^2 = \text{Var}[A(X)] &lt; \infty\)</span>: <span class="math inline">\(\text{Var}[\hat\mu_n] = \sigma^2/n\)</span> and (CLT) <span class="math display">\[
+\frac{\sqrt{n}}{\sigma}(\hat{\mu}_n-\mu) \to \mathcal{N}(0,1) \quad \text{in distribution}
+\]</span></li>
+</ol>
+</div>
+</section>
+<section id="error-bars" class="slide level2">
+<h2>Error bars</h2>
+<p><span class="math inline">\(z_{1-\alpha/2}\)</span>: the <span class="math inline">\((1-\alpha/2)\)</span>-quantile of <span class="math inline">\(\mathcal{N}(0,1)\)</span>, so <span class="math inline">\(\mathbb{P}[|Z| \le z_{1-\alpha/2}] = 1-\alpha\)</span>: <span class="math display">\[
+\mathbb{P}\left[ |\hat\mu_n - \mu| \le z_{1-\alpha/2}\frac{\sigma}{\sqrt{n}} \right] \approx 1-\alpha
+\]</span></p>
+<ul>
+<li><span class="math inline">\(z_{0.975} \approx 1.96\)</span> (<span class="math inline">\(95\%\)</span>), <span class="math inline">\(\; z_{0.995} \approx 2.576\)</span> (<span class="math inline">\(99\%\)</span>), <code>norminv(1 - alpha/2)</code></li>
+</ul>
+<div class="fragment">
+<p>Replace <span class="math inline">\(\sigma\)</span> by the sample standard deviation <span class="math inline">\(\hat\sigma_n\)</span> (<code>std</code>):</p>
+<ul>
+<li><strong>Standard error</strong> <span class="math inline">\(\hat\sigma_n/\sqrt{n}\)</span>: estimates the standard deviation of <span class="math inline">\(\hat\mu_n\)</span></li>
+<li>Approximate <span class="math inline">\(100(1-\alpha)\%\)</span> <strong>confidence interval:</strong> <span class="math inline">\(\;\hat\mu_n \pm z_{1-\alpha/2}\,\hat\sigma_n/\sqrt{n}\)</span></li>
+<li>Monte Carlo estimates its own error, for free</li>
+</ul>
+</div>
+</section>
+<section id="example-a-one-dimensional-integral" class="slide level2">
+<h2>Example: a one-dimensional integral</h2>
+<div class="eg">
+<p><span class="box-title"><span class="math inline">\(\mu = \mathbb{E}[U^2] = \int_0^1 x^2\,dx = \tfrac13\)</span></span> <span class="math inline">\(\sigma^2 = \mathbb{E}[U^4] - \mu^2 = \tfrac15 - \tfrac19 = \tfrac{4}{45}\)</span>: the <span class="math inline">\(95\%\)</span> half-width is <span class="math inline">\(\approx 0.58/\sqrt{n}\)</span>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode matlab code-with-copy"><code class="sourceCode matlab"><span id="cb2-1"><a aria-hidden="true" tabindex="-1"></a><span class="va">n</span> <span class="op">=</span> <span class="fl">1e4</span><span class="op">;</span></span>
+<span id="cb2-2"><a aria-hidden="true" tabindex="-1"></a><span class="va">gU</span> <span class="op">=</span> <span class="va">rand</span>(<span class="va">n</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">.^</span><span class="fl">2</span><span class="op">;</span>                      <span class="co">% samples of A(U) = U^2</span></span>
+<span id="cb2-3"><a aria-hidden="true" tabindex="-1"></a><span class="va">muHat</span> <span class="op">=</span> <span class="va">mean</span>(<span class="va">gU</span>)<span class="op">;</span></span>
+<span id="cb2-4"><a aria-hidden="true" tabindex="-1"></a><span class="va">SE</span> <span class="op">=</span> <span class="va">std</span>(<span class="va">gU</span>)<span class="op">/</span><span class="va">sqrt</span>(<span class="va">n</span>)<span class="op">;</span>                    <span class="co">% standard error</span></span>
+<span id="cb2-5"><a aria-hidden="true" tabindex="-1"></a><span class="va">fprintf</span>(<span class="ss">'%.4f +/- %.4f\n'</span><span class="op">,</span> <span class="va">muHat</span><span class="op">,</span> <span class="fl">1.96</span><span class="op">*</span><span class="va">SE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="fragment">
+<ul>
+<li>Error <span class="math inline">\(\sim n^{-1/2}\)</span>: one more digit costs <span class="math inline">\(100\times\)</span> more samples</li>
+<li><span class="math inline">\(n = 10^4\)</span>: error <span class="math inline">\(\approx 6\times 10^{-3}\)</span>; composite trapezium with <span class="math inline">\(10^4\)</span> points: <span class="math inline">\(\approx 2\times10^{-9}\)</span></li>
+<li>In one dimension, Monte Carlo is <strong>terrible</strong>!</li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="the-curse-of-dimensionality" class="title-slide slide level1 center">
+<h1>The Curse of Dimensionality</h1>
+
+</section>
+<section id="grids-in-d-dimensions" class="slide level2">
+<h2>Grids in <span class="math inline">\(d\)</span> dimensions</h2>
+<p><span class="math display">\[
+I = \int_{[0,1]^d} g(x)\,dx
+\]</span></p>
+<ul>
+<li><strong>Tensor-product</strong> rule: <span class="math inline">\(m\)</span> points per direction, <span class="math inline">\(n = m^d\)</span> points, error <span class="math inline">\(O(m^{-2})\)</span> for trapezium</li>
+</ul>
+<div class="fragment">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: left;">Error with <span class="math inline">\(n\)</span> evaluations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Trapezium</td>
+<td style="text-align: left;"><span class="math inline">\(O(n^{-2/d})\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Simpson</td>
+<td style="text-align: left;"><span class="math inline">\(O(n^{-4/d})\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Monte Carlo</td>
+<td style="text-align: left;"><span class="math inline">\(O(n^{-1/2})\)</span>, <strong>independent of <span class="math inline">\(d\)</span></strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="fragment">
+<ul>
+<li>Monte Carlo wins for <span class="math inline">\(d &gt; 4\)</span> (trapezium) and <span class="math inline">\(d &gt; 8\)</span> (Simpson)</li>
+<li>Even <span class="math inline">\(2\)</span> points per direction: <span class="math inline">\(2^{100} \approx 10^{30}\)</span> evaluations for <span class="math inline">\(d = 100\)</span></li>
+</ul>
+</div>
+</section>
+<section id="example-gx-e-x2-on-01d" class="slide level2">
+<h2>Example: <span class="math inline">\(g(x) = e^{-|x|^2}\)</span> on <span class="math inline">\([0,1]^d\)</span></h2>
+<p>Exact: <span class="math inline">\(I_d = \big(\int_0^1 e^{-s^2}\,ds\big)^d = \big(\tfrac{\sqrt\pi}{2}\,\text{erf}(1)\big)^d\)</span></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode matlab code-with-copy"><code class="sourceCode matlab"><span id="cb3-1"><a aria-hidden="true" tabindex="-1"></a><span class="va">d</span> <span class="op">=</span> <span class="fl">10</span><span class="op">;</span>  <span class="va">n</span> <span class="op">=</span> <span class="fl">1e6</span><span class="op">;</span></span>
+<span id="cb3-2"><a aria-hidden="true" tabindex="-1"></a><span class="va">gX</span> <span class="op">=</span> <span class="va">exp</span>(<span class="op">-</span><span class="va">sum</span>(<span class="va">rand</span>(<span class="va">n</span><span class="op">,</span> <span class="va">d</span>)<span class="op">.^</span><span class="fl">2</span><span class="op">,</span> <span class="fl">2</span>))<span class="op">;</span>        <span class="co">% g at n uniform points in [0,1]^d</span></span>
+<span id="cb3-3"><a aria-hidden="true" tabindex="-1"></a><span class="va">muHat</span> <span class="op">=</span> <span class="va">mean</span>(<span class="va">gX</span>)<span class="op">;</span>  <span class="va">SE</span> <span class="op">=</span> <span class="va">std</span>(<span class="va">gX</span>)<span class="op">/</span><span class="va">sqrt</span>(<span class="va">n</span>)<span class="op">;</span></span>
+<span id="cb3-4"><a aria-hidden="true" tabindex="-1"></a><span class="va">Iexact</span> <span class="op">=</span> (<span class="va">sqrt</span>(<span class="va">pi</span>)<span class="op">/</span><span class="fl">2</span><span class="op">*</span><span class="va">erf</span>(<span class="fl">1</span>))<span class="op">^</span><span class="va">d</span><span class="op">;</span></span>
+<span id="cb3-5"><a aria-hidden="true" tabindex="-1"></a><span class="va">fprintf</span>(<span class="ss">'%.6f +/- %.6f (exact %.6f)\n'</span><span class="op">,</span> <span class="va">muHat</span><span class="op">,</span> <span class="fl">1.96</span><span class="op">*</span><span class="va">SE</span><span class="op">,</span> <span class="va">Iexact</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The same few lines work in any dimension.</p>
+</section>
+<section id="monte-carlo-vs-trapezium" class="slide level2">
+<h2>Monte Carlo vs trapezium</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../im/mc_dimension.png" class="quarto-figure quarto-figure-center" height="330"></p>
+</figure>
+</div>
+<ul>
+<li><span class="math inline">\(d=1\)</span>: trapezium wins by many orders of magnitude</li>
+<li><span class="math inline">\(d=4\)</span>: comparable</li>
+<li><span class="math inline">\(d=10\)</span>: trapezium with <span class="math inline">\(3^{10} = 59049\)</span> points has error <span class="math inline">\(10^{-2}\)</span>; <span class="math inline">\(10^6\)</span> Monte Carlo samples give <span class="math inline">\(\sim 10^{-4}\)</span>, with an error bar</li>
+</ul>
+</section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<p><strong>Monte Carlo is a poor method in one dimension and often the only practical method in a hundred.</strong></p>
+<p>High-dimensional integrals are everywhere:</p>
+<ul>
+<li><strong>Statistical physics:</strong> averages over configurations of <span class="math inline">\(N\)</span> spins (Ising model), via Markov chain Monte Carlo</li>
+<li><strong>Finance:</strong> options on baskets of many assets</li>
+<li><strong>Bayesian statistics:</strong> posterior means over all parameters</li>
+<li><strong>Computer graphics:</strong> path tracing in animated films; grainy renders show the <span class="math inline">\(n^{-1/2}\)</span> error</li>
+</ul>
+</section></section>
+<section>
+<section id="variance-reduction" class="title-slide slide level1 center">
+<h1>Variance Reduction</h1>
+
+</section>
+<section id="rare-events" class="slide level2">
+<h2>Rare events</h2>
+<p>The rate <span class="math inline">\(n^{-1/2}\)</span> is fixed, but the constant <span class="math inline">\(\sigma\)</span> is not.</p>
+<div class="eg">
+<p><span class="box-title"><span class="math inline">\(p = \mathbb{P}[Z &gt; 4] \approx 3.17\times 10^{-5}\)</span>, <span class="math inline">\(\; Z\sim\mathcal{N}(0,1)\)</span></span> Plain Monte Carlo averages <span class="math inline">\(A(Z) = \mathbb{1}\{Z &gt; 4\}\)</span>, with <span class="math inline">\(\sigma^2 = p(1-p)\)</span>. Relative error: <span class="math display">\[
+\frac{\sigma}{p\sqrt{n}} \approx \frac{1}{\sqrt{pn}}
+\]</span></p>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(n = 10^4\)</span>: we expect <em>fewer than one</em> sample above <span class="math inline">\(4\)</span></li>
+<li><span class="math inline">\(10\%\)</span> relative accuracy needs <span class="math inline">\(n \approx 100/p \approx 3\times 10^6\)</span></li>
+<li>Almost every sample lands where <span class="math inline">\(A = 0\)</span> and is wasted</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="importance-sampling" class="slide level2">
+<h2>Importance sampling</h2>
+<p>Sample from a different density <span class="math inline">\(g\)</span> that puts more samples where they matter, then correct with a <strong>weight</strong>:</p>
+<p><span class="math display">\[
+\mu = \int A(x) f(x)\,dx = \int A(x)\frac{f(x)}{g(x)}\, g(x)\,dx = \mathbb{E}\big[A(Y)\,w(Y)\big], \qquad Y\sim g
+\]</span></p>
+<ul>
+<li><span class="math inline">\(w = f/g\)</span>: the <strong>likelihood ratio</strong></li>
+<li>Need <span class="math inline">\(g(x) &gt; 0\)</span> wherever <span class="math inline">\(A(x)f(x) \neq 0\)</span></li>
+</ul>
+</section>
+<section id="importance-sampling-theorem" class="slide level2">
+<h2>Importance sampling theorem</h2>
+<div class="thm">
+<p><span class="box-title">Importance sampling</span> For independent <span class="math inline">\(Y_1, \ldots, Y_n\)</span> with density <span class="math inline">\(g\)</span>, <span class="math display">\[
+\hat\mu_n^{\rm IS} = \frac{1}{n}\sum_{i=1}^n A(Y_i)\,w(Y_i)
+\]</span> is unbiased for <span class="math inline">\(\mu\)</span>, with variance <span class="math inline">\(\sigma_g^2/n\)</span>, where <span class="math display">\[
+\sigma_g^2 = \int \frac{A(x)^2 f(x)^2}{g(x)}\,dx - \mu^2.
+\]</span> If <span class="math inline">\(A \ge 0\)</span> and <span class="math inline">\(\mu &gt; 0\)</span>, then <span class="math inline">\(g^* = Af/\mu\)</span> gives <span class="math inline">\(\sigma_{g^*}^2 = 0\)</span>.</p>
+</div>
+</section>
+<section id="importance-sampling-proof" class="slide level2">
+<h2>Importance sampling: proof</h2>
+<p>Unbiased: by the identity on the previous slide.</p>
+<div class="fragment">
+<p>Variance: <span class="math display">\[
+\text{Var}[A(Y)w(Y)] = \mathbb{E}\big[A^2w^2\big] - \mu^2 = \int A^2\frac{f^2}{g^2}\,g\,dx - \mu^2 = \int \frac{A^2f^2}{g}\,dx - \mu^2
+\]</span> and averaging <span class="math inline">\(n\)</span> independent copies divides by <span class="math inline">\(n\)</span>.</p>
+</div>
+<div class="fragment">
+<p>Optimal <span class="math inline">\(g^*\)</span>: wherever <span class="math inline">\(A &gt; 0\)</span>, <span class="math inline">\(\; A^2f^2/g^* = \mu A f\)</span>, so <span class="math display">\[
+\sigma_{g^*}^2 = \mu\int Af\,dx - \mu^2 = 0. \quad\blacksquare
+\]</span></p>
+</div>
+</section>
+<section id="choosing-g" class="slide level2">
+<h2>Choosing <span class="math inline">\(g\)</span></h2>
+<ul>
+<li><span class="math inline">\(g^*\)</span> needs <span class="math inline">\(\mu\)</span>, so we can’t use it directly</li>
+<li>But it tells us what to aim for: <strong><span class="math inline">\(g \propto |A|f\)</span></strong>, concentrating samples where the integrand is large</li>
+<li>A poor <span class="math inline">\(g\)</span> (e.g.&nbsp;lighter tails than <span class="math inline">\(Af\)</span>) can make the variance much <em>larger</em>, or even infinite</li>
+</ul>
+</section>
+<section id="example-mathbbpz-4" class="slide level2">
+<h2>Example: <span class="math inline">\(\mathbb{P}[Z &gt; 4]\)</span></h2>
+<p>Shift the samples into the rare region: <span class="math inline">\(g = \mathcal{N}(4,1)\)</span>, so <span class="math display">\[
+w(y) = \frac{e^{-y^2/2}}{e^{-(y-4)^2/2}} = e^{8 - 4y}
+\]</span></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode matlab code-with-copy"><code class="sourceCode matlab"><span id="cb4-1"><a aria-hidden="true" tabindex="-1"></a><span class="va">rng</span>(<span class="fl">2</span>)</span>
+<span id="cb4-2"><a aria-hidden="true" tabindex="-1"></a><span class="va">n</span> <span class="op">=</span> <span class="fl">1e4</span><span class="op">;</span></span>
+<span id="cb4-3"><a aria-hidden="true" tabindex="-1"></a><span class="va">Z</span> <span class="op">=</span> <span class="va">randn</span>(<span class="va">n</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span>  <span class="va">A</span> <span class="op">=</span> (<span class="va">Z</span> <span class="op">&gt;</span> <span class="fl">4</span>)<span class="op">;</span>              <span class="co">% plain Monte Carlo</span></span>
+<span id="cb4-4"><a aria-hidden="true" tabindex="-1"></a><span class="va">Y</span> <span class="op">=</span> <span class="fl">4</span> <span class="op">+</span> <span class="va">randn</span>(<span class="va">n</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span>                        <span class="co">% samples from g = N(4,1)</span></span>
+<span id="cb4-5"><a aria-hidden="true" tabindex="-1"></a><span class="va">AW</span> <span class="op">=</span> (<span class="va">Y</span> <span class="op">&gt;</span> <span class="fl">4</span>)<span class="op">.*</span><span class="va">exp</span>(<span class="fl">8</span> <span class="op">-</span> <span class="fl">4</span><span class="op">*</span><span class="va">Y</span>)<span class="op">;</span>                 <span class="co">% A(Y) w(Y)</span></span>
+<span id="cb4-6"><a aria-hidden="true" tabindex="-1"></a><span class="va">fprintf</span>(<span class="ss">'plain: %.2e +/- %.1e\n'</span><span class="op">,</span> <span class="va">mean</span>(<span class="va">A</span>)<span class="op">,</span> <span class="fl">1.96</span><span class="op">*</span><span class="va">std</span>(<span class="va">A</span>)<span class="op">/</span><span class="va">sqrt</span>(<span class="va">n</span>))</span>
+<span id="cb4-7"><a aria-hidden="true" tabindex="-1"></a><span class="va">fprintf</span>(<span class="ss">'IS:    %.3e +/- %.1e\n'</span><span class="op">,</span> <span class="va">mean</span>(<span class="va">AW</span>)<span class="op">,</span> <span class="fl">1.96</span><span class="op">*</span><span class="va">std</span>(<span class="va">AW</span>)<span class="op">/</span><span class="va">sqrt</span>(<span class="va">n</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="fragment">
+<ul>
+<li>Plain: <span class="math inline">\((1.0 \pm 2.0)\times 10^{-4}\)</span>, from a single sample above <span class="math inline">\(4\)</span></li>
+<li>IS: <span class="math inline">\((3.23 \pm 0.13)\times 10^{-5}\)</span>; exact <span class="math inline">\(3.167\times 10^{-5}\)</span></li>
+<li>Variance <span class="math inline">\(\approx 7000\times\)</span> smaller</li>
+</ul>
+</div>
+</section>
+<section id="other-ways-to-beat-plain-monte-carlo" class="slide level2">
+<h2>Other ways to beat plain Monte Carlo</h2>
+<ul>
+<li><strong>Control variates:</strong> subtract a correlated quantity with known mean</li>
+<li><strong>Antithetic variables:</strong> pair each <span class="math inline">\(U\)</span> with <span class="math inline">\(1-U\)</span></li>
+<li><strong>Quasi-Monte Carlo:</strong> low-discrepancy sequences (<code>sobolset</code>), errors close to <span class="math inline">\(O(n^{-1})\)</span> for smooth integrands</li>
+</ul>
+</section></section>
+<section>
+<section id="random-walkers-and-the-heat-equation" class="title-slide slide level1 center">
+<h1>Random Walkers and the Heat Equation</h1>
+
+</section>
+<section id="forward-euler-as-an-average" class="slide level2">
+<h2>Forward Euler as an average</h2>
+<p>Forward Euler for the method of lines, at the largest stable step <span class="math inline">\(\Delta t = (\Delta x)^2/(2\alpha)\)</span>: <span class="math display">\[
+u_j^{k+1} = u_j^k + \frac{\alpha\Delta t}{(\Delta x)^2}\left(u_{j-1}^k - 2u_j^k + u_{j+1}^k\right) = \frac12 u_{j-1}^k + \frac12 u_{j+1}^k
+\]</span> with ghost nodes <span class="math inline">\(u_0^k = u_1^k\)</span>, <span class="math inline">\(\; u_{N+1}^k = u_N^k\)</span>.</p>
+<div class="fragment">
+<p>Each new value is the <strong>average of its two neighbours</strong>.</p>
+</div>
+</section>
+<section id="random-walkers" class="slide level2">
+<h2>Random walkers</h2>
+<ul>
+<li>A walker on nodes <span class="math inline">\(1, \ldots, N\)</span> moves left or right with probability <span class="math inline">\(\tfrac12\)</span> each</li>
+<li>A step onto a ghost node: it <strong>stays put</strong> (reflection)</li>
+<li><span class="math inline">\(J_k\)</span>: the walker’s node after <span class="math inline">\(k\)</span> steps</li>
+</ul>
+<p><span class="math display">\[
+v_j^k = \mathbb{E}\big[\, u(x_{J_k}, 0) \;\big|\; J_0 = j \,\big]
+\]</span></p>
+<div class="thm">
+<p>For all <span class="math inline">\(j\)</span> and <span class="math inline">\(k\)</span>, <span class="math inline">\(v_j^k = u_j^k\)</span>: the forward Euler solution is the expected initial data at the end of a random walk.</p>
+</div>
+</section>
+<section id="random-walkers-proof" class="slide level2">
+<h2>Random walkers: proof</h2>
+<ul>
+<li><span class="math inline">\(k=0\)</span>: the walker hasn’t moved, so <span class="math inline">\(v_j^0 = u(x_j,0) = u_j^0\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Condition on the first step: with probability <span class="math inline">\(\tfrac12\)</span> the walker moves to <span class="math inline">\(j\pm1\)</span>, then performs a <span class="math inline">\(k\)</span>-step walk from there: <span class="math display">\[
+v_j^{k+1} = \tfrac12 v_{j-1}^k + \tfrac12 v_{j+1}^k, \qquad v_0^k = v_1^k, \;\; v_{N+1}^k = v_N^k
+\]</span></li>
+</ul>
+</div>
+<div class="fragment">
+<ul>
+<li>Same recursion and same initial values as <span class="math inline">\(u_j^k\)</span>, so <span class="math inline">\(v_j^k = u_j^k\)</span> by induction. <span class="math inline">\(\blacksquare\)</span></li>
+</ul>
+</div>
+<div class="fragment">
+<p>As <span class="math inline">\(\Delta x\to 0\)</span>: <span class="math inline">\(u(x,t) = \mathbb{E}[u(X_t,0)]\)</span> with <span class="math inline">\(X_t\)</span> a reflected Brownian motion, a special case of the <strong>Feynman–Kac formula</strong>.</p>
+</div>
+</section>
+<section id="matlab-demo-random-walkers" class="slide level2">
+<h2>MATLAB demo: random walkers</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode matlab code-with-copy"><code class="sourceCode matlab"><span id="cb5-1"><a aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> [<span class="va">uHat</span><span class="op">,</span> <span class="va">SE</span>] <span class="op">=</span> <span class="va">walkers</span>(<span class="va">j0</span><span class="op">,</span> <span class="va">M</span><span class="op">,</span> <span class="va">N</span><span class="op">,</span> <span class="va">K</span><span class="op">,</span> <span class="va">u0</span>)</span>
+<span id="cb5-2"><a aria-hidden="true" tabindex="-1"></a><span class="va">x</span> <span class="op">=</span> <span class="va">linspace</span>(<span class="fl">0</span><span class="op">,</span> <span class="fl">1</span><span class="op">,</span> <span class="va">N</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a aria-hidden="true" tabindex="-1"></a><span class="va">j</span> <span class="op">=</span> <span class="va">j0</span><span class="op">*</span><span class="va">ones</span>(<span class="va">M</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">;</span>                         <span class="co">% every walker starts at node j0</span></span>
+<span id="cb5-4"><a aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> <span class="va">k</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">K</span></span>
+<span id="cb5-5"><a aria-hidden="true" tabindex="-1"></a>    <span class="va">j</span> <span class="op">=</span> <span class="va">j</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span>(<span class="va">rand</span>(<span class="va">M</span><span class="op">,</span> <span class="fl">1</span>) <span class="op">&lt;</span> <span class="fl">0.5</span>) <span class="op">-</span> <span class="fl">1</span><span class="op">;</span>      <span class="co">% step left or right</span></span>
+<span id="cb5-6"><a aria-hidden="true" tabindex="-1"></a>    <span class="va">j</span> <span class="op">=</span> <span class="va">min</span>(<span class="va">max</span>(<span class="va">j</span><span class="op">,</span> <span class="fl">1</span>)<span class="op">,</span> <span class="va">N</span>)<span class="op">;</span>                 <span class="co">% a step off the grid stays put</span></span>
+<span id="cb5-7"><a aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb5-8"><a aria-hidden="true" tabindex="-1"></a><span class="va">vals</span> <span class="op">=</span> <span class="va">u0</span>(<span class="va">x</span>(<span class="va">j</span>))<span class="op">;</span>                           <span class="co">% initial data at final positions</span></span>
+<span id="cb5-9"><a aria-hidden="true" tabindex="-1"></a><span class="va">uHat</span> <span class="op">=</span> <span class="va">mean</span>(<span class="va">vals</span>)<span class="op">;</span></span>
+<span id="cb5-10"><a aria-hidden="true" tabindex="-1"></a><span class="va">SE</span> <span class="op">=</span> <span class="va">std</span>(<span class="va">vals</span>)<span class="op">/</span><span class="va">sqrt</span>(<span class="va">M</span>)<span class="op">;</span></span>
+<span id="cb5-11"><a aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><span class="math inline">\(L = \alpha = 1\)</span>, <span class="math inline">\(u(x,0) = \cos(\pi x)\)</span>, <span class="math inline">\(t = 0.1\)</span>, <span class="math inline">\(N = 51\)</span>: <span class="math inline">\(\; \Delta t = 2\times 10^{-4}\)</span>, <span class="math inline">\(K = 500\)</span> steps, <span class="math inline">\(M = 10^4\)</span> walkers</p>
+</section>
+<section id="walkers-vs-method-of-lines" class="slide level2">
+<h2>Walkers vs method of lines</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../im/heat_walkers.png" class="quarto-figure quarto-figure-center" height="440"></p>
+</figure>
+</div>
+<p>Agreement with forward Euler to within the error bars, as the theorem predicts.</p>
+</section>
+<section id="why-bother" class="slide level2">
+<h2>Why bother?</h2>
+<ul>
+<li>Grids compute everywhere: <span class="math inline">\(m^d\)</span> points in <span class="math inline">\(d\)</span> dimensions</li>
+<li>A walker estimates the solution only where we need it, at a cost per step that barely depends on <span class="math inline">\(d\)</span> (<span class="math inline">\(2d\)</span> neighbours)</li>
+<li>The curse of dimensionality again: used for high-dimensional PDEs in finance and quantum mechanics</li>
+<li>Complicated geometries are easy: the walker only needs to know when it hits a boundary</li>
+<li>Other rules, other equations:
+<ul>
+<li>Dirichlet boundary conditions: <strong>absorbed</strong> walkers</li>
+<li>expected hitting times (a foraging animal finding food) solve a Poisson equation</li>
+</ul></li>
+</ul>
+</section>
+<section id="chapter-6-summary" class="slide level2">
+<h2>Chapter 6 summary</h2>
+<ul>
+<li><strong>Method of lines:</strong> finite differences in space, ghost nodes, forward Euler needs <span class="math inline">\(\Delta t \le (\Delta x)^2/(2\alpha)\)</span>, backward Euler is unconditionally stable</li>
+<li><strong>Pseudorandom numbers:</strong> seeds and periods; LCGs and their planes; the chi-squared test</li>
+<li><strong>Sampling:</strong> inverse transform method</li>
+<li><strong>Monte Carlo:</strong> unbiased, error <span class="math inline">\(\sigma/\sqrt{n}\)</span>, confidence intervals from the CLT</li>
+<li><strong>Curse of dimensionality:</strong> <span class="math inline">\(O(n^{-2/d})\)</span> for grids vs <span class="math inline">\(O(n^{-1/2})\)</span> for Monte Carlo</li>
+<li><strong>Importance sampling:</strong> reduce <span class="math inline">\(\sigma\)</span> by sampling where the integrand matters</li>
+<li><strong>Random walkers</strong> reproduce forward Euler for the heat equation</li>
+</ul>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true,"theme":"chalkboard"},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1280,
+
+        height: 720,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
