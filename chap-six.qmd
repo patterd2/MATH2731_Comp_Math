@@ -36,9 +36,9 @@ which correspond physically to an insulated domain where no heat flows in or out
 
 To apply the method of lines, we first discretise the spatial variable $x$ using a uniform grid of $N$ nodes. Let:
 $$
-x_j = j \Delta x, \quad j = 1, 2, \dots, N, \quad \Delta x = L / (N-1),
+x_j = (j-1) \Delta x, \quad j = 1, 2, \dots, N, \quad \Delta x = L / (N-1),
 $$
-and define:
+so that $x_1 = 0$ and $x_N = L$, and define:
 $$
 u_j(t) \approx u(x_j, t).
 $$
@@ -47,7 +47,7 @@ $$
 \frac{\partial^2}{\partial x^2}u(x_j,t) \approx \frac{u_{j-1}(t) - 2u_j(t) + u_{j+1}(t)}{(\Delta x)^2}.
 $$
 
-For the Neumann boundary conditions, we use the concept of **ghost nodes**, introducing extra nodes at $u_0$ and $u_{N+1}$. To determine these, we approximate the first derivative at the endpoints using forward and backward differences:
+For the Neumann boundary conditions, we use the concept of **ghost nodes**, introducing extra nodes $x_0 = -\Delta x$ and $x_{N+1} = L + \Delta x$ just outside the domain, with values $u_0$ and $u_{N+1}$. To determine these, we approximate the first derivative at the endpoints using forward and backward differences:
 $$
 \frac{u_1 - u_0}{\Delta x} = 0 \quad \Rightarrow \quad u_1 = u_0,
 $$
@@ -67,13 +67,13 @@ where we recall that $u_0=u_1$ and $u_{N+1} = u_N$, so that two of these equatio
 
 We can also write this system for the vector:
 $$
-\mathbf{u}(t) = (u_0(t), u_1(t), \dots, u_N(t))^\top.
+\mathbf{u}(t) = (u_1(t), u_2(t), \dots, u_N(t))^\top.
 $$
 We obtain:
 $$
 \frac{d}{dt}\mathbf{u}(t) = \alpha \mathbf{A} \mathbf{u}(t),
 $$
-where $\mathbf{A}$ is the $(N+1)\times(N+1)$ matrix defined by:
+where $\mathbf{A}$ is the $N\times N$ matrix defined by:
 $$
 \mathbf{A} = \frac{1}{(\Delta x)^2}
 \begin{pmatrix}
@@ -119,579 +119,423 @@ The method of lines converts a PDE into a large system of ODEs by discretising o
 
 On the Blackboard page are several code demos for the Heat equation, using both the matrix approach and a for-loop approach to discretising this equation. A demo is also provided for the Schnakenberg system of reaction-diffusion equations.
 
-## Random Number Generation
+## Monte Carlo Methods
 
-> *How do we generate random numbers on a computer?*
+> *How can random numbers compute things that are not random?*
 
-The ability to simulate random numbers on a computer is essential for modelling and understanding systems where chance and variability play a central role. Robust and repeatable random number generation is thus central to statistics, finance, queuing systems, cryptography, and a host of algorithms and other applications.
+Many quantities in applied mathematics are averages: the expected payoff of a financial contract, the mean energy of a magnet in statistical physics, the probability that a structure fails under random loads. Each of these is an integral, and often an integral over a space of very high dimension. The **Monte Carlo method** estimates such integrals by averaging the integrand at randomly chosen points. It was developed by Stan Ulam, John von Neumann and Nicholas Metropolis at Los Alamos in the 1940s to simulate neutron transport, and is named after the casinos of Monte Carlo.
 
-But what exactly do we mean by randomness or random numbers? For our purposes, we will consider "random numbers" to mean sequences of numbers that mimic the statistical properties of realisations of random variables drawn with a given distribution.  
+In this section we will see how computers produce random numbers, how to turn an average of random samples into an estimate with an error bar, and, most importantly, why this apparently crude method is the method of choice for integrals in high dimensions.
 
-### Uniform Random Numbers
+### Pseudorandom numbers
 
-Recall that a **continuous** random variable is a "random experiment" that takes values in $\mathbb{R}^n$ (or some other uncountably infinite set). A **discrete** random variable is one that takes values in a countably infinite or finite set, like a subset of $\mathbb{Z}$, for example. A continuous random variable is typically described in terms of its **probability density function (PDF)**, while a discrete random variable is most often described by its **probability mass function (PMF)**.
-
-:::{.eg}
-Let $X$ be a uniformly distributed random variable on $[a,b]$. Then $X$ has probability density function given by
+A computer executes deterministic instructions, so it cannot compute truly random numbers. Instead it produces **pseudorandom numbers**: a deterministic sequence $u_1, u_2, \ldots \in (0,1)$ designed to be statistically indistinguishable from independent samples of the uniform distribution on $[0,1]$. Most generators have the form
 $$
-f(x) = \begin{cases}
-        \frac{1}{b-a} & \text{if } a \leq x \leq b \\
-        0             & \text{otherwise}.
-    \end{cases}
+s_{i+1} = g(s_i), \qquad u_i = h(s_i),
 $$
-If $Y$ is a random variable that is uniformly distributed on the integers $\{0,\dots,n-1\}$, then its probability mass function is given by
-$$
-P(k) = \mathbb{P}[X = k] = 
-    \begin{cases}
-        \frac{1}{n} & \text{if } k \in \{0, 1, \ldots, n-1\} \\
-        0           & \text{otherwise}.
-    \end{cases}
-$$
+where $s_i$ is the internal **state** of the generator, $g$ updates the state, and $h$ converts the state into a number in $(0,1)$. The initial state $s_0$ is called the **seed**. Since the state can take only finitely many values, the sequence must eventually repeat, and the length of the cycle is called the **period**.
 
-![](im/examp.png){width=95% fig-align="center"}
+Determinism is a feature rather than a bug: running the same code with the same seed reproduces exactly the same "random" numbers, which makes simulations repeatable and much easier to debug. This is why the noisy-data demonstration in Chapter 4 begins with `rng(1)`.
 
-:::
-
-We will mainly be concerned with continuous random variables, and each continuous real-valued random variable $X$ has an associated **cumulative distribution function (CDF)** (distribution function for short) that is defined by:
-$$
-F(x) = \mathbb{P}[X \leq x].
-$$
-Moreoever, for reasonably behaved real-valued random variables, the PDF and CDF can be related by the Fundamental Theorem of Calculus as follows:
-$$
-f(x) = \frac{d}{dx}F(x), \quad F(x) = \int_{-\infty}^x f(y)\,dy.
-$$
-
-If we know how to create a sample from a uniform distribution, then we can obtain a sample with a given distribution using the following result:
-
-:::{.theorem}
-## The Inverse Transform Method
-Let $U$ be a uniformly distributed random variable on $[0,1]$, and let $F(x)$ be a cumulative distribution function. If $F$ is invertible, then $X=F^{-1}(U)$ is distributed according to $F$. 
-:::
-
-:::{.eg}
-## Inverse Transform Sampling for the Pareto Distribution
-
-The PDF of the Pareto distribution with scale parameter $x_m > 0$ and shape parameter $\alpha > 0$ is given by:
-$$
-f(x) = \frac{\alpha x_m^\alpha}{x^{\alpha+1}}, \quad x \geq x_m
-$$
-
-The cumulative distribution function (CDF) is thus
-$$
-F(x) = 1 - \left( \frac{x_m}{x} \right)^\alpha, \quad x \geq x_m
-$$
-
-To use the inverse transform method, we need to compute $F^{-1}(x)$. We know that
-$$
-F(F^{-1}(x)) = x
-$$
-and hence we can solve for $F^{-1}(x)$ as follows:
-$$
-\left(\frac{x_m}{F^{-1}(x)}\right)^{\alpha} - 1 \implies F^{-1}(x)
- = \frac{x_m}{(1-x)^{1/\alpha}}.
-$$
-Thus if $U\sim \text{uniform([0,1])}$, then
-$$
-\frac{x_m}{(1-U)^{1/\alpha}} \sim \text{Pareto}(x_m,\alpha).
-$$
-:::
-
- Therefore it is often enough to have samples from the uniform distribution and hence this distribution plays a central role in the theory of random number generation.
-
-In some sense, there are no *truly* random number generators. Computers can only execute algorithms, which are deterministic instructions, and thus they can only yield samples which appear random. We call these numbers **pseudorandom numbers**, and the algorithms which produce these numbers are called **pseudorandom number generators**.
-
-**The theoretical wish**
-
-A generator of **genuine** random numbers is an algorithm that produces a sequence of random variables $U_1$, $U_2$, $\ldots$ which satisfies:
-
-1. Each $U_i$ is uniformly distributed between $0$ and $1$.
-2. The $U_i$ are mutually independent.
-
-Property (ii) is the more important one since the normalisation in (i) is convenient but not crucial. Property (ii) implies that all pairs of values are uncorrelated and, more generally, that the value of $U_i$ should not be predictable from $U_1,\ldots, U_{i-1}$. Of course, the properties listed above are those of authentically random numbers; the goal is to come as close as possible to these properties with our artificially generated pseudorandom numbers.
-
-### Linear Congruential Generators
-
-An important and simple class of generators are the **linear congruential generators**, abbreviated as LCGs.  
-We need the modulo operation in order to define this class of generators.
-
-::: {.definition}
-For nonnegative integers $x$ and $m$, we call $y=x \;\text{mod}\;m$ the integer remainder from the division $x/m$; we will write this as
-$$
-y = x \mod m.
-$$
-:::
+What should we ask of the sequence? Each $u_i$ should look uniformly distributed, but this is the easy part: the sequence $0.01, 0.02, \ldots, 0.99$ has a perfect histogram and is not random at all. The essential property is **independence**: knowing $u_1, \ldots, u_{i-1}$ should tell us nothing about $u_i$. In particular, pairs $(u_i, u_{i+1})$ should fill the unit square uniformly, triples $(u_i, u_{i+1}, u_{i+2})$ should fill the unit cube uniformly, and so on.
 
 ::: {.definition}
 A **linear congruential generator (LCG)** is an iteration of the form
 $$
-\begin{aligned}
-x_{i+1} &= (a x_i + c) \mod m \\
-u_{i+1} &= \frac{x_{i+1}}{m} \in (0,1),
-\end{aligned}
+x_{i+1} = (a x_i + c) \bmod m, \qquad u_{i+1} = \frac{x_{i+1}}{m},
 $$
-where $a$, $c$, and $m$ are integers.
+where the multiplier $a$, the increment $c$ and the modulus $m$ are integers, and $y \bmod m$ denotes the remainder when $y$ is divided by $m$.
 :::
 
 ::: {.eg}
-Choose $a=6$, $c=0$, and $m=11$. Starting from $x_0=1$, which is called the *seed*, gives
+With $a=6$, $c=0$, $m=11$ and seed $x_0=1$ we obtain
 $$
-1, 6, 3, 7, 9, 10, 5, 8, 4, 2, 1, 6, \ldots
+1, 6, 3, 7, 9, 10, 5, 8, 4, 2, 1, 6, \ldots,
 $$
-Choosing $a=3$ yields the sequence
-$$
-1, 3, 9, 5, 4, 1, \ldots
-$$
-whereas the seed $x_0 = 2$ results in
-$$
-2, 6, 7, 10, 8, 2, \ldots
-$$
+which visits every nonzero remainder before repeating (period $10$). With $a=3$ instead we obtain $1, 3, 9, 5, 4, 1, \ldots$, which has period only $5$.
 :::
 
-**Conditions for a Full Period I**
+The period of an LCG is at most $m$, and number theory tells us how to choose $a$, $c$ and $m$ to achieve this maximum (see Knuth, *The Art of Computer Programming*, Volume 2). But a long period is not enough, as the following cautionary tale shows.
+
+::: {.eg title="RANDU"}
+The LCG with $a = 65539 = 2^{16}+3$, $c=0$ and $m=2^{31}$, known as RANDU, was supplied with IBM mainframes in the 1960s and was very widely used for scientific simulation. Its output passes a casual inspection: the histogram of the $u_i$ looks uniform, and so does a 3D scatter plot of consecutive triples $(u_i, u_{i+1}, u_{i+2})$. But if we rotate the cube, all of the triples turn out to lie on just $15$ parallel planes!
+
+![RANDU output: histogram of $3\times 10^4$ values (left), consecutive triples (middle), and the same triples viewed from a different angle (right).](im/randu.png){width=100% fig-align="center"}
+
+To see why, note that $a^2 = 2^{32} + 6\cdot 2^{16} + 9 = 2^{32} + 6a - 9$. Since $2^{32}$ is a multiple of $2^{31}$,
+$$
+x_{i+2} = a^2 x_i \bmod 2^{31} = (6 a x_i - 9 x_i) \bmod 2^{31} = (6x_{i+1} - 9x_i) \bmod 2^{31}.
+$$
+Hence $9x_i - 6x_{i+1} + x_{i+2}$ is an integer multiple of $2^{31}$, and dividing by $2^{31}$ gives
+$$
+9u_i - 6u_{i+1} + u_{i+2} = k \in \mathbb{Z}.
+$$
+Since each $u_i\in(0,1)$, the left-hand side lies in $(-6, 10)$, so $k \in \{-5, -4, \ldots, 9\}$. Every triple lies on one of these $15$ planes, and any simulation that uses three consecutive numbers (for example, to place a random point in 3D) only ever explores those planes.
+
+```matlab
+n = 3e4;
+x = zeros(n, 1);  x(1) = 1;              % seed
+for i = 1:n-1
+    x(i+1) = mod(65539*x(i), 2^31);      % exact: 65539*x(i) < 2^53 (Chapter 1)
+end
+u = x/2^31;
+plot3(u(1:end-2), u(2:end-1), u(3:end), '.', 'MarkerSize', 2)
+view([2 3 0])                            % look along the planes
+```
+:::
+
+RANDU is a particularly bad choice of parameters, but the defect is shared by every LCG: Marsaglia showed in 1968 that consecutive $d$-tuples from an LCG always lie on at most $(d!\,m)^{1/d}$ parallel hyperplanes.
+
+### Testing generators: the chi-squared test
+
+How can we tell whether a generator is any good? We use statistical hypothesis tests of the null hypothesis
+
+> $H_0$: the numbers $u_1, \ldots, u_n$ are independent samples from the uniform distribution on $[0,1]$.
+
+A test can never show that $H_0$ is true (we know that the numbers are not random!), but a generator that fails a test has a detectable non-random pattern. The simplest such test is the chi-squared goodness-of-fit test.
+
+::: {.definition}
+Let $Z_1, \ldots, Z_\nu$ be independent standard normal random variables. The distribution of $Z_1^2 + \cdots + Z_\nu^2$ is called the **chi-squared distribution** with $\nu$ degrees of freedom, written $\chi^2_\nu$.
+:::
+
+To test for uniformity, partition $[0,1]$ into $k$ equal bins $[0,\tfrac1k), [\tfrac1k,\tfrac2k), \ldots, [\tfrac{k-1}{k},1]$ and let $n_j$ be the number of samples in bin $j$. Under $H_0$, each bin has expected count $n/k$, and the **chi-squared test statistic** measures how far the observed counts are from this:
+$$
+T = \sum_{j=1}^k \frac{(n_j - n/k)^2}{n/k} = \frac{k}{n}\sum_{j=1}^k \left(n_j - \frac{n}{k}\right)^2.
+$$
 
 ::: {.theorem}
-Suppose $c\neq 0$. The generator has full period (that is, the number of distinct values generated from any seed $x_0$ is $m-1$) if and only if the following conditions hold:
-
-1. $c$ and $m$ are relatively prime (their only common divisor is $1$).
-
-2. Every prime number that divides $m$ divides $a-1$ as well.
-
-3. $a-1$ is divisible by $4$ if $m$ is.
-
-If $m$ is a power of $2$, the generator has full period if $c$ is odd and $a=4n+1$ for some integer $n$.
+Under $H_0$, $T$ converges in distribution to $\chi^2_{k-1}$ as $n\to\infty$.
 :::
 
-::: {.eg}
-The Borland C++ LCG has parameters
+We will not prove this, but here is the intuition. For large $n$, each count $n_j$ is approximately normal with mean $n/k$ and variance approximately $n/k$, so each term in $T$ is approximately the square of a standard normal. The terms are not independent, since $n_1 + \cdots + n_k = n$, and this single constraint removes one degree of freedom.
+
+The test is carried out at a chosen **significance level** $\alpha$, typically $\alpha = 0.05$. Let $c$ be the $(1-\alpha)$-quantile of $\chi^2_{k-1}$, computed in MATLAB as `chi2inv(1 - alpha, k - 1)`. If $T > c$ we reject $H_0$ (the sample **fails** the test), and otherwise the sample **passes**. If $H_0$ is true, the sample wrongly fails with probability approximately $\alpha$. The limiting distribution is a good approximation when every expected count $n/k$ is at least about $5$.
+
+::: {.eg title="Chi-squared test with ten bins"}
+A generator produces $n = 1000$ numbers, which we sort into $k = 10$ bins, each with expected count $100$. Suppose the observed counts are:
+
+| Bin $j$ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+| $n_j$ | 98 | 104 | 112 | 107 | 94 | 95 | 108 | 97 | 96 | 89 |
+
+Then
 $$
-m=2^{32},\quad a=22695477=1+4\times 5673869,\quad c=1.
+T = \frac{10}{1000}\left[(-2)^2 + 4^2 + 12^2 + 7^2 + (-6)^2 + (-5)^2 + 8^2 + (-3)^2 + (-4)^2 + (-11)^2\right] = \frac{484}{100} = 4.84.
 $$
-Hence, by the corollary above, the LCG has full period.
+The critical value at significance level $\alpha = 0.05$ is `chi2inv(0.95, 9)` $\approx 16.92$. Since $4.84 < 16.92$, the sample passes the test.
 :::
 
-**Conditions for a Full Period II**
+::: {.eg title="Catching RANDU"}
+Take $n = 3\times 10^5$ numbers $u_1, \ldots, u_n$ from RANDU with seed $x_0 = 1$. With $k = 10$ bins, the chi-squared test gives $T \approx 4.3$, well below the critical value $16.92$, so RANDU passes. The individual numbers really do look uniform.
 
-If $c=0$ and $m$ is a prime, then full period is achieved from any $x_0 \not = 0$ when
+The same idea applies to triples. Group the numbers into $10^5$ non-overlapping triples $(u_1,u_2,u_3), (u_4,u_5,u_6), \ldots$, divide the unit cube into $k^3 = 1000$ small cubes of side $0.1$, and count the triples in each. Under $H_0$, each small cube has expected count $100$, and $T$ is approximately $\chi^2_{999}$, with critical value `chi2inv(0.95, 999)` $\approx 1074$. For RANDU the counts range from $68$ to $145$ and $T \approx 1593$, so RANDU fails decisively. The Mersenne Twister gives $T \approx 1043$ on the same test and passes.
+:::
 
-1. $a^{m-1} - 1$ is a multiple of $m$,
-2. $a^j - 1$ is not a multiple of $m$ for $j=1, \ldots , m-2$.
+The lesson is that tests must probe *independence*, not just the histogram of single values.
 
-If $a$ satisfies these two properties it is called a *primitive root* of $m$. In this situation, the sequence $\{ x_i \}_{i \geq 1}$ is of the form
+::: {.callout-note title="Modern generators"}
+MATLAB's default generator is the **Mersenne Twister** (Matsumoto and Nishimura, 1998), which has period $2^{19937}-1$ and is equidistributed in up to $623$ dimensions. Newer families include PCG (the default in Python's NumPy) and xoshiro (the default in Julia). Large simulations now run on thousands of GPU cores at once, which favours **counter-based** generators such as Philox (`rng(seed, 'philox')` in MATLAB). In these generators $u_i = h(\text{key}, i)$ is a scrambled version of the counter $i$, so each core can jump directly to its own part of the sequence.
+
+Generators are vetted by large batteries of statistical tests, such as the TestU01 suite, which apply hypothesis tests like the one above (and many others, such as the Kolmogorov–Smirnov test) to hundreds of different features of the output. The practical lessons are: never write your own generator, always record your seed, and make sure that parallel computations use independent streams of random numbers.
+:::
+
+### Sampling from other distributions
+
+Recall that a real-valued random variable $X$ has **cumulative distribution function (CDF)** $F(x) = \mathbb{P}[X\le x]$ and, if $X$ is continuous, **probability density function (PDF)** $f = F'$. Generators produce uniform samples, and samples from other distributions are obtained by transforming these.
+
+::: {.theorem title="Inverse transform method"}
+Let $U$ be uniformly distributed on $[0,1]$ and let $F$ be a continuous, strictly increasing CDF. Then $X = F^{-1}(U)$ has CDF $F$.
+:::
+
+::: {.proof}
+Since $F$ is increasing, $F^{-1}(U)\le x$ if and only if $U \le F(x)$. Hence
 $$
-x_0 , a x_0 , a^2 x_0 , a^3 x_0 , \ldots \quad \mod m,
+\mathbb{P}[X \le x] = \mathbb{P}[U \le F(x)] = F(x),
 $$
-given that $c=0$. The sequence returns to $x_0$ for the first time for the smallest $k$ which satisfies $a^k x_0 \mod m = x_0$. This is the smallest $k$ for which $a^k \mod m = 1$, that is $a^k - 1$ is a multiple of $m$.
+because $\mathbb{P}[U\le y] = y$ for $y \in[0,1]$.
+:::
 
-Hence, the definition of a prime root coincides with the requirement that the series does not return to $x_0$ until $a^{m-1} x_0$.
-
-:::{.eg}
-## Examples of LCG Parameters
-
-| Modulus $m$      | Multiplier $a$ | Reference                      |
-|------------------|----------------|-------------------------------|
-| $2^{31} - 1$     | $16807$        | Lewis, Goodman, and Miller, Park and Miller |
-| $(=2147483647)$  | $39373$        | L'Ecuyer                      |
-|                  | $742938285$    | Fishman and Moore             |
-|                  | $950706376$    | Fishman and Moore             |
-|                  | $1226874159$   | Fishman and Moore             |
-| $2147483399$     | $40692$        | L'Ecuyer                      |
-| $2147483563$     | $40014$        | L'Ecuyer                      |
+::: {.eg title="Exponential distribution"}
+If $X\sim\text{Exp}(\lambda)$, then $F(x) = 1 - e^{-\lambda x}$ for $x\ge0$. Solving $F(x) = u$ gives $F^{-1}(u) = -\log(1-u)/\lambda$. Since $1-U$ is also uniform on $[0,1]$, the command `X = -log(rand(n, 1))/lambda` generates $n$ independent samples of $X$.
 :::
 
 ::: {.doit}
-Define an LCG with parameters
-$$
-c=0,\quad m=2^3-1=7,\quad a=3.
-$$
-Does this LCG have full period?
+The Pareto distribution with parameters $x_m, \alpha > 0$ has PDF $f(x) = \alpha x_m^\alpha/x^{\alpha+1}$ for $x\ge x_m$. Find its CDF and show that $x_m (1-U)^{-1/\alpha}$ is Pareto distributed. Generate $10^5$ samples in MATLAB and compare a normalised histogram (`histogram(X, 'Normalization', 'pdf')`) with $f$.
 :::
 
-:::{.callout-note}
-Earlier versions of Microsoft Excel (prior to 2003) relied on a linear congruential generator (LCG) for its RAND() function, which produced predictable and statistically non-random outputs that undermined the reliability of numerical simulations, Monte Carlo methods, and statistical sampling. This flaw was widely recognized in the simulation community during the late 1990s and early 2000s, leading Microsoft to update Excel's random number algorithm in the 2003 release.
-:::
+When $F^{-1}$ has no closed form, other transformations are used. For example, the **Box–Muller transform** turns two independent uniform samples $U_1, U_2$ into two independent standard normal samples $\sqrt{-2\log U_1}\cos(2\pi U_2)$ and $\sqrt{-2\log U_1}\sin(2\pi U_2)$. In practice, built-in functions such as `randn` should be used.
 
-In applications, the following considerations are typically the most important when considering the appropriateness of a random number generating scheme:
+### The Monte Carlo estimator
 
-- Reproducibility
-- Speed
-- Portability
-- Period Length (if any)
-- Randomness (i.e. robust statistical properties)
+::: {.eg}
+## Estimating $\pi$
 
-Linear congruential generators are no longer (and have not been for some time) used practically, although they are a useful illustration of pseudorandom number generation. The Mersenne Twister family of algorithms is among the most popular in practice, and modern implementations are appropriate for most applications. It is notable for its extremely long period ($2^{19937} - 1$), strong statistical properties, and fast performance (see *Mersenne Twister: A 623-dimensionally equidistributed uniform pseudorandom number generator* by Matsumoto and Nishimura, 1998).
-
-### Testing uniformity
-
-Previously, we have only checked for a full period, to see whether a pseudorandom number generator is reasonable or not. In this section, we demonstrate more elaborate means to test the quality of a pseudorandom number generator.
-
-Given a sample from a supposedly uniform distribution, one can use statistical tests to reject the hypothesis of uniformity. The samples provided by a computer are fake since they are totally deterministic, and therefore not random (as such they cannot be uniformly distributed). However, they are so "well chosen", that they might appear random. Hence we require statistical tests of randomness in order to judge the quality of a candidate PRNG.
-
-#### Chi-Squared Test
-
-::: {.definition}
-Let $k\geq 1$, and let $X_1,\dots,X_k$ be a sequence of i.i.d. standard normally distributed random variables. The distribution of the sum of squares
+Suppose $(X_i, Y_i)$ are independent and uniformly distributed on the square $[-1,1]^2$. The probability that a point lands in the unit disc is the ratio of the areas, $\pi/4$. So $4\times$ (fraction of points in the disc) estimates $\pi$. In the left panel below, $8$ of $10$ points fall in the disc, giving the estimate $3.2$. With $1000$ points (right panel) the estimate improves to about $3.15$. In other words, we are estimating the integral
 $$
-S=X_1^2+\dots+X_k^2
+\pi = \int_{-1}^1 \int_{-1}^1 \mathbb{1}\{x^2+y^2\le 1\}\,dy\,dx
 $$
-is called **chi-square** with $k$ degrees of freedom.
-:::
-
-The probability density function of $\chi(k)$ is given by
-$$
-f(x,k)=\frac{1}{2^{k/2}\Gamma(k/2)}x^{k/2-1}e^{-x/2},
-$$
-where $\Gamma$ denotes the gamma function, which is defined by
-$$
-\Gamma(\xi)=\int_0^\infty x^{\xi-1}e^{-x}\,\mathrm{d}x.
-$$
-For integers $n \in \mathbb{N}$, we can write the Gamma function in terms of the factorial function as follows:
-$$
-\Gamma(n)=(n-1)!=(n-1)(n-2)\dots 2\cdot 1.
-$$
-
-Let
-$$
-X_1,X_2,\dots, X_n
-$$
-be a sample.
-
-The **chi-squared test for uniformity** is constituted by the following:
-- The null hypothesis $H_0$: The sample is from a uniform distribution against the alternative hypothesis $H_a$ that it is not.
-- The test statistic
-  $$
-  T=\frac{k}{n}\sum_{j=1}^k \left ( n_j-\frac{n}{k}\right)^2,
-  $$
-  where $k$ is the number of equidistant partitions ("bins", to be chosen) of the unit interval, given by
-  $$
-  [0,1/k),\quad [1/k, 2/k),\dots, [(k-1)/k,1].
-  $$
-  and $n_j$ is the number of observations in the $j$th bin.
-- The confidence level $\alpha$ (to be chosen).
-
-The following theorem is stated without proof.
-
-::: {.theorem}
-As $n\rightarrow\infty$, $T$ converges, in distribution, to the chi-square distribution $\chi_{k-1}$ with $k-1$ degrees of freedom.
-:::
-
-:::{.eg}
-## Using the Chi-Square Test for Uniformity
-
-Suppose you have a sample of pseudorandom numbers generated on the interval $[0,1]$ and you wish to test if these are consistent with being independent and uniformly distributed.
-
-Let's set up the test with the following parameters:
-- The number of bins: $k = 10$
-- The sample size: $n = 1000$
-- The observed counts in each bin: $n_j$ for $j = 1, \ldots, 10$
-
-**Step 1: Compute the Test Statistic**
-
-Partition the interval $[0,1]$ into 10 bins: $[0, 0.1), [0.1, 0.2), \ldots, [0.9, 1]$.
-
-Count how many values fall in each bin, giving counts $n_1, n_2, \ldots, n_{10}$.
-
-The theoretical expected count in each bin is $n/k = 1000/10 = 100$.
-
-The chi-square test statistic is
-$$
-T = \frac{k}{n} \sum_{j=1}^k \left( n_j - \frac{n}{k} \right)^2
-$$
-
-Suppose the observed bin counts based on the pseudorandom sample are:
-
-| Bin | Observed Count $n_j$ |
-|-----|---------|
-| 1   | 98                     |
-| 2   | 104                    |
-| 3   | 112                    |
-| 4   | 107                    |
-| 5   | 94                     |
-| 6   | 95                     |
-| 7   | 108                    |
-| 8   | 97                     |
-| 9   | 96                     |
-| 10  | 89                     |
-
-Compute the sum:
-$$
-T = \frac{10}{1000} \sum_{j=1}^{10} (n_j - 100)^2
-$$
-$$
-T = 0.01 \left[ (98-100)^2 + (104-100)^2 + (112-100)^2 + \cdots + (89-100)^2 \right]
-$$
-$$
-T = 0.01 [4 + 16 + 144 + 49 + 36 + 25 + 64 + 9 + 16 + 121]
-$$
-$$
-T = 0.01 \times 484 = 4.84
-$$
-
-**Step 2: Find the Critical Value**
-
-The null hypothesis is rejected if $T$ exceeds the critical value from the chi-square distribution with $k-1 = 9$ degrees of freedom at significance level $\alpha$ (e.g., $\alpha = 5%$).
-
-For $\chi^2_{0.95,9}$, the critical value is approximately 16.919 (which can be computed using the Matlab function [chi2inv](https://www.mathworks.com/help/stats/chi2inv.html)).
-
-**Step 3: Compare $T$ to the critical value:**
-
-- If $T < 16.919$, do **not** reject the null hypothesis (the sample is consistent with being uniform).
-- If $T > 16.919$, **reject** the null hypothesis (the sample is not uniform).
-
-In this example:
-$$
-4.84 < 16.919
-$$
-So we **do not reject** the null hypothesis; the sample passes the uniformity test.
-:::
-
-#### The Kolmogorov–Smirnov Test
-
-Another simple test uses the empirical distribution function of the sample, which we define below:
-
-::: {.definition}
-If $x=(x_1,\dots,x_n)$ is a sample, then the **empirical distribution function** of $x$ is given by
-$$
-F_n(x) = \frac{1}{n}\sum_{i=1}^n \mathbb{1}_{(-\infty,x)}(x_i), \quad x \in \mathbb{R}.
-$$
-:::
-
-
-:::{.eg}
-![Comparison of the empirical and true CDFs for a sample of normally distributed pseudorandom numbers. We observe increasingly good agreement for larger sample sizes, as expected if the PRNG has good statistical properties.](im/emp_cdf.png){width=80% fig-align="center"}
-:::
-
-The Kolmogorov–Smirnov test is based on the following intuition: If the sample is uniformly distributed, the deviation of the empirical distribution function from the theoretical distribution function should be small, as shown in the figure above.
-
-The **Kolmogorov–Smirnov test for uniformity** is constituted by the following:
-- The null hypothesis $H_0$: The sample is from a given distribution $F$ against the alternative hypothesis $H_a$ that it is not.
-- The test statistic
-  $$
-  D_n=\sup_{x\in\mathbb R}\vert F_n(x)-F(x)\vert,
-  $$
-  where $n$ is the sample size.
-- The confidence level $\alpha$ (to be chosen).
-
-As $n\rightarrow\infty$, $\sqrt{n} D_n$ converges to
-$$
-\sup_{t\in\mathbb R}\vert B(F(t))\vert,
-$$
-in distribution, where $B$ is a [Brownian Bridge](https://en.wikipedia.org/wiki/Brownian_bridge) (i.e., the quantity $\sup_{t\in\mathbb R}\vert B(F(t))\vert$ is a random variable).
-
-For $F(t)=t$, the uniform distribution, the critical values of the Kolmogorov statistics $D_n$ are known. For large $n$, the statistics converge in distribution to the so-called **Kolmogorov distribution**, which satisfies
-$$
-K=\sup_{t\in [0,1]}\vert B(t)\vert.
-$$
-In fact, it can be shown that
-$$
-\mathbb P[K\leq x]=1-2\sum_{k=1}^\infty (-1)^{k-1}e^{-2k^2x^2}, \quad x \in \mathbb{R}^+.
-$$
-
-:::{.callout-note}
-Along with the statistical tests outlined above, popular test suites such as [Diehard](https://en.wikipedia.org/wiki/Diehard_tests) and [Dieharder](https://webhome.phy.duke.edu/~rgb/General/dieharder.php) provide batteries of statistical tests for evaluating the quality of pseudorandom number generators (PRNGs). These suites assess a PRNG's output for statistical randomness and are widely used in research and industry to ensure reliability and unpredictability.
-:::
-
-## Monte Carlo Methods
-
-### A motivating example
-
-The basic idea of the "Monte Carlo Method" is that we can use random sampling to estimate the value of integrals. The method is named for the famous Monte Carlo casinos. The following example illustrates the basic idea, which can be generalised and applied to a wide variety of situations.
-
-:::{.eg}
-Consider the unit circle in $\mathbb{R}^2$, i.e. the set of points
-$$
-\{(x,y) : x^2 + y^2 \leq 1 \}.
-$$
-
-We know that the area of the unit circle is $\pi$ and we could hence consider the following way to estimate $\pi$ by random sampling. If we take two indepedent random numbers, $X_i$ and $Y_i$, each uniformly random on $[-1,1]$, then $(X_i,\,Y_i)$ is a uniform random number on the square $[-1,1] \times [-1,1]$. Since the distribution is uniform, the probability that a random pair $(X_i,\,Y_i)$ falls into the unit circle is $\pi/4$. 
-
-Looking at the two numerical experiments below, we see that in the left panel, we have $8$ of $10$ points falling in unit circle. This gives us an estimate of $\pi$ of about $3.2$. For $N = 1000$, we can't count so easily by eye but the estimate in fact improves to about $3.1523$. Put another way, we are estimating the integral
-$$
-\int\int_{x^2 + y^2 \leq 1}^{} dx dy = \int_{-1}^1 \int_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}} dx dy.
-$$
-This connection between probabilities, areas and integration is the basis of the Monte Carlow method, and we will spend the rest of this section formalising these connections.
+by averaging the integrand at random points.
 
 ![](im/MC_circle.png){width=80% fig-align="center"}
-
 :::
 
-### The Monte Carlo Estimator
+More generally, suppose that we want to compute
+$$
+\mu = \mathbb{E}[A(X)] = \int_{\mathbb{R}^d} A(x) f(x)\,dx,
+$$
+where $X$ is a random variable in $\mathbb{R}^d$ with PDF $f$. In particular, any integral over the unit cube is an expectation: if $U$ is uniformly distributed on $[0,1]^d$ (so $f\equiv 1$ there), then
+$$
+\int_{[0,1]^d} g(x)\,dx = \mathbb{E}[g(U)].
+$$
+Similarly, if $U$ is uniformly distributed on an interval $[a,b]$, it has density $1/(b-a)$ there, so
+$$
+\frac{1}{b-a}\int_a^b g(x)\,dx = \mathbb{E}[g(U)],
+$$
+and samples of $U$ are given by $a + (b-a)\,$`rand`.
 
-For a continuous real-valued random variable $X$ with PDF $f$, its mean or **expectation** can be computed via the formula:
-
+::: {.definition}
+Let $X_1, \ldots, X_n$ be independent random variables with the same distribution as $X$. The **Monte Carlo estimator** of $\mu = \mathbb{E}[A(X)]$ is the sample average
 $$
-\mathbb{E}[X] = \int_\mathbb{R} x f(x)\,dx
-$$
-
-Moreoever, if we want to calculate an expectation of a random variable $Y = A(X)$, for some smooth function $x \mapsto A(x)$, this is given by the related formula:
-
-$$
-\mu := \mathbb{E}[A(X)] = \int_{\mathbb{R}} A(x) f(x)\, dx.
-$$
-
-However, often the function $A$ is sufficiently complicated that the integral cannot be derived in closed form. For example, in financial applications, $A$ might be the payoff function of an exotic option or be related to the claims policy on an insurance contract. The Monte-Carlo method (MCM) uses simulations to derive an approximation of $\mu$ as follows:
-
-Suppose we have a sample from the same distribution as $X$, namely
-
-$$
-X_1,\ldots,X_n.
-$$
-
-Then
-
-$$
-A(X_1), \ldots, A(X_n)
-$$
-
-is a sample with the distribution of $A(X)$. The **strong law of large numbers** says that the **sample average** converges **almost surely** to the expectation $\mu$, i.e.,
-
-$$
-\lim_{n \to \infty} \frac{A(X_1) + \cdots + A(X_n)}{n} = \mathbb{E}[A(X)] = \mu, \quad \text{almost surely}.
-$$
-
-The strong law applies under mild conditions (finite means and variances of the random variables), and allows us to use the **sample average** as an estimator for the true value of $\mu$ for large values of $n$.
-
-:::{.callout}
-**Almost sure** convergence is a mode of convergence appropriate to sequences of random variables. It is a very strong form of convergence (there are weaker forms) and roughly means that if you repeatedly observe values from a sequence of random variables, eventually the sequence will settle down and stay close to the limit for all future observations.
-:::
-
-In practice, one runs a simulation and obtains a sample, say
-
-$$
-x_1, \ldots, x_n,
-$$
-
-and thus a sample from the same distribution as $A(X)$,
-
-$$
-A(x_1), \ldots, A(x_n).
-$$
-
-For large $n$, the SLLN therefore allows us to use the **sample average**, also called the **Monte Carlo estimator** in this context,  as a proxy for $\mu$, i.e.
-$$
-\hat{\mu}_n := \frac{A(x_1) + \cdots + A(x_n)}{n} \approx \mu.
-$$
-
-However, each time we run a new simulation the sample average delivers a new value. This begs the question:
-
-### How good is the approximation?
-
-The Monte Carlo estimator has several desirable properties as a statistical estimator. In particular, the Monte Carlo estimator is:
-
-- **Unbiased**, i.e. $\mathbb{E}[\hat{\mu}_n] = \mu$, or “the sample mean is equal to the true mean”.
-- **Strongly consistent**, i.e. $\lim_{n\rightarrow\infty} \hat{\mu}_n = \mu$ almost surely.
-
-Furthermore, we can quantify the error of the Monte Carlo estimator. If $\sigma^2 = \text{Var}[A(X)] = \mathbb{E}[(A(X) - \mu)^2]$, the variance of $A(X)$, was known, then we could use the Central Limit Theorem to quantify the quality of approximation of the Monte Carlo estimator. In fact,
-$$
-\frac{\sqrt{n}}{\sigma}(\hat{\mu}_n-\mu) \approx \mathcal{N}(0,1), \quad \text{as }n \to\infty.
-$$
-In practice, we can estimate the variance of $A(X)$ from random samples as part of the Monte Carlo Method.
-
-Therefore, the $\alpha$ confidence interval of $\hat{\mu}_n$ is approximately equal to
-$$
-\mu \pm z_{1-\alpha/2} \frac{\sigma}{\sqrt{n}},
-$$
-where $z_{\beta}$ is the $\beta$-quantile of $\mathcal{N}(0,1)$ distribution, i.e.
-$$
-\mathbb{P}[- z_{\beta} \leq Z \leq z_{\beta}] = \beta, \quad Z \sim \mathcal{N}(0,1).
-$$
-
-### The practical approach
-
-Recall that for a sample $y_1, \ldots, y_n$, the sample mean and variance are given by
-$$
-\bar{y} = \frac{y_1 + \cdots + y_n}{n} \qquad
-s = \frac{\sum_{k=1}^{n}(y_k - \bar{y})^2}{n-1}.
-$$
-
-Often, one does not know the precise values of $\mu$ or $\sigma^2$ (especially $\mu$, otherwise we don’t need to run Monte-Carlo simulations at all!). One thus replaces $\mu$ and $\sigma^2$ by their empirical estimates as follows:
-$$
-\hat{\mu}_n \pm z_{1-\alpha/2} \frac{\hat{\sigma}_n}{\sqrt{n}},
-$$
-where $\hat{\mu}_n, \hat{\sigma}_n^2$ are the empirical mean and variance of the given sample
-$$
-A(x_1), \ldots, A(x_n).
-$$
-
-The quantity $\hat{\sigma}_n/\sqrt{n}$ is called **standard error**. Summarizing, we have
-$$
-S.E. = \sqrt{\frac{\sum_{i=1}^n (A(x_i) - \hat{\mu}_n)^2}{n(n-1)}}.
-$$
-
-The standard error expression tells us that the error scales like $n^{-1/2}$. For example, if we wish to make our estimate 10 times more accurate we need to increase $n$ by a factor of 100!
-**This is a key feature of the Monte Carlo method and persists even in a higher dimensional setting.**
-In one-dimensional the simple trapezoidal rule has an error which scales like $n^{-2}$ and is hence far superior to the MCM. However, in $d$-dimensions the trapezoidal rule error scales like $n^{-2/d}$ while the MCM retains its $n^{-1/2}$ error scaling. Therefore MCMs are attractive methods for quickly and accurately evaluating higher dimensional integrals whose closed form expressions are not available.
-
-:::{.eg}
-Let $X$ be a uniformly distributed r.v. on the unit interval and consider
-$$
-\mu = \mathbb{E}[X^2].
-$$
-
-For size $n$, let us sample from the uniform distribution, which gives us
-$$
-x_1, x_2, \ldots, x_n
-$$
-independent copies of $X$. The Monte Carlo estimator for $\mu$ is just the sample average
-$$
-\mu \approx \frac{x_1^2 + \cdots + x_n^2}{n} =: \hat{\mu}_n.
-$$
-
-The theoretical value of $\mu$ can actually be calculated explicitly, and it is given by
-$$
-\mu = \int_0^1 x^2 f(x)\,dx = \int_0^1 x^2 dx = \left.\frac{x^3}{3}\right|_0^1 = \frac{1}{3},
-$$
-where we recall that the uniform distribution has density $f \equiv 1$ on $[0,1]$.
-
-The variance $\sigma^2$ of the Monte Carlo estimator is the Variance of $X^2$ divided by $n$, $\sigma^2/n$, where
-$$
-\sigma^2 = \mathbb{E}\left[(X^2 - \mu)^2\right] = \mathbb{E}[X^4] - \mathbb{E}\left[(X^2)\right]^2
-= 1/5 - (1/3)^2 = \frac{9-5}{45} = \frac{4}{45}.
-$$
-
-We conclude that the $\alpha$ confidence interval of $\hat{\mu}_n$ is approximately
-$$
-\mu \pm z_{1-\alpha/2} \frac{2}{\sqrt{9n}}.
+\hat{\mu}_n = \frac{1}{n}\sum_{i=1}^n A(X_i).
 $$
 :::
 
-### Application: Stochastic Processes
+::: {.theorem title="Properties of the Monte Carlo estimator"}
+Suppose $\mathbb{E}|A(X)| < \infty$. Then:
 
-Random variables are our standard mathematical model or formalisation of a random experiment. However, in many real-world scenarios we are observing a collection of observations from the same random experiment as time evolves. Hence, we need the concept of a **stochastic process**, which is simply a collection of random variables indexed by time. The simplest example is the **random walk**:
-
-:::{.eg}
-## Random walk
-We take time to be discrete, i.e. the set of times is $\{0,1,2,\dots\}$. A simple symmetric random walk can be written as
+1. $\hat\mu_n$ is **unbiased**: $\mathbb{E}[\hat{\mu}_n] = \mu$.
+2. $\hat\mu_n$ is **consistent**: $\hat{\mu}_n \to \mu$ almost surely as $n\to\infty$ (the strong law of large numbers).
+3. If also $\sigma^2 = \text{Var}[A(X)] < \infty$, then $\text{Var}[\hat\mu_n] = \sigma^2/n$, and by the central limit theorem
 $$
-S_0 = 0, \quad S_n = Z_1 + Z_2 + \cdots + Z_n,
+\frac{\sqrt{n}}{\sigma}(\hat{\mu}_n-\mu) \to \mathcal{N}(0,1) \quad \text{in distribution as } n \to\infty.
 $$
-where each $Z_i$ is an independent random variable taking the value $+1$ or $-1$ with equal probability. Given that we know how to simulate random numbers on a comuputer, we can immediately simulate a random walk directly from the formula above.
-
-![Three simulated paths of a symmetric random walk.](im/rand_walk.png){width=80% fig-align="center"}
 :::
 
-The Monte Carlo method for estimating integrals using repeated random sampling is especially useful for estimating complicated integrals arising in applications. In many cases, closed form expressions are difficult or impossible to obtain, but we can easily approximate their values with simple direct simulations.
-
-:::{.eg}
-## Expected meal time for a hungry forager
-
-Suppose an animal starts foraging for food in a meadow. We suppose they move within a patchy landscape of possible food locations, i.e. each point $(i,j)$ for $i,j \in \mathbb{Z}_+$ is a patch, with their starting coordinate denoted by $(0, 0)$. At each step, the animal moves to one of four neighboring patches (up, down, left, right) with equal probability. There is food located in the square $\mathcal{D}$ of patches with vertices $[4,4]$, $[4,8]$, $[8,4]$, $[8,8]$. To ensure that the forager stays in $\mathbb{Z}^2_+$, we must impose a **reflecting** boundary condition on the random walk, so that if the forager tries to take a step that would result in them leaving $\mathbb{Z}^2_+$, they are pushed back inside.
-
-How long do we expect it to take the animal to successfully secure some food?
-
-If $S_n$ denotes the position of forager at time $n \in \mathbb{N}$, we are looking to estimate the expected value (mean) of the hitting time $\tau$, where
+Part 1 follows from linearity of expectation, and the variance formula in part 3 holds because the variance of a sum of independent random variables is the sum of their variances. Part 3 is what gives us an **error bar**. For $0 < \alpha < 1$, let $z_{1-\alpha/2}$ be the $(1-\alpha/2)$-quantile of the standard normal distribution, so that $\mathbb{P}[|Z| \le z_{1-\alpha/2}] = 1-\alpha$ for $Z\sim\mathcal{N}(0,1)$. Then
 $$
-\tau := \inf_{\{n \geq 0\}}\{ S_n \in \mathcal{D} \}.
+\mathbb{P}\left[ |\hat\mu_n - \mu| \le z_{1-\alpha/2}\frac{\sigma}{\sqrt{n}} \right] \approx 1-\alpha \quad\text{for large } n.
 $$
-It is challenging (but possible) to write down an analytic expression for the value of $\mathbb{E}[\tau]$. However, this becomes increasingly hard for more realistic models of animal movement! Instead we will directly simualate the random walk the forager is taking and record the number of steps it takes to reach $\mathcal{D}$. 
+The most common choices are $z_{0.975} \approx 1.96$ (for $\alpha = 0.05$) and $z_{0.995} \approx 2.576$ (for $\alpha = 0.01$). In MATLAB, $z_{1-\alpha/2}$ is `norminv(1 - alpha/2)`.
 
-If $\hat{\tau}_i$ is the number of steps to reach $\mathcal{D}$ in simulation $i$, then our Monte Carlo approximation is this
+We don't usually know $\sigma$ (if we can't compute $\mu$, we probably can't compute $\sigma$ either), so in practice we replace it by the sample standard deviation $\hat\sigma_n$ of the same samples, where
 $$
-\mathbb{E}[\tau] \approx\frac{\hat{\tau}_1 + \hat{\tau}_2 + \dots \hat{\tau}_n}{n}.
+\hat\sigma_n^2 = \frac{1}{n-1}\sum_{i=1}^n \big(A(X_i) - \hat\mu_n\big)^2.
 $$
+The quantity $\hat\sigma_n/\sqrt{n}$, which estimates the standard deviation of $\hat\mu_n$, is called the **standard error**, and
+$$
+\hat\mu_n \pm z_{1-\alpha/2}\,\frac{\hat\sigma_n}{\sqrt{n}}
+$$
+is an approximate $100(1-\alpha)\%$ **confidence interval** for $\mu$. For example, $\hat\mu_n \pm 1.96\,\hat\sigma_n/\sqrt{n}$ is an approximate $95\%$ confidence interval. Unlike the quadrature rules of Chapter 4, Monte Carlo provides an estimate of its own error at no extra cost.
 
-![Three simulated paths of the hungry forager searching for food.](im/forager.png){width=100% fig-align="center"}
-
-Simulating the process gives us $\tau \approx 113$ and we can also use the values of $\hat{\tau}_i$ to make the following plot of the PDF of $\tau$:
-
-![](im/hitting_dist.png){width=100% fig-align="center"}
+::: {.callout-note}
+**Almost sure** convergence means that, with probability one, the sequence of estimates $\hat\mu_1, \hat\mu_2, \ldots$ produced by a single run converges to $\mu$. It is one of several modes of convergence for random variables that you will meet in probability courses.
 :::
+
+The error therefore decreases like $n^{-1/2}$. This is **slow**: to gain one more correct digit we need $100$ times as many samples.
+
+::: {.eg title="A one-dimensional integral"}
+Let $U$ be uniform on $[0,1]$ and $\mu = \mathbb{E}[U^2] = \int_0^1 x^2\,dx = \tfrac13$. Here
+$$
+\sigma^2 = \mathbb{E}[U^4] - \mu^2 = \frac15 - \frac19 = \frac{4}{45},
+$$
+so the $95\%$ confidence interval has half-width $1.96\sqrt{4/45}/\sqrt{n} \approx 0.58/\sqrt{n}$.
+
+```matlab
+n = 1e4;
+gU = rand(n, 1).^2;                      % samples of A(U) = U^2
+muHat = mean(gU);
+SE = std(gU)/sqrt(n);                    % standard error
+fprintf('%.4f +/- %.4f\n', muHat, 1.96*SE)
+```
+With $n = 10^4$ samples the error is around $6\times 10^{-3}$. By comparison, the composite trapezium rule with $10^4$ points has error $h^2/6 \approx 2\times10^{-9}$ for this integral. In one dimension, Monte Carlo is a terrible method!
+:::
+
+### Why Monte Carlo? The curse of dimensionality
+
+So why bother with Monte Carlo at all? Consider an integral over the $d$-dimensional unit cube,
+$$
+I = \int_{[0,1]^d} g(x)\,dx.
+$$
+The quadrature rules of Chapter 4 extend to $d$ dimensions by applying them in each coordinate direction in turn (a **tensor-product** rule). With $m$ points in each direction, the composite trapezium rule uses a grid of $n = m^d$ points and, for smooth $g$, has error $O(h^2) = O(m^{-2})$. In terms of the total number of function evaluations, this is
+$$
+\text{trapezium: } O(n^{-2/d}), \qquad \text{Simpson: } O(n^{-4/d}), \qquad \text{Monte Carlo: } O(n^{-1/2}).
+$$
+The Monte Carlo rate **does not depend on the dimension** (although the constant $\sigma$ does depend on $g$). It overtakes the trapezium rule when $d > 4$ and Simpson's rule when $d > 8$. Worse still for grids, even the crudest grid with $2$ points per direction needs $2^d$ evaluations. For $d=100$, this is about $10^{30}$ evaluations, which would take more than $10^{13}$ years at a billion evaluations per second. This exponential growth of cost with dimension is called the **curse of dimensionality**.
+
+::: {.eg title="Monte Carlo versus the trapezium rule in higher dimensions"}
+The integrand $g(x) = e^{-|x|^2}$ on $[0,1]^d$ has exact integral $I_d = \big(\int_0^1 e^{-s^2}\,ds\big)^d = \big(\tfrac{\sqrt\pi}{2}\,\text{erf}(1)\big)^d$. The Monte Carlo estimate takes a few lines in any dimension:
+```matlab
+d = 10;  n = 1e6;
+gX = exp(-sum(rand(n, d).^2, 2));        % g at n uniform points in [0,1]^d
+muHat = mean(gX);  SE = std(gX)/sqrt(n);
+Iexact = (sqrt(pi)/2*erf(1))^d;
+fprintf('%.6f +/- %.6f (exact %.6f)\n', muHat, 1.96*SE, Iexact)
+```
+
+![Error against the number of evaluations of $g$ for the tensor-product trapezium rule and for a single Monte Carlo run, in dimensions $d=1,4,10$. The dashed line is the $95\%$ error bar $1.96\sigma/\sqrt{n}$.](im/mc_dimension.png){width=100% fig-align="center"}
+
+In one dimension the trapezium rule wins by many orders of magnitude. In four dimensions the two methods are comparable. In ten dimensions, the trapezium rule with only $3$ points per direction already needs $3^{10} = 59049$ evaluations and is accurate to just $10^{-2}$, while a million Monte Carlo samples (fewer than a grid with $4$ points per direction) give an error of order $10^{-4}$, as predicted by the dashed line, together with an error bar.
+:::
+
+**Summary: Monte Carlo is a poor method in one dimension and often the only practical method in a hundred.**
+
+::: {.callout-note title="Where high-dimensional integrals arise"}
+- **Statistical physics:** averages over all configurations of a system of $N$ particles or spins, such as the Ising model, are integrals or sums in dimension proportional to $N$. These are computed with **Markov chain Monte Carlo** methods such as the Metropolis algorithm.
+- **Finance:** the price of an option on a basket of many assets is an expectation over all of their future paths.
+- **Bayesian statistics and machine learning:** posterior means are integrals over all unknown parameters.
+- **Computer graphics:** in modern animated films, the colour of each pixel is an integral over all paths that light can take through the scene, computed by Monte Carlo *path tracing*. The grainy "noise" in a render with too few samples is exactly the $n^{-1/2}$ Monte Carlo error.
+:::
+
+### Variance reduction: importance sampling
+
+The rate $n^{-1/2}$ is fixed, but the constant $\sigma$ is not. The same quantity $\mu$ can be written as the expectation of many different random variables, some with much smaller variance than others. Methods that exploit this are called **variance reduction** techniques, and one of the most important is importance sampling.
+
+Its main use is for **rare events**. Suppose we want $p = \mathbb{P}[Z > 4] \approx 3.17\times 10^{-5}$ for $Z\sim\mathcal{N}(0,1)$. The plain Monte Carlo estimator averages $A(Z) = \mathbb{1}\{Z > 4\}$, which has $\sigma^2 = p(1-p)$, so the error relative to $p$ is about
+$$
+\frac{\sigma}{p\sqrt{n}} \approx \frac{1}{\sqrt{pn}}.
+$$
+With $n = 10^4$ samples we expect fewer than one sample to exceed $4$, and we need $n \approx 100/p \approx 3\times 10^6$ for $10\%$ relative accuracy. Almost every sample lands where $A = 0$ and is wasted.
+
+The idea of importance sampling is to draw samples from a different density $g$ that puts more of them where they matter, and then correct for this with a weight. If $g(x) > 0$ wherever $A(x)f(x) \neq 0$, then
+$$
+\mu = \int A(x) f(x)\,dx = \int A(x)\frac{f(x)}{g(x)}\, g(x)\,dx = \mathbb{E}\big[A(Y)\,w(Y)\big], \qquad Y\sim g,
+$$
+where $w = f/g$ is called the **likelihood ratio** or **weight**.
+
+::: {.theorem title="Importance sampling"}
+Let $Y_1, \ldots, Y_n$ be independent with density $g$, and let
+$$
+\hat\mu_n^{\rm IS} = \frac{1}{n}\sum_{i=1}^n A(Y_i)\,w(Y_i), \qquad w = \frac{f}{g}.
+$$
+Then $\hat\mu_n^{\rm IS}$ is an unbiased estimator of $\mu$, with variance $\sigma_g^2/n$, where
+$$
+\sigma_g^2 = \int \frac{A(x)^2 f(x)^2}{g(x)}\,dx - \mu^2.
+$$
+If $A \ge 0$ and $\mu > 0$, the choice $g^* = Af/\mu$ gives $\sigma_{g^*}^2 = 0$.
+:::
+
+::: {.proof}
+Unbiasedness follows from the identity above. For the variance,
+$$
+\text{Var}[A(Y)w(Y)] = \mathbb{E}\big[A(Y)^2w(Y)^2\big] - \mu^2 = \int A^2\frac{f^2}{g^2}\,g\,dx - \mu^2 = \int \frac{A^2f^2}{g}\,dx - \mu^2,
+$$
+and the variance of the average of $n$ independent copies is this divided by $n$. With $g = g^*$, we have $A^2f^2/g^* = \mu A f$ wherever $A > 0$ (and both sides vanish where $A = 0$), so $\sigma_{g^*}^2 = \mu\int Af\,dx - \mu^2 = 0$.
+:::
+
+The optimal density $g^*$ cannot be used in practice, since it requires knowing $\mu$. But it tells us what to aim for: $g$ should be roughly proportional to $|A|f$, so that samples are concentrated where the integrand is large. A poor choice of $g$, for example one with much lighter tails than $Af$, can instead make the variance much *larger*, or even infinite.
+
+::: {.eg title="Importance sampling for a rare event"}
+To estimate $p = \mathbb{P}[Z > 4]$, we shift the samples into the rare region by taking $g$ to be the $\mathcal{N}(4,1)$ density. The weight is
+$$
+w(y) = \frac{f(y)}{g(y)} = \frac{e^{-y^2/2}}{e^{-(y-4)^2/2}} = e^{8 - 4y}.
+$$
+```matlab
+rng(2)
+n = 1e4;
+Z = randn(n, 1);  A = (Z > 4);              % plain Monte Carlo
+Y = 4 + randn(n, 1);                        % samples from g = N(4,1)
+AW = (Y > 4).*exp(8 - 4*Y);                 % A(Y) w(Y)
+fprintf('plain: %.2e +/- %.1e\n', mean(A), 1.96*std(A)/sqrt(n))
+fprintf('IS:    %.3e +/- %.1e\n', mean(AW), 1.96*std(AW)/sqrt(n))
+```
+Plain Monte Carlo gives $(1.0 \pm 2.0)\times 10^{-4}$, based on the single sample that exceeded $4$, which is useless. Importance sampling gives $(3.23 \pm 0.13)\times 10^{-5}$, consistent with the exact value $3.167\times 10^{-5}$. For this choice of $g$, the variance is about $7000$ times smaller than for plain Monte Carlo, so we would need about $7000$ times as many plain samples for the same accuracy.
+:::
+
+::: {.doit}
+Estimate $\mathbb{P}[Z > 6]$ for $Z\sim\mathcal{N}(0,1)$ by importance sampling with $g$ the $\mathcal{N}(6,1)$ density, and compare with the exact value `0.5*erfc(6/sqrt(2))`. Roughly how many plain Monte Carlo samples would be needed for the same accuracy?
+:::
+
+::: {.callout-note title="Other ways to beat plain Monte Carlo"}
+Other variance reduction techniques include **control variates**, which subtract a correlated quantity with known mean, and **antithetic variables**, which pair each sample $U$ with $1-U$. **Quasi-Monte Carlo** methods go further, replacing random points by carefully constructed low-discrepancy sequences (e.g. `sobolset` in MATLAB), and achieve errors close to $O(n^{-1})$ for smooth integrands.
+:::
+
+### Application: random walkers solve the heat equation
+
+We can now connect this section to the heat equation from earlier in the chapter. Recall the method-of-lines system with Neumann boundary conditions, and apply forward Euler with the *largest stable timestep*, $\Delta t = (\Delta x)^2/(2\alpha)$. Writing $u_j^k \approx u(x_j, t_k)$, the scheme becomes
+$$
+u_j^{k+1} = u_j^k + \frac{\alpha\Delta t}{(\Delta x)^2}\left(u_{j-1}^k - 2u_j^k + u_{j+1}^k\right) = \frac12 u_{j-1}^k + \frac12 u_{j+1}^k, \qquad j = 1, \ldots, N,
+$$
+with ghost nodes $u_0^k = u_1^k$ and $u_{N+1}^k = u_N^k$. Each new value is simply the *average of the two neighbouring values*.
+
+This has a probabilistic interpretation. Consider a **random walker** on the nodes $1, \ldots, N$ that, at each timestep, moves one node left or right with probability $\tfrac12$ each. If a step would take the walker onto a ghost node, it stays where it is instead (it is **reflected**). Let $J_k$ be the walker's node after $k$ steps, and define
+$$
+v_j^k = \mathbb{E}\big[\, u(x_{J_k}, 0) \;\big|\; J_0 = j \,\big],
+$$
+the expected initial temperature at the walker's position after $k$ steps, starting from node $j$.
+
+::: {.theorem}
+For all $j$ and $k$, $v_j^k = u_j^k$: the forward Euler solution is the expected value of the initial data at the end of a random walk.
+:::
+
+::: {.proof}
+For $k=0$ the walker has not moved, so $v_j^0 = u(x_j,0) = u_j^0$. For $k \ge 0$, condition on the walker's first step. With probability $\tfrac12$ it moves to node $j-1$, after which it performs a $k$-step walk from there; similarly for $j+1$. Hence
+$$
+v_j^{k+1} = \tfrac12 v_{j-1}^k + \tfrac12 v_{j+1}^k,
+$$
+where a step onto a ghost node is replaced by staying at the boundary node, i.e. $v_0^k = v_1^k$ and $v_{N+1}^k = v_N^k$. This is exactly the recursion satisfied by $u_j^k$, with the same initial values, so $v_j^k = u_j^k$ by induction on $k$.
+:::
+
+So we can estimate the solution at a single point by Monte Carlo: release $M$ independent walkers from node $j$, run each for $K = t/\Delta t$ steps, and average the initial data at their final positions. As $\Delta x \to 0$, the random walk converges to Brownian motion, and we obtain $u(x,t) = \mathbb{E}[u(X_t, 0)]$, where $X_t$ is a (reflected) Brownian motion started at $x$. This is a special case of the **Feynman–Kac formula**, which links a large class of PDEs to expectations over random paths.
+
+::: {.eg title="MATLAB demonstration: random walkers for the heat equation"}
+We take $L = \alpha = 1$, $u(x,0) = \cos(\pi x)$ and $t = 0.1$; the exact solution is $u(x,t) = e^{-\pi^2 t}\cos(\pi x)$. The following function estimates $u(x_{j_0}, t)$ using $M$ walkers on a grid of $N$ nodes:
+
+```matlab
+function [uHat, SE] = walkers(j0, M, N, K, u0)
+x = linspace(0, 1, N);
+j = j0*ones(M, 1);                         % every walker starts at node j0
+for k = 1:K
+    j = j + 2*(rand(M, 1) < 0.5) - 1;      % step left or right
+    j = min(max(j, 1), N);                 % a step off the grid stays put
+end
+vals = u0(x(j));                           % initial data at final positions
+uHat = mean(vals);
+SE = std(vals)/sqrt(M);
+end
+```
+With $N = 51$ we have $\Delta x = 0.02$, $\Delta t = 2\times 10^{-4}$ and $K = 500$ steps. Running `walkers(j0, 1e4, 51, 500, @(x) cos(pi*x))` for every fifth node gives the estimates below. They agree with the method-of-lines solution to within their error bars (as the theorem predicts), and that solution in turn approximates the exact solution.
+
+![](im/heat_walkers.png){width=70% fig-align="center"}
+:::
+
+Why would we ever do this, when the method of lines gives the whole solution at once? A grid method must compute the solution everywhere, on a grid of $m^d$ points in $d$ dimensions. A walker estimates the solution at just the points we care about, and its cost per step barely depends on dimension: in $d$ dimensions it simply chooses among $2d$ neighbours. This is the curse of dimensionality again, and it is why random-walk methods are used for high-dimensional PDEs such as those arising in finance and quantum mechanics. They also handle complicated geometries easily, since the walker only needs to know whether it has hit a boundary. Other boundary conditions and equations correspond to other walker rules: for example, Dirichlet boundary conditions correspond to walkers that are *absorbed* when they reach the boundary, and the expected time for a walker to hit a target region (such as a foraging animal searching for food) satisfies a Poisson equation.
+
+::: {.doit}
+Extend `walkers` to the heat equation on the unit square $[0,1]^2$ with Neumann boundary conditions, where each walker moves to one of its four neighbours with equal probability. Take $u(x,y,0) = \cos(\pi x)\cos(\pi y)$, for which $u = e^{-2\pi^2\alpha t}\cos(\pi x)\cos(\pi y)$. What timestep does forward Euler need to make the scheme an average over neighbours? How does the standard error change as you increase $M$?
+:::
+
+## Knowledge checklist {.unnumbered}
+
+**Key topics:**
+
+1. The method of lines for the heat equation: finite-difference discretisation in space, ghost nodes for Neumann boundary conditions, and the stability of forward and backward Euler.
+
+2. Pseudorandom number generators: seeds, periods, linear congruential generators and their lattice structure.
+
+3. The chi-squared test for uniformity, and why tests must probe independence as well as the distribution of single values.
+
+4. Sampling from other distributions by the inverse transform method.
+
+5. The Monte Carlo estimator: unbiasedness, the law of large numbers, the $n^{-1/2}$ error from the central limit theorem, standard errors and confidence intervals.
+
+6. The curse of dimensionality: grid-based quadrature errors of $O(n^{-2/d})$ compared with the dimension-independent $O(n^{-1/2})$ for Monte Carlo.
+
+7. Variance reduction by importance sampling, and the optimal sampling density.
+
+8. The random-walk representation of the forward Euler scheme for the heat equation.
+
+**Key skills:**
+
+- Implementing the method of lines with explicit and implicit timestepping, and choosing a stable timestep.
+
+- Implementing a linear congruential generator and testing its output with the chi-squared test.
+
+- Generating samples from a given distribution by the inverse transform method.
+
+- Writing integrals as expectations, and computing Monte Carlo estimates with confidence intervals at a given level.
+
+- Deciding when Monte Carlo is preferable to quadrature.
+
+- Choosing an importance sampling density and computing the corresponding weights.
+
+- Simulating random walks and using them to estimate expectations.

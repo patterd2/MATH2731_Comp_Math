@@ -1,3 +1,6 @@
 /.quarto/
 /_site/
 **/*.quarto_ipynb
+
+# Assessment drafts with reference solutions (do not publish)
+/assessment-drafts/

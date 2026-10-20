@@ -30,8 +30,8 @@ The module's content is divided into six chapters of roughly equal length; some 
     - Timestepping: explicit and implicit methods
     - Stability and convergence order
 - **Chapter 6: Selected Further Topics**
-    - Intro. to the Monte Carlo method and stochastic processes
-    - Intro. to partial differential equations
+    - Intro. to partial differential equations (the method of lines)
+    - Monte Carlo methods: pseudorandom numbers and testing them, sampling, error estimates, the curse of dimensionality, and variance reduction
 
 ---
 
