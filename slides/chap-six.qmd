@@ -105,6 +105,21 @@ $$
 - A-stable, so **unconditionally stable** for the heat equation
 - Any $\Delta t$ is stable, but accuracy may still require small $\Delta t$
 
+## Reaction–diffusion systems
+
+Several species diffuse and react:
+$$
+\frac{\partial u}{\partial t} = D_u\frac{\partial^2 u}{\partial x^2} + f(u,v), \qquad \frac{\partial v}{\partial t} = D_v\frac{\partial^2 v}{\partial x^2} + g(u,v)
+$$
+
+- Method of lines: $\;\mathbf{u}' = D_u\mathbf{A}\mathbf{u} + f(\mathbf{u},\mathbf{v}), \quad \mathbf{v}' = D_v\mathbf{A}\mathbf{v} + g(\mathbf{u},\mathbf{v})$
+
+::: {.fragment}
+- Eigenvalues of $\mathbf{A}$ up to $4/(\Delta x)^2$ in magnitude: explicit methods need $\Delta t = O\big((\Delta x)^2\big)$, even when the solution changes slowly
+- **Stiff** (Chapter 5): use implicit, adaptive stiff solvers such as `ode15s`
+- Rich behaviour: spatial patterns, travelling waves, spatiotemporal chaos ([VisualPDE.com](https://VisualPDE.com))
+:::
+
 ## Summary: method of lines
 
 - Discretise in space only: PDE $\to$ large ODE system

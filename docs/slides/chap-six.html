@@ -315,6 +315,22 @@ x_j = (j-1) \Delta x, \quad j = 1, \dots, N, \quad \Delta x = \frac{L}{N-1}, \qq
 <li>Any <span class="math inline">\(\Delta t\)</span> is stable, but accuracy may still require small <span class="math inline">\(\Delta t\)</span></li>
 </ul>
 </section>
+<section id="reactiondiffusion-systems" class="slide level2">
+<h2>Reaction–diffusion systems</h2>
+<p>Several species diffuse and react: <span class="math display">\[
+\frac{\partial u}{\partial t} = D_u\frac{\partial^2 u}{\partial x^2} + f(u,v), \qquad \frac{\partial v}{\partial t} = D_v\frac{\partial^2 v}{\partial x^2} + g(u,v)
+\]</span></p>
+<ul>
+<li>Method of lines: <span class="math inline">\(\;\mathbf{u}' = D_u\mathbf{A}\mathbf{u} + f(\mathbf{u},\mathbf{v}), \quad \mathbf{v}' = D_v\mathbf{A}\mathbf{v} + g(\mathbf{u},\mathbf{v})\)</span></li>
+</ul>
+<div class="fragment">
+<ul>
+<li>Eigenvalues of <span class="math inline">\(\mathbf{A}\)</span> up to <span class="math inline">\(4/(\Delta x)^2\)</span> in magnitude: explicit methods need <span class="math inline">\(\Delta t = O\big((\Delta x)^2\big)\)</span>, even when the solution changes slowly</li>
+<li><strong>Stiff</strong> (Chapter 5): use implicit, adaptive stiff solvers such as <code>ode15s</code></li>
+<li>Rich behaviour: spatial patterns, travelling waves, spatiotemporal chaos (<a href="https://VisualPDE.com">VisualPDE.com</a>)</li>
+</ul>
+</div>
+</section>
 <section id="summary-method-of-lines" class="slide level2">
 <h2>Summary: method of lines</h2>
 <ul>

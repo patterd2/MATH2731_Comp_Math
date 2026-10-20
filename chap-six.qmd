@@ -117,6 +117,12 @@ However, the backward Euler method is A-stable, and therefore unconditionally st
 
 The method of lines converts a PDE into a large system of ODEs by discretising only in space. The resulting ODE system can then be integrated using any of the timestepping methods from Chapter 5. The stability and accuracy of the full PDE scheme are determined by both the spatial discretisation and the ODE integrator used in time.
 
+The same approach applies to **reaction–diffusion systems**, in which several chemical or biological species $u, v, \ldots$ diffuse and react, for example
+$$
+\frac{\partial u}{\partial t} = D_u\frac{\partial^2 u}{\partial x^2} + f(u,v), \qquad \frac{\partial v}{\partial t} = D_v\frac{\partial^2 v}{\partial x^2} + g(u,v).
+$$
+Discretising in space gives $\mathbf{u}' = D_u\mathbf{A}\mathbf{u} + f(\mathbf{u},\mathbf{v})$ and $\mathbf{v}' = D_v\mathbf{A}\mathbf{v} + g(\mathbf{u},\mathbf{v})$, where $f$ and $g$ act componentwise. The eigenvalues of $\mathbf{A}$ are as large as $4/(\Delta x)^2$ in magnitude, so the diffusion terms force an explicit method to take $\Delta t = O\big((\Delta x)^2\big)$, even when the solution itself changes slowly. Such systems are therefore **stiff** (Chapter 5), and are usually integrated with implicit, adaptive solvers designed for stiff problems, such as MATLAB's `ode15s`. Despite their simple form, reaction–diffusion systems can produce remarkably rich behaviour, including spatial patterns, travelling waves and spatiotemporal chaos, which you can explore on [VisualPDE.com](https://VisualPDE.com).
+
 On the Blackboard page are several code demos for the Heat equation, using both the matrix approach and a for-loop approach to discretising this equation. A demo is also provided for the Schnakenberg system of reaction-diffusion equations.
 
 ## Monte Carlo Methods
