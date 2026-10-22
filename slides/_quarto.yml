@@ -15,11 +15,32 @@ format:
     center: false
     width: 1280
     height: 720
-    # C: draw on the slide, B: open a blackboard. The chalkboard cannot be
-    # used with embed-resources, so images load from ../im (docs/im once
-    # deployed, which the book render provides).
+    # C: draw on the slide, B: open a board. The whiteboard theme gives the
+    # board a white background with dark markers, which is more readable on
+    # projectors than a blackboard. The chalkboard cannot be used with
+    # embed-resources, so images load from ../im (docs/im once deployed,
+    # which the book render provides).
+    # Default pen: solid black and thicker than the plugin's grey (width 3),
+    # for projectors. The other pens are the plugin's defaults. Cursor paths
+    # are relative to the decks in docs/slides/.
     chalkboard:
-      theme: chalkboard
+      theme: whiteboard
+      boardmarker-width: 5
+      boardmarkers:
+        - color: "rgba(0,0,0,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-black.png), auto"
+        - color: "rgba(30,144,255,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-blue.png), auto"
+        - color: "rgba(220,20,60,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-red.png), auto"
+        - color: "rgba(50,205,50,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-green.png), auto"
+        - color: "rgba(255,140,0,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-orange.png), auto"
+        - color: "rgba(150,0,255,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-purple.png), auto"
+        - color: "rgba(255,220,0,1)"
+          cursor: "url(site_libs/revealjs/plugin/reveal-chalkboard/img/boardmarker-yellow.png), auto"
     code-line-numbers: false
     html-math-method: mathjax
     include-before: |
