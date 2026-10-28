@@ -108,14 +108,6 @@ Essentially, this says that if $\mathbf{f}$ is sufficiently nice then the ODE ha
 
 While this is theoretical, the theorem is important: there are ODEs without solutions or with non-unique solutions, and for PDEs existence and uniqueness are often much harder (and can fail).
 
-::: {.callout-note icon="trophy" title="Millennium Prize Problem: Navier–Stokes Equations"}
-The Clay Mathematics Institute has offered a \$1,000,000 prize for resolving one of the most important open problems in mathematics:  
-
-**Do smooth and uniquely determined solutions always exist for the three-dimensional, incompressible Navier–Stokes equations, given reasonable initial data?**  
-
-The Navier-Stokes equations are the fundamental equations of fluid mechanics. Resolving this longstanding problem would be a huge achievement in pure mathematics and would also revolutionise our understanding of turbulence in physics.
-:::
-
 ::: {.eg}
 The ODE given by
 $$
